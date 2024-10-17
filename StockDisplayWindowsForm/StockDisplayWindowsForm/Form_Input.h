@@ -18,9 +18,11 @@ namespace CppCLRWinFormsProject {
 		Form_Input(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
+
+			// Generate initial  directory for open file dialog
+			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\StockData");
+			// Set initial directory for open file dialog
+			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath); // Set default path
 		}
 
 	protected:
@@ -86,8 +88,6 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->openFileDialog_load->FileName = L"openFileDialog1";
 			this->openFileDialog_load->Filter = L"CSV Files (*.csv)|*.csv|Monthly|*_Month.csv|Weekly|*_Week.csv|Daily|*_Day.csv";
-			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\StockData"); // Create string for default path
-			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath); // Set default path
 			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
