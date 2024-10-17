@@ -10,12 +10,12 @@ namespace CppCLRWinFormsProject {
 	using namespace System::Drawing;
 
 	/// <summary>
-	/// Summary for Form1
+	/// Summary for Form_Input
 	/// </summary>
-	public ref class Form1 : public System::Windows::Forms::Form
+	public ref class Form_Input : public System::Windows::Forms::Form
 	{
 	public:
-		Form1(void)
+		Form_Input(void)
 		{
 			InitializeComponent();
 			//
@@ -27,7 +27,7 @@ namespace CppCLRWinFormsProject {
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		~Form1()
+		~Form_Input()
 		{
 			if (components)
 			{
@@ -77,21 +77,21 @@ namespace CppCLRWinFormsProject {
 			this->button_selectFile->TabIndex = 1;
 			this->button_selectFile->Text = L"Select File";
 			this->button_selectFile->UseVisualStyleBackColor = true;
-			this->button_selectFile->Click += gcnew System::EventHandler(this, &Form1::button_selectFile_Click);
+			this->button_selectFile->Click += gcnew System::EventHandler(this, &Form_Input::button_selectFile_Click);
 			// 
 			// openFileDialog_selectStock
 			// 
 			this->openFileDialog_selectStock->FileName = L"openFileDialog1";
 			// 
-			// Form1
+			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1043, 724);
 			this->Controls->Add(this->button_selectFile);
 			this->Controls->Add(this->dataGridView_stockData);
-			this->Name = L"Form1";
-			this->Text = L"Form1";
+			this->Name = L"Form_Input";
+			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->EndInit();
 			this->ResumeLayout(false);
 
@@ -99,6 +99,7 @@ namespace CppCLRWinFormsProject {
 #pragma endregion
 
 	private: System::Void button_selectFile_Click(System::Object^ sender, System::EventArgs^ e) {
+		// On button click, trigger the open file dialog
 		openFileDialog_selectStock->ShowDialog();
 	}
 	};
