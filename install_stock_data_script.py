@@ -6,11 +6,11 @@ def main():
     print("Starting stock data download script...")
     # Define the stock ticker and the date range
     tickers = {'AAPL', 'MSFT', 'GOOG', 'IBM', 'TSLA'}
-    start_date = '2000-01-01'
+    start_date = '1900-01-01'
     end_date = '2024-12-31'
         
      # Define the path where files will be saved
-    directory = './StockData/'  # Replace with your desired path
+    directory = './StockDisplayWindowsForm/StockData/'  # Replace with your desired path
     
     # Ensure the directory exists, if not, create it
     if not os.path.exists(directory):
