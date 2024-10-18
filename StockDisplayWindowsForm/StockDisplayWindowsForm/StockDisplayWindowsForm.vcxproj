@@ -130,6 +130,7 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Candlestick.h" />
     <ClInclude Include="Form_Input.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Candlestick.cpp" />
     <ClCompile Include="CppCLR_WinFormsProject.cpp" />
     <ClCompile Include="Form_Input.cpp" />
     <ClCompile Include="pch.cpp">
