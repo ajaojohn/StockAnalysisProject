@@ -2,14 +2,70 @@ namespace CppCLRWinFormsProject {
 #pragma once
     ref class Candlestick
     {
+    private:
+        // Private fields
+        System::DateTime^ _date;
+        System::Decimal _open;
+        System::Decimal _high;
+        System::Decimal _low;
+        System::Decimal _close;
+        System::Int64 _volume;
+
+        /**
+        * Set the candlestick properties
+        * @param date Date of the candlestick
+        * @param open Opening price
+        * @param high Highest price
+        * @param low Lowest price
+        * @param close Closing price
+        * @param volume Volume of stock traded
+        * @returns void
+        */
+        System::Void setCandlestickProperties(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume) {
+            // Set properties from parameters
+            this->_date = date;
+            this->_open = open;
+            this->_high = high;
+            this->_low = low;
+            this->_close = close;
+            this->_volume = volume;
+        }
     public:
-        // Properties for a candlestick
-        System::DateTime^ date;  // Date of the candlestick
-        System::Decimal open;    // Opening price
-        System::Decimal high;    // Highest price
-        System::Decimal low;     // Lowest price
-        System::Decimal close;   // Closing price
-        System::Int64 volume;    // Volume of stock traded
+        // Property for date
+        property System::DateTime^ date {
+            System::DateTime^ get() { return _date; }
+            void set(System::DateTime^ value) { _date = value; }
+        }
+
+        // Property for open
+        property System::Decimal open {
+            System::Decimal get() { return _open; }
+            void set(System::Decimal value) { _open = value; }
+        }
+
+        // Property for high
+        property System::Decimal high {
+            System::Decimal get() { return _high; }
+            void set(System::Decimal value) { _high = value; }
+        }
+
+        // Property for low
+        property System::Decimal low {
+            System::Decimal get() { return _low; }
+            void set(System::Decimal value) { _low = value; }
+        }
+
+        // Property for close
+        property System::Decimal close {
+            System::Decimal get() { return _close; }
+            void set(System::Decimal value) { _close = value; }
+        }
+
+        // Property for volume
+        property System::Int64 volume {
+            System::Int64 get() { return _volume; }
+            void set(System::Int64 value) { _volume = value; }
+        }
 
         /**
         * Default constructor
@@ -59,27 +115,6 @@ namespace CppCLRWinFormsProject {
         */
         Candlestick(Candlestick^ candlestick) {
             setCandlestickProperties(candlestick->date, candlestick->open, candlestick->high, candlestick->low, candlestick->close, candlestick->volume);
-        }
-
-    private:
-        /**
-        * Set the candlestick properties
-        * @param date Date of the candlestick
-        * @param open Opening price
-        * @param high Highest price
-        * @param low Lowest price
-        * @param close Closing price
-        * @param volume Volume of stock traded
-        * @returns void
-        */
-        System::Void setCandlestickProperties(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume) {
-            // Set properties from parameters
-		    this->date = date;
-		    this->open = open;
-		    this->high = high;
-		    this->low = low;
-		    this->close = close;
-		    this->volume = volume;
         }
     };
 }
