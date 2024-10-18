@@ -74,6 +74,8 @@ namespace CppCLRWinFormsProject {
 			// 
 			// dataGridView_stockData
 			// 
+			this->dataGridView_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->dataGridView_stockData->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
 			this->dataGridView_stockData->Location = System::Drawing::Point(12, 38);
 			this->dataGridView_stockData->Name = L"dataGridView_stockData";
@@ -84,6 +86,8 @@ namespace CppCLRWinFormsProject {
 			// 
 			// button_load
 			// 
+			this->button_load->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->button_load->Location = System::Drawing::Point(423, 625);
 			this->button_load->Name = L"button_load";
 			this->button_load->Size = System::Drawing::Size(141, 44);
