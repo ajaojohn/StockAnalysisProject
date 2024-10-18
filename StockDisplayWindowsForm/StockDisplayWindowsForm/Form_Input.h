@@ -83,7 +83,7 @@ namespace CppCLRWinFormsProject {
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Select File";
 			this->button_load->UseVisualStyleBackColor = true;
-			this->button_load->Click += gcnew System::EventHandler(this, &Form_Input::button_selectFile_Click);
+			this->button_load->Click += gcnew System::EventHandler(this, &Form_Input::button_load_Click);
 			// 
 			// openFileDialog_load
 			// 
@@ -106,7 +106,7 @@ namespace CppCLRWinFormsProject {
 		}
 #pragma endregion
 
-	private: System::Void button_selectFile_Click(System::Object^ sender, System::EventArgs^ e) {
+	private: System::Void button_load_Click(System::Object^ sender, System::EventArgs^ e) {
 		// On button click, trigger the open file dialog
 		openFileDialog_load->ShowDialog();
 	}
