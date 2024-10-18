@@ -14,6 +14,12 @@ namespace CppCLRWinFormsProject {
 	/// </summary>
 	public ref class Form_Input : public System::Windows::Forms::Form
 	{
+#pragma region Self-written Form properties
+	// List to store all candlesticks loaded from a file
+	private: Generic::List<Candlestick^>^ listOfCandlesticks;
+
+#pragma endregion
+
 	public:
 		Form_Input(void)
 		{
@@ -22,7 +28,10 @@ namespace CppCLRWinFormsProject {
 			// Generate initial  directory for open file dialog
 			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\Stock Data");
 			// Set initial directory for open file dialog
-			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath); // Set default path
+			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath);
+
+			// Initialize list as empty
+			this->listOfCandlesticks = gcnew Generic::List<Candlestick^>();
 		}
 
 	protected:
@@ -105,7 +114,68 @@ namespace CppCLRWinFormsProject {
 
 	private: System::Void button_load_Click(System::Object^ sender, System::EventArgs^ e) {
 		// On button click, trigger the open file dialog
-		openFileDialog_load->ShowDialog();
+		System::Windows::Forms::DialogResult result = this->openFileDialog_load->ShowDialog();
+
+		// If the user selected a file
+		if (result == System::Windows::Forms::DialogResult::OK) {
+			// Get file selected
+			System::String^ filename =this->openFileDialog_load->FileName;
+			// Load the selected file
+			this->populateDataGridView(filename);
+		}
+	}
+
+	/**
+	* Reads candlestick data from a file
+	* @param filename The name of the file to read
+	*/
+	private: Generic::List<Candlestick^>^ readCandlestickDataFromFile(System::String^ filename) {
+		// Create empty list of candlesticks
+		Generic::List<Candlestick^>^ listOfCandlesticks = gcnew Generic::List<Candlestick^>();
+
+		try {
+			// Create stream reader for new data file
+			System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(filename);
+
+			// Confirm file is formatted as expected
+			System::String^ firstLine = reader->ReadLine();
+			if (firstLine == "Date,Open,High,Low,Close,Adj Close,Volume") {
+				// Loop through each line in the file
+				while (!reader->EndOfStream) {
+					// Get next row
+					System::String^ currRow = reader->ReadLine();
+
+					// Create new candlestick from row
+					Candlestick^ newCandlestick = gcnew Candlestick(currRow);
+					// Add the candlestick to the list
+					listOfCandlesticks->Add(newCandlestick);
+				}
+			}
+			else {
+				// If file is a different format, throw error
+				throw gcnew System::IO::IOException("File is not formatted as expected");
+			}
+		} catch (System::IO::IOException^ e) {
+			// If error reading file, show message box with what went wrong
+			System::Windows::Forms::MessageBox::Show("Error reading file: " + e->Message);
+		}
+
+		// Return the list
+		return listOfCandlesticks;
+	}
+
+	/**
+	* Populates the dataGridView_stockData with candlestick data
+	* @param filename The name of the file to read data from
+	*/
+	private: System::Void populateDataGridView(System::String^ filename) {
+		// Read candlesticks from file into list
+		this->listOfCandlesticks = readCandlestickDataFromFile(filename);
+		
+		// Create binding list
+		BindingList<Candlestick^>^ bindingList = gcnew BindingList<Candlestick^>(this->listOfCandlesticks);
+		// Set binding list
+		this->dataGridView_stockData->DataSource = bindingList;
 	}
 	};
 }
