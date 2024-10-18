@@ -20,7 +20,7 @@ namespace CppCLRWinFormsProject {
 			InitializeComponent();
 
 			// Generate initial  directory for open file dialog
-			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\StockData");
+			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\Stock Data");
 			// Set initial directory for open file dialog
 			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath); // Set default path
 		}
@@ -66,20 +66,18 @@ namespace CppCLRWinFormsProject {
 			// dataGridView_stockData
 			// 
 			this->dataGridView_stockData->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->dataGridView_stockData->Location = System::Drawing::Point(16, 57);
-			this->dataGridView_stockData->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->dataGridView_stockData->Location = System::Drawing::Point(12, 38);
 			this->dataGridView_stockData->Name = L"dataGridView_stockData";
 			this->dataGridView_stockData->RowHeadersWidth = 51;
 			this->dataGridView_stockData->RowTemplate->Height = 24;
-			this->dataGridView_stockData->Size = System::Drawing::Size(1401, 744);
+			this->dataGridView_stockData->Size = System::Drawing::Size(1019, 496);
 			this->dataGridView_stockData->TabIndex = 0;
 			// 
 			// button_load
 			// 
-			this->button_load->Location = System::Drawing::Point(581, 938);
-			this->button_load->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->button_load->Location = System::Drawing::Point(423, 625);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(194, 66);
+			this->button_load->Size = System::Drawing::Size(141, 44);
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Select File";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -88,16 +86,15 @@ namespace CppCLRWinFormsProject {
 			// openFileDialog_load
 			// 
 			this->openFileDialog_load->FileName = L"openFileDialog1";
-			this->openFileDialog_load->Filter = L"CSV Files (*.csv)|*.csv|Monthly|*_Month.csv|Weekly|*_Week.csv|Daily|*_Day.csv";
+			this->openFileDialog_load->Filter = L"CSV Files (*.csv)|*.csv|Monthly|*-Month.csv|Weekly|*-Week.csv|Daily|*-Day.csv";
 			// 
 			// Form_Input
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
+			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1434, 1086);
+			this->ClientSize = System::Drawing::Size(1043, 724);
 			this->Controls->Add(this->button_load);
 			this->Controls->Add(this->dataGridView_stockData);
-			this->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->EndInit();
