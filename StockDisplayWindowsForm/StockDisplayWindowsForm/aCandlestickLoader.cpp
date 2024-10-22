@@ -9,9 +9,15 @@ List<aCandlestick^>^ aCandlestickLoader::load(System::String^ filename) {
 		// Create stream reader for new data file
 		System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(filename);
 
-		// Confirm file is formatted as expected
+		// Store expected file headers
+		System::Collections::Generic::SortedSet<System::String^>^ expectedHeaders = gcnew System::Collections::Generic::SortedSet<System::String^>();
+		expectedHeaders->Add("Date,Open,High,Low,Close,Volume");
+		expectedHeaders->Add("\"Date\",\"Open\",\"High\",\"Low\",\"Close\",\"Volume\"");
+
+		// Get first line
 		System::String^ firstLine = reader->ReadLine();
-		if (firstLine == "Date,Open,High,Low,Close,Adj Close,Volume") {
+		// Confirm first line is formatted as expected
+		if (expectedHeaders->Contains(firstLine)) {
 			// Loop through each line in the file
 			while (!reader->EndOfStream) {
 				// Get next row

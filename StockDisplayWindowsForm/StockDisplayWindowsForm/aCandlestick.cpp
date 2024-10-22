@@ -15,7 +15,7 @@ aCandlestick::aCandlestick()
 aCandlestick::aCandlestick(System::String^ row)
 {
     // Split the row into an array
-    array<System::String^>^ splitRow = row->Split(',');
+    array<System::String^>^ splitRow = row->Split(gcnew array<wchar_t>{',', '\"'}, System::StringSplitOptions::RemoveEmptyEntries);
 
     // Set the properties
     setCandlestickProperties(
@@ -24,7 +24,7 @@ aCandlestick::aCandlestick(System::String^ row)
         System::Convert::ToDecimal(splitRow[2]),
         System::Convert::ToDecimal(splitRow[3]),
         System::Convert::ToDecimal(splitRow[4]),
-        System::Convert::ToInt64(splitRow[6])
+        System::Convert::ToInt64(splitRow[5])
     );
 }
 
