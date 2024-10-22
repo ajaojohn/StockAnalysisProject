@@ -1,6 +1,6 @@
 namespace CppCLRWinFormsProject {
 #pragma once
-    ref class Candlestick
+    ref class aCandlestick
     {
     private:
         // Private fields
@@ -70,16 +70,16 @@ namespace CppCLRWinFormsProject {
         /**
         * Default constructor
         */
-        Candlestick()
+        aCandlestick()
         {
             setCandlestickProperties(gcnew System::DateTime(), System::Decimal(0), System::Decimal(0), System::Decimal(0), System::Decimal(0), 0);
         }
 
         /**
-        * Candlestick constructor
+        * aCandlestick constructor
         * @param Line from a csv file formatted "date,open,high,low,close,adj close,volume"
         */
-        Candlestick(System::String^ row)
+        aCandlestick(System::String^ row)
         {
             // Split the row into an array
             array<System::String^>^ splitRow = row->Split(',');
@@ -96,7 +96,7 @@ namespace CppCLRWinFormsProject {
         }
 
         /**
-        * Candlestick constructor
+        * aCandlestick constructor
         * @param date Time of the candlestick
         * @param open Opening price
         * @param high Highest price
@@ -104,7 +104,7 @@ namespace CppCLRWinFormsProject {
         * @param close Closing price
         * @param volume Volume of stock traded
         */
-        Candlestick(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume)
+        aCandlestick(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume)
         {
             setCandlestickProperties(date, open, high, low, close, volume);
         }
@@ -113,7 +113,7 @@ namespace CppCLRWinFormsProject {
         * Copy constructor
         * @param candlestick The candlestick to copy
         */
-        Candlestick(Candlestick^ candlestick) {
+        aCandlestick(aCandlestick^ candlestick) {
             setCandlestickProperties(candlestick->date, candlestick->open, candlestick->high, candlestick->low, candlestick->close, candlestick->volume);
         }
     };

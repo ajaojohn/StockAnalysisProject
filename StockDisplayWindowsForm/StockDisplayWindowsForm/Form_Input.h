@@ -16,7 +16,7 @@ namespace CppCLRWinFormsProject {
 	{
 #pragma region Self-written Form properties
 	// List to store all candlesticks loaded from a file
-	private: Generic::List<Candlestick^>^ listOfCandlesticks;
+	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
 
 #pragma endregion
 
@@ -31,7 +31,7 @@ namespace CppCLRWinFormsProject {
 			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath);
 
 			// Initialize list as empty
-			this->listOfCandlesticks = gcnew Generic::List<Candlestick^>();
+			this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
 		}
 
 	protected:
@@ -133,9 +133,9 @@ namespace CppCLRWinFormsProject {
 	* Reads candlestick data from a file
 	* @param filename The name of the file to read
 	*/
-	private: Generic::List<Candlestick^>^ readCandlestickDataFromFile(System::String^ filename) {
+	private: Generic::List<aCandlestick^>^ readCandlestickDataFromFile(System::String^ filename) {
 		// Create empty list of candlesticks
-		Generic::List<Candlestick^>^ listOfCandlesticks = gcnew Generic::List<Candlestick^>();
+		Generic::List<aCandlestick^>^ listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
 
 		try {
 			// Create stream reader for new data file
@@ -150,7 +150,7 @@ namespace CppCLRWinFormsProject {
 					System::String^ currRow = reader->ReadLine();
 
 					// Create new candlestick from row
-					Candlestick^ newCandlestick = gcnew Candlestick(currRow);
+					aCandlestick^ newCandlestick = gcnew aCandlestick(currRow);
 					// Add the candlestick to the list
 					listOfCandlesticks->Add(newCandlestick);
 				}
@@ -177,7 +177,7 @@ namespace CppCLRWinFormsProject {
 		this->listOfCandlesticks = readCandlestickDataFromFile(filename);
 		
 		// Create binding list
-		BindingList<Candlestick^>^ bindingList = gcnew BindingList<Candlestick^>(this->listOfCandlesticks);
+		BindingList<aCandlestick^>^ bindingList = gcnew BindingList<aCandlestick^>(this->listOfCandlesticks);
 		// Set binding list
 		this->dataGridView_stockData->DataSource = bindingList;
 	}

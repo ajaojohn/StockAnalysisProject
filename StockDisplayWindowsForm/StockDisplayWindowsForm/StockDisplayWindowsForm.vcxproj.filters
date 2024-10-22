@@ -29,7 +29,7 @@
     <ClInclude Include="Form_Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Candlestick.h">
+    <ClInclude Include="aCandlestick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -46,7 +46,7 @@
     <ClCompile Include="Form_Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Candlestick.cpp">
+    <ClCompile Include="aCandlestick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
