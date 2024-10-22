@@ -24,19 +24,19 @@ def downloadStockData (ticker, start_date, end_date, directory):
 
     # Download daily stock data
     daily_data = yf.download(ticker, start=start_date, end=end_date, interval='1d')
-    daily_data = daily_data.sort_index(ascending=False)
+    #daily_data = daily_data.sort_index(ascending=False)
     daily_file = os.path.join(directory, f"{ticker}-Day.csv")
     daily_data.to_csv(daily_file)
 
     # Download weekly stock data
     weekly_data = yf.download(ticker, start=start_date, end=end_date, interval='1wk')
-    weekly_data = weekly_data.sort_index(ascending=False)
+    #weekly_data = weekly_data.sort_index(ascending=False)
     weekly_file = os.path.join(directory, f"{ticker}-Week.csv")
     weekly_data.to_csv(weekly_file)
 
     # Download monthly stock data
     monthly_data = yf.download(ticker, start=start_date, end=end_date, interval='1mo')
-    weekly_data = weekly_data.sort_index(ascending=False)
+    #weekly_data = weekly_data.sort_index(ascending=False)
     monthly_file = os.path.join(directory, f"{ticker}-Month.csv")
     monthly_data.to_csv(monthly_file)
 
