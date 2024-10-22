@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aCandlestick.h" />
+    <ClInclude Include="aCandlestickLoader.h" />
     <ClInclude Include="Form_Input.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -138,6 +139,7 @@
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aCandlestickLoader.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="aCandlestick.cpp" />
     <ClCompile Include="CppCLR_WinFormsProject.cpp" />

@@ -72,7 +72,12 @@ namespace CppCLRWinFormsProject {
         */
         aCandlestick()
         {
-            setCandlestickProperties(gcnew System::DateTime(), System::Decimal(0), System::Decimal(0), System::Decimal(0), System::Decimal(0), 0);
+            setCandlestickProperties(
+                gcnew System::DateTime(),
+                System::Decimal(0),
+                System::Decimal(0),
+                System::Decimal(0),
+                System::Decimal(0), 0);
         }
 
         /**

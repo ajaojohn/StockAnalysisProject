@@ -125,57 +125,19 @@ namespace CppCLRWinFormsProject {
 			// Get file selected
 			System::String^ filename =this->openFileDialog_load->FileName;
 			// Load the selected file
-			this->populateDataGridView(filename);
+			aCandlestickLoader^ loader = gcnew aCandlestickLoader();
+			this->listOfCandlesticks = loader->load(filename);
+			this->populateDataGridView(this->listOfCandlesticks);
 		}
 	}
 
-	/**
-	* Reads candlestick data from a file
-	* @param filename The name of the file to read
-	*/
-	private: Generic::List<aCandlestick^>^ readCandlestickDataFromFile(System::String^ filename) {
-		// Create empty list of candlesticks
-		Generic::List<aCandlestick^>^ listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
-
-		try {
-			// Create stream reader for new data file
-			System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(filename);
-
-			// Confirm file is formatted as expected
-			System::String^ firstLine = reader->ReadLine();
-			if (firstLine == "Date,Open,High,Low,Close,Adj Close,Volume") {
-				// Loop through each line in the file
-				while (!reader->EndOfStream) {
-					// Get next row
-					System::String^ currRow = reader->ReadLine();
-
-					// Create new candlestick from row
-					aCandlestick^ newCandlestick = gcnew aCandlestick(currRow);
-					// Add the candlestick to the list
-					listOfCandlesticks->Add(newCandlestick);
-				}
-			}
-			else {
-				// If file is a different format, throw error
-				throw gcnew System::IO::IOException("File is not formatted as expected");
-			}
-		} catch (System::IO::IOException^ e) {
-			// If error reading file, show message box with what went wrong
-			System::Windows::Forms::MessageBox::Show("Error reading file: " + e->Message);
-		}
-
-		// Return the list
-		return listOfCandlesticks;
-	}
+	
 
 	/**
 	* Populates the dataGridView_stockData with candlestick data
 	* @param filename The name of the file to read data from
 	*/
-	private: System::Void populateDataGridView(System::String^ filename) {
-		// Read candlesticks from file into list
-		this->listOfCandlesticks = readCandlestickDataFromFile(filename);
-		
+	private: System::Void populateDataGridView(Generic::List<aCandlestick^>^ listOfCandlesticks) {		
 		// Create binding list
 		BindingList<aCandlestick^>^ bindingList = gcnew BindingList<aCandlestick^>(this->listOfCandlesticks);
 		// Set binding list
