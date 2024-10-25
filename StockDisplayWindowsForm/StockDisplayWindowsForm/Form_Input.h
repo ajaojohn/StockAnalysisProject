@@ -95,21 +95,19 @@ namespace CppCLRWinFormsProject {
 			// dataGridView_stockData
 			// 
 			this->dataGridView_stockData->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->dataGridView_stockData->Location = System::Drawing::Point(17, 59);
-			this->dataGridView_stockData->Margin = System::Windows::Forms::Padding(4);
+			this->dataGridView_stockData->Location = System::Drawing::Point(11, 38);
 			this->dataGridView_stockData->Name = L"dataGridView_stockData";
 			this->dataGridView_stockData->RowHeadersWidth = 51;
 			this->dataGridView_stockData->RowTemplate->Height = 24;
-			this->dataGridView_stockData->Size = System::Drawing::Size(875, 775);
+			this->dataGridView_stockData->Size = System::Drawing::Size(583, 496);
 			this->dataGridView_stockData->TabIndex = 0;
 			// 
 			// button_load
 			// 
 			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->button_load->Location = System::Drawing::Point(919, 981);
-			this->button_load->Margin = System::Windows::Forms::Padding(4);
+			this->button_load->Location = System::Drawing::Point(613, 628);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(368, 69);
+			this->button_load->Size = System::Drawing::Size(245, 44);
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Load";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -123,51 +121,56 @@ namespace CppCLRWinFormsProject {
 			// dateTimePicker_start
 			// 
 			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_start->Location = System::Drawing::Point(454, 999);
+			this->dateTimePicker_start->Location = System::Drawing::Point(303, 639);
+			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(2);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(381, 31);
+			this->dateTimePicker_start->Size = System::Drawing::Size(255, 22);
 			this->dateTimePicker_start->TabIndex = 2;
-			this->dateTimePicker_start->Value = System::DateTime(2020, 1, 1, 0, 0, 0, 0);
+			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
 			// 
 			// dateTimePicker_end
 			// 
 			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_end->Location = System::Drawing::Point(1375, 999);
+			this->dateTimePicker_end->Location = System::Drawing::Point(917, 639);
+			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(2);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(355, 31);
+			this->dateTimePicker_end->Size = System::Drawing::Size(238, 22);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
 			// 
+			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
 			chartArea1->Name = L"ChartArea_OHLC";
 			this->chart_stockData->ChartAreas->Add(chartArea1);
 			legend1->Name = L"Legend1";
 			this->chart_stockData->Legends->Add(legend1);
-			this->chart_stockData->Location = System::Drawing::Point(919, 59);
+			this->chart_stockData->Location = System::Drawing::Point(613, 38);
+			this->chart_stockData->Margin = System::Windows::Forms::Padding(2);
 			this->chart_stockData->Name = L"chart_stockData";
 			series1->ChartArea = L"ChartArea_OHLC";
 			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series1->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
 			series1->Legend = L"Legend1";
 			series1->Name = L"Series_OHLC";
 			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
 			series1->YValuesPerPoint = 4;
 			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
 			this->chart_stockData->Series->Add(series1);
-			this->chart_stockData->Size = System::Drawing::Size(1225, 775);
+			this->chart_stockData->Size = System::Drawing::Size(817, 496);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
 			// 
 			// Form_Input
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
+			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(2157, 1131);
+			this->ClientSize = System::Drawing::Size(1438, 724);
 			this->Controls->Add(this->chart_stockData);
 			this->Controls->Add(this->dateTimePicker_end);
 			this->Controls->Add(this->dateTimePicker_start);
 			this->Controls->Add(this->button_load);
 			this->Controls->Add(this->dataGridView_stockData);
-			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->EndInit();
@@ -273,11 +276,22 @@ namespace CppCLRWinFormsProject {
 			point->XValue = candlestick->date->ToOADate();
 			// Set point's x value
 			point->YValues = gcnew cli::array<double>{
-				static_cast<double>(candlestick->open),
 				static_cast<double>(candlestick->high),
 				static_cast<double>(candlestick->low),
+				static_cast<double>(candlestick->open),
 				static_cast<double>(candlestick->close)
 			};
+
+			// Check if point is bullish or bearish
+			if (candlestick->close > candlestick->open) {
+				// If point is bullish, set color to green
+				point->Color = System::Drawing::Color::Green;
+			}
+			else {
+				// If point is bearish, set color to red
+				point->Color = System::Drawing::Color::Red;
+			}
+			point->BorderWidth = 1.5;
 			// Add the point to the series
 			chart->Series[seriesName]->Points->Add(point);
 		}
@@ -307,18 +321,18 @@ namespace CppCLRWinFormsProject {
 		// If the series is not empty
 		if (chart->Series[seriesName]->Points->Count != 0) {
 			// Set proper initial min
-			minY = chart->Series[seriesName]->Points[0]->YValues[2];
+			minY = chart->Series[seriesName]->Points[0]->YValues[1];
 			// Set proper initial max
-			maxY = chart->Series[seriesName]->Points[0]->YValues[1];
+			maxY = chart->Series[seriesName]->Points[0]->YValues[0];
 		}
 
 		
 		// Iterate through each point in the series
 		for each (Windows::Forms::DataVisualization::Charting::DataPoint^ point in chart->Series[seriesName]->Points) {
 			// Check point and update min
-			minY = Math::Min(minY, point->YValues[2]);
+			minY = Math::Min(minY, point->YValues[1]);
 			// Check point and update max
-			maxY = Math::Max(maxY, point->YValues[1]);
+			maxY = Math::Max(maxY, point->YValues[0]);
 		}
 
 		// Set chart area minimum
