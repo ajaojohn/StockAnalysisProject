@@ -17,6 +17,8 @@ namespace CppCLRWinFormsProject {
 #pragma region Self-written Form properties
 	// List to store all candlesticks loaded from a file
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
+	// List of candlesticks to display
+	private: BindingList<aCandlestick^>^ bindingListOfCandlesticks = gcnew BindingList<aCandlestick^>();
 
 #pragma endregion
 
@@ -32,6 +34,8 @@ namespace CppCLRWinFormsProject {
 
 			// Initialize list as empty
 			this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
+			// Bind data grid to binding list
+			dataGridView_stockData->DataSource = bindingListOfCandlesticks;
 		}
 
 	protected:
@@ -51,6 +55,8 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::OpenFileDialog^ openFileDialog_load;
 	private: System::Windows::Forms::DateTimePicker^ dateTimePicker_start;
 	private: System::Windows::Forms::DateTimePicker^ dateTimePicker_end;
+	private: System::Windows::Forms::DataVisualization::Charting::Chart^ chart_stockData;
+
 
 	protected:
 
@@ -68,35 +74,37 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->dataGridView_stockData = (gcnew System::Windows::Forms::DataGridView());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
 			this->dateTimePicker_end = (gcnew System::Windows::Forms::DateTimePicker());
+			this->chart_stockData = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// dataGridView_stockData
 			// 
-			this->dataGridView_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
-				| System::Windows::Forms::AnchorStyles::Right));
 			this->dataGridView_stockData->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->dataGridView_stockData->Location = System::Drawing::Point(16, 57);
-			this->dataGridView_stockData->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->dataGridView_stockData->Location = System::Drawing::Point(17, 59);
+			this->dataGridView_stockData->Margin = System::Windows::Forms::Padding(4);
 			this->dataGridView_stockData->Name = L"dataGridView_stockData";
 			this->dataGridView_stockData->RowHeadersWidth = 51;
 			this->dataGridView_stockData->RowTemplate->Height = 24;
-			this->dataGridView_stockData->Size = System::Drawing::Size(1401, 744);
+			this->dataGridView_stockData->Size = System::Drawing::Size(875, 775);
 			this->dataGridView_stockData->TabIndex = 0;
 			// 
 			// button_load
 			// 
-			this->button_load->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->button_load->Location = System::Drawing::Point(582, 938);
-			this->button_load->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->button_load->Location = System::Drawing::Point(919, 981);
+			this->button_load->Margin = System::Windows::Forms::Padding(4);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(194, 66);
+			this->button_load->Size = System::Drawing::Size(368, 69);
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Load";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -109,32 +117,56 @@ namespace CppCLRWinFormsProject {
 			// 
 			// dateTimePicker_start
 			// 
-			this->dateTimePicker_start->Location = System::Drawing::Point(125, 959);
+			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->dateTimePicker_start->Location = System::Drawing::Point(454, 999);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(350, 29);
+			this->dateTimePicker_start->Size = System::Drawing::Size(381, 31);
 			this->dateTimePicker_start->TabIndex = 2;
 			this->dateTimePicker_start->Value = System::DateTime(2020, 1, 1, 0, 0, 0, 0);
 			// 
 			// dateTimePicker_end
 			// 
-			this->dateTimePicker_end->Location = System::Drawing::Point(899, 955);
+			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->dateTimePicker_end->Location = System::Drawing::Point(1375, 999);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(326, 29);
+			this->dateTimePicker_end->Size = System::Drawing::Size(355, 31);
 			this->dateTimePicker_end->TabIndex = 3;
+			// 
+			// chart_stockData
+			// 
+			chartArea1->Name = L"ChartArea_OHLC";
+			this->chart_stockData->ChartAreas->Add(chartArea1);
+			legend1->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend1);
+			this->chart_stockData->Location = System::Drawing::Point(919, 59);
+			this->chart_stockData->Name = L"chart_stockData";
+			series1->ChartArea = L"ChartArea_OHLC";
+			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series1->Legend = L"Legend1";
+			series1->Name = L"Series_OHLC";
+			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series1->YValuesPerPoint = 4;
+			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			this->chart_stockData->Series->Add(series1);
+			this->chart_stockData->Size = System::Drawing::Size(1225, 775);
+			this->chart_stockData->TabIndex = 4;
+			this->chart_stockData->Text = L"Stock Data";
 			// 
 			// Form_Input
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
+			this->AutoScaleDimensions = System::Drawing::SizeF(12, 25);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1434, 1086);
+			this->ClientSize = System::Drawing::Size(2157, 1131);
+			this->Controls->Add(this->chart_stockData);
 			this->Controls->Add(this->dateTimePicker_end);
 			this->Controls->Add(this->dateTimePicker_start);
 			this->Controls->Add(this->button_load);
 			this->Controls->Add(this->dataGridView_stockData);
-			this->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->EndInit();
 			this->ResumeLayout(false);
 
 		}
@@ -151,7 +183,17 @@ namespace CppCLRWinFormsProject {
 			// Load the selected file
 			aCandlestickLoader^ loader = gcnew aCandlestickLoader();
 			this->listOfCandlesticks = loader->load(filename);
-			this->populateDataGridView(this->listOfCandlesticks);
+
+			// Get candlesticks in time frame
+			Generic::List<aCandlestick^>^ filteredCandlesticks = this->getFilteredCandlesticks(this->dateTimePicker_start->Value, this->dateTimePicker_end->Value, this->listOfCandlesticks);
+			// Clear binding list
+			this->bindingListOfCandlesticks->Clear();
+			// Add filtered candlesticks to binding list
+			for (int i = 0; i < filteredCandlesticks->Count; i++) {
+				this->bindingListOfCandlesticks->Add(filteredCandlesticks[i]);
+			}
+			// Fill chart with candlestick data
+			this->populateChart(filteredCandlesticks);
 		}
 	}
 
@@ -176,19 +218,29 @@ namespace CppCLRWinFormsProject {
 		return filteredCandlesticks;
 	}
 
-	
-
 	/**
-	* Populates the dataGridView_stockData with candlestick data
-	* @param filename The name of the file to read data from
+	* Populate chart with data
+	* @param listOfCandlesticks The list of candlesticks to display
 	*/
-	private: System::Void populateDataGridView(Generic::List<aCandlestick^>^ listOfCandlesticks) {
-		// Filter candlesticks to display
-		Generic::List<aCandlestick^>^ filteredCandlesticks = getFilteredCandlesticks(this->dateTimePicker_start->Value, this->dateTimePicker_end->Value, listOfCandlesticks);
-		// Create binding list
-		BindingList<aCandlestick^>^ bindingList = gcnew BindingList<aCandlestick^>(filteredCandlesticks);
-		// Set binding list
-		this->dataGridView_stockData->DataSource = bindingList;
+	private: System::Void populateChart(Generic::List<aCandlestick^> ^ listOfCandlesticks) {
+		// Clear prior chart data
+		chart_stockData->Series["Series_OHLC"]->Points->Clear();
+
+		// Add each candlestick to the chart
+		for each (aCandlestick^ candlestick in listOfCandlesticks)
+		{
+			// Create a new data point
+			System::Windows::Forms::DataVisualization::Charting::DataPoint^ point = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
+			point->XValue = candlestick->date->ToOADate();
+			point->YValues = gcnew cli::array<double>{
+				static_cast<double>(candlestick->open),
+				static_cast<double>(candlestick->high),
+				static_cast<double>(candlestick->low),
+				static_cast<double>(candlestick->close)
+			};
+			// Add the point to the series
+			chart_stockData->Series[0]->Points->Add(point);
+		}
 	}
-	};
+};
 }
