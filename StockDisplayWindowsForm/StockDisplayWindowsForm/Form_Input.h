@@ -80,8 +80,10 @@ namespace CppCLRWinFormsProject {
 		void InitializeComponent(void)
 		{
 			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
 			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
 			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->dataGridView_stockData = (gcnew System::Windows::Forms::DataGridView());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
@@ -141,8 +143,13 @@ namespace CppCLRWinFormsProject {
 			// 
 			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
 			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea1->AxisY->Title = L"Price";
 			chartArea1->Name = L"ChartArea_OHLC";
+			chartArea2->AxisY->Title = L"Volume";
+			chartArea2->Name = L"ChartArea_Volume";
 			this->chart_stockData->ChartAreas->Add(chartArea1);
+			this->chart_stockData->ChartAreas->Add(chartArea2);
+			legend1->Enabled = false;
 			legend1->Name = L"Legend1";
 			this->chart_stockData->Legends->Add(legend1);
 			this->chart_stockData->Location = System::Drawing::Point(613, 38);
@@ -155,8 +162,14 @@ namespace CppCLRWinFormsProject {
 			series1->Name = L"Series_OHLC";
 			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
 			series1->YValuesPerPoint = 4;
-			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series2->ChartArea = L"ChartArea_Volume";
+			series2->Legend = L"Legend1";
+			series2->Name = L"Series_Volume";
+			series2->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series2->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
 			this->chart_stockData->Series->Add(series1);
+			this->chart_stockData->Series->Add(series2);
 			this->chart_stockData->Size = System::Drawing::Size(817, 496);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
@@ -195,7 +208,7 @@ namespace CppCLRWinFormsProject {
 			// Fill chart with filtered candlestick data
 			displayChart();
 			// Normalize the chart
-			normalizeChart();
+			normalizeCandlestickChart();
 		}
 	}
 
@@ -261,21 +274,24 @@ namespace CppCLRWinFormsProject {
 	*/
 	private: System::Void displayChart(
 		DataVisualization::Charting::Chart^ chart,
-		System::String^ seriesName,
+		System::String^ candlestickSeriesName,
+		System::String^ volumeSeriesName,
 		System::Collections::Generic::IList<aCandlestick^>^ listOfCandlesticks) 
 	{
-		// Clear prior chart series data
-		chart->Series[seriesName]->Points->Clear();
+		// Clear prior candlestick series data
+		chart->Series[candlestickSeriesName]->Points->Clear();
+		// Clear prior volume series data
+		chart->Series[volumeSeriesName]->Points->Clear();
 
 		// Add each candlestick to the chart
 		for each (aCandlestick^ candlestick in listOfCandlesticks)
 		{
 			// Create a new data point
-			System::Windows::Forms::DataVisualization::Charting::DataPoint^ point = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
+			System::Windows::Forms::DataVisualization::Charting::DataPoint^ csPoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
-			point->XValue = candlestick->date->ToOADate();
+			csPoint->XValue = candlestick->date->ToOADate();
 			// Set point's x value
-			point->YValues = gcnew cli::array<double>{
+			csPoint->YValues = gcnew cli::array<double>{
 				static_cast<double>(candlestick->high),
 				static_cast<double>(candlestick->low),
 				static_cast<double>(candlestick->open),
@@ -285,15 +301,28 @@ namespace CppCLRWinFormsProject {
 			// Check if point is bullish or bearish
 			if (candlestick->close > candlestick->open) {
 				// If point is bullish, set color to green
-				point->Color = System::Drawing::Color::Green;
+				csPoint->Color = System::Drawing::Color::Green;
 			}
 			else {
 				// If point is bearish, set color to red
-				point->Color = System::Drawing::Color::Red;
+				csPoint->Color = System::Drawing::Color::Red;
 			}
-			point->BorderWidth = 1.5;
-			// Add the point to the series
-			chart->Series[seriesName]->Points->Add(point);
+			csPoint->BorderWidth = 1.5;
+
+			// Create data point for volume
+			System::Windows::Forms::DataVisualization::Charting::DataPoint^ volumePoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
+			// Set point's y-value
+			volumePoint->XValue = candlestick->date->ToOADate();
+			// Set point's x value
+			volumePoint->YValues = gcnew cli::array<double>{
+				static_cast<double>(candlestick->volume)
+			};
+
+
+			// Add volume point to the series
+			chart->Series[volumeSeriesName]->Points->Add(volumePoint);
+			// Add the candlestick point to chart
+			chart->Series[candlestickSeriesName]->Points->Add(csPoint);
 		}
 	}
 	/**
@@ -302,7 +331,7 @@ namespace CppCLRWinFormsProject {
 	*/
 	private: System::Void displayChart() {
 		// Populate chart with candlestick data
-		this->displayChart(chart_stockData, "Series_OHLC", filteredListOfCandlesticks);
+		this->displayChart(chart_stockData, "Series_OHLC", "Series_Volume", filteredListOfCandlesticks);
 	}
 	
 
@@ -312,7 +341,7 @@ namespace CppCLRWinFormsProject {
 	* @param seriesName The name of the chart series to normalize
 	* @param areaName The name of the chart area to normalize
 	*/
-	private: System::Void normalizeChart(Windows::Forms::DataVisualization::Charting::Chart^ chart, String^ seriesName, String^ areaName) {
+	private: System::Void normalizeCandlestickChart(Windows::Forms::DataVisualization::Charting::Chart^ chart, String^ seriesName, String^ areaName) {
 		// Variable to store min
 		double minY = 0;
 		// Variable to store max
@@ -336,16 +365,16 @@ namespace CppCLRWinFormsProject {
 		}
 
 		// Set chart area minimum
-		this->chart_stockData->ChartAreas[areaName]->AxisY->Minimum = Math::Round(minY * 0.98, 2);
+		chart->ChartAreas[areaName]->AxisY->Minimum = Math::Round(minY * 0.98, 2);
 		// Set chart area maximum
-		this->chart_stockData->ChartAreas[areaName]->AxisY->Maximum = Math::Round(maxY * 1.02, 2);
+		chart->ChartAreas[areaName]->AxisY->Maximum = Math::Round(maxY * 1.02, 2);
 	}
 	/**
 	* Normalize a chart series according to min and max values
 	*/
-	private: System::Void normalizeChart() {
+	private: System::Void normalizeCandlestickChart() {
 		// Normalize chart
-		normalizeChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
+		normalizeCandlestickChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
 };
 }
