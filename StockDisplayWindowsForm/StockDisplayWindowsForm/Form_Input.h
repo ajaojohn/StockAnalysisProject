@@ -15,10 +15,12 @@ namespace CppCLRWinFormsProject {
 	public ref class Form_Input : public System::Windows::Forms::Form
 	{
 #pragma region Self-written Form properties
+	// String to store selected file
+	private: System::String^ selectedFilename;
 	// List to store all candlesticks loaded from a file
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
 	// List of candlesticks to display
-	private: BindingList<aCandlestick^>^ bindingListOfCandlesticks = gcnew BindingList<aCandlestick^>();
+	private: BindingList<aCandlestick^>^ filteredListOfCandlesticks;
 
 #pragma endregion
 
@@ -34,8 +36,11 @@ namespace CppCLRWinFormsProject {
 
 			// Initialize list as empty
 			this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
+			// Intialize filtered list as empty
+			this->filteredListOfCandlesticks = gcnew BindingList<aCandlestick^>();
+
 			// Bind data grid to binding list
-			dataGridView_stockData->DataSource = bindingListOfCandlesticks;
+			dataGridView_stockData->DataSource = filteredListOfCandlesticks;
 		}
 
 	protected:
@@ -179,23 +184,32 @@ namespace CppCLRWinFormsProject {
 		// If the user selected a file
 		if (result == System::Windows::Forms::DialogResult::OK) {
 			// Get file selected
-			System::String^ filename =this->openFileDialog_load->FileName;
-			// Load the selected file
-			aCandlestickLoader^ loader = gcnew aCandlestickLoader();
-			this->listOfCandlesticks = loader->load(filename);
-
-			// Get candlesticks in time frame
-			Generic::List<aCandlestick^>^ filteredCandlesticks = this->getFilteredCandlesticks(this->dateTimePicker_start->Value, this->dateTimePicker_end->Value, this->listOfCandlesticks);
-			// Clear binding list
-			this->bindingListOfCandlesticks->Clear();
-			// Add filtered candlesticks to binding list
-			for (int i = 0; i < filteredCandlesticks->Count; i++) {
-				this->bindingListOfCandlesticks->Add(filteredCandlesticks[i]);
-			}
-			// Fill chart with candlestick data
-			this->populateChart(filteredCandlesticks);
+			this->selectedFilename = this->openFileDialog_load->FileName;
+			// Load candlesticks from the selected file
+			readCandlesticksFromFile();
+			// Filter candlesticks
+			filterCandlesticks();
+			// Fill chart with filtered candlestick data
+			displayChart();
 		}
 	}
+
+	/**
+	* Read candlesticks from file
+	* @param filename The name of the file to read
+	* @return A list of candlesticks read from the file
+	*/
+	private: Generic::List<aCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
+		aCandlestickLoader^ loader = gcnew aCandlestickLoader();
+		return loader->load(filename);
+	}
+	/**
+	* Read candlesticks from file
+	*/
+	private: System::Void readCandlesticksFromFile() {
+		this->listOfCandlesticks = this->readCandlesticksFromFile(this->selectedFilename);
+	}
+
 
 	/**
 	* Get filtered list of candlesticks in a time frame
@@ -203,7 +217,7 @@ namespace CppCLRWinFormsProject {
 	* @param endDate The end date of the time frame
 	* @return A list of candlesticks in the time frame
 	*/
-	private: Generic::List<aCandlestick^>^ getFilteredCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aCandlestick^>^  listOfCandlesticks) {
+	private: Generic::List<aCandlestick^>^ filterCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aCandlestick^>^  listOfCandlesticks) {
 		// Create a new list
 		Generic::List<aCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aCandlestick^>();
 		// Loop through each candlestick
@@ -217,14 +231,36 @@ namespace CppCLRWinFormsProject {
 		// Return the list
 		return filteredCandlesticks;
 	}
+	/**
+	* Set filteredListOfCandlesticks to candlesticks in the time frame selected using the date time pickers
+	*/
+	private: System::Void filterCandlesticks() {
+		// Get candlesticks in time frame
+		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(
+			this->dateTimePicker_start->Value, this->dateTimePicker_end->Value, this->listOfCandlesticks
+		);
+		// Clear binding list
+		this->filteredListOfCandlesticks->Clear();
+		// Add filtered candlesticks to binding list
+		for (int i = 0; i < filteredCandlesticks->Count; i++) {
+			this->filteredListOfCandlesticks->Add(filteredCandlesticks[i]);
+		}
+	}
+
 
 	/**
-	* Populate chart with data
+	* Populate a chart series with candlestick data
+	* @param chart The chart to populate
+	* @param seriesName The name of the Candlestick series to populate
 	* @param listOfCandlesticks The list of candlesticks to display
 	*/
-	private: System::Void populateChart(Generic::List<aCandlestick^> ^ listOfCandlesticks) {
-		// Clear prior chart data
-		chart_stockData->Series["Series_OHLC"]->Points->Clear();
+	private: System::Void displayChart(
+		DataVisualization::Charting::Chart^ chart,
+		System::String^ seriesName,
+		System::Collections::Generic::IList<aCandlestick^>^ listOfCandlesticks) 
+	{
+		// Clear prior chart series data
+		chart->Series[seriesName]->Points->Clear();
 
 		// Add each candlestick to the chart
 		for each (aCandlestick^ candlestick in listOfCandlesticks)
@@ -241,8 +277,16 @@ namespace CppCLRWinFormsProject {
 				static_cast<double>(candlestick->close)
 			};
 			// Add the point to the series
-			chart_stockData->Series["Series_OHLC"]->Points->Add(point);
+			chart->Series[seriesName]->Points->Add(point);
 		}
+	}
+	/**
+	* Populate chart_stockData with data
+	* @param listOfCandlesticks The list of candlesticks to display
+	*/
+	private: System::Void displayChart() {
+		// Populate chart with candlestick data
+		this->displayChart(chart_stockData, "Series_OHLC", filteredListOfCandlesticks);
 	}
 };
 }
