@@ -231,7 +231,9 @@ namespace CppCLRWinFormsProject {
 		{
 			// Create a new data point
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ point = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
+			// Set point's y-value
 			point->XValue = candlestick->date->ToOADate();
+			// Set point's x value
 			point->YValues = gcnew cli::array<double>{
 				static_cast<double>(candlestick->open),
 				static_cast<double>(candlestick->high),
@@ -239,7 +241,7 @@ namespace CppCLRWinFormsProject {
 				static_cast<double>(candlestick->close)
 			};
 			// Add the point to the series
-			chart_stockData->Series[0]->Points->Add(point);
+			chart_stockData->Series["Series_OHLC"]->Points->Add(point);
 		}
 	}
 };
