@@ -191,6 +191,8 @@ namespace CppCLRWinFormsProject {
 			filterCandlesticks();
 			// Fill chart with filtered candlestick data
 			displayChart();
+			// Normalize the chart
+			normalizeChart();
 		}
 	}
 
@@ -287,6 +289,49 @@ namespace CppCLRWinFormsProject {
 	private: System::Void displayChart() {
 		// Populate chart with candlestick data
 		this->displayChart(chart_stockData, "Series_OHLC", filteredListOfCandlesticks);
+	}
+	
+
+	/**
+	* Normalize a chart series according to min and max values
+	* @param chart The chart to normalize
+	* @param seriesName The name of the chart series to normalize
+	* @param areaName The name of the chart area to normalize
+	*/
+	private: System::Void normalizeChart(Windows::Forms::DataVisualization::Charting::Chart^ chart, String^ seriesName, String^ areaName) {
+		// Variable to store min
+		double minY = 0;
+		// Variable to store max
+		double maxY = 0;
+		
+		// If the series is not empty
+		if (chart->Series[seriesName]->Points->Count != 0) {
+			// Set proper initial min
+			minY = chart->Series[seriesName]->Points[0]->YValues[2];
+			// Set proper initial max
+			maxY = chart->Series[seriesName]->Points[0]->YValues[1];
+		}
+
+		
+		// Iterate through each point in the series
+		for each (Windows::Forms::DataVisualization::Charting::DataPoint^ point in chart->Series[seriesName]->Points) {
+			// Check point and update min
+			minY = Math::Min(minY, point->YValues[2]);
+			// Check point and update max
+			maxY = Math::Max(maxY, point->YValues[1]);
+		}
+
+		// Set chart area minimum
+		this->chart_stockData->ChartAreas[areaName]->AxisY->Minimum = Math::Round(minY * 0.98, 2);
+		// Set chart area maximum
+		this->chart_stockData->ChartAreas[areaName]->AxisY->Maximum = Math::Round(maxY * 1.02, 2);
+	}
+	/**
+	* Normalize a chart series according to min and max values
+	*/
+	private: System::Void normalizeChart() {
+		// Normalize chart
+		normalizeChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
 };
 }
