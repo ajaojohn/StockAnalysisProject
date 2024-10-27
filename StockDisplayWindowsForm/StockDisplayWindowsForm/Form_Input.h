@@ -19,7 +19,12 @@ namespace CppCLRWinFormsProject {
 	private: System::String^ selectedFilename;
 	// List to store all candlesticks loaded from a file
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
-	// List of candlesticks to display
+
+
+	private: System::Windows::Forms::Label^ label_startDate;
+	private: System::Windows::Forms::Label^ label_endDate;
+
+		   // List of candlesticks to display
 	private: BindingList<aCandlestick^>^ filteredListOfCandlesticks;
 
 #pragma endregion
@@ -90,26 +95,32 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
 			this->dateTimePicker_end = (gcnew System::Windows::Forms::DateTimePicker());
 			this->chart_stockData = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
+			this->label_startDate = (gcnew System::Windows::Forms::Label());
+			this->label_endDate = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// dataGridView_stockData
 			// 
+			this->dataGridView_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left));
+			this->dataGridView_stockData->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::Fill;
 			this->dataGridView_stockData->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->dataGridView_stockData->Location = System::Drawing::Point(11, 38);
+			this->dataGridView_stockData->Location = System::Drawing::Point(11, 12);
 			this->dataGridView_stockData->Name = L"dataGridView_stockData";
+			this->dataGridView_stockData->RowHeadersVisible = false;
 			this->dataGridView_stockData->RowHeadersWidth = 51;
 			this->dataGridView_stockData->RowTemplate->Height = 24;
-			this->dataGridView_stockData->Size = System::Drawing::Size(583, 496);
+			this->dataGridView_stockData->Size = System::Drawing::Size(670, 882);
 			this->dataGridView_stockData->TabIndex = 0;
 			// 
 			// button_load
 			// 
 			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->button_load->Location = System::Drawing::Point(613, 628);
+			this->button_load->Location = System::Drawing::Point(560, 924);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(245, 44);
+			this->button_load->Size = System::Drawing::Size(245, 49);
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Load";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -123,7 +134,7 @@ namespace CppCLRWinFormsProject {
 			// dateTimePicker_start
 			// 
 			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_start->Location = System::Drawing::Point(303, 639);
+			this->dateTimePicker_start->Location = System::Drawing::Point(284, 947);
 			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(2);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
 			this->dateTimePicker_start->Size = System::Drawing::Size(255, 22);
@@ -133,14 +144,17 @@ namespace CppCLRWinFormsProject {
 			// dateTimePicker_end
 			// 
 			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_end->Location = System::Drawing::Point(917, 639);
+			this->dateTimePicker_end->Location = System::Drawing::Point(821, 947);
 			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(2);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(238, 22);
+			this->dateTimePicker_end->Size = System::Drawing::Size(255, 22);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
 			// 
+			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
 			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
 			chartArea1->AxisY->Title = L"Price";
@@ -152,7 +166,7 @@ namespace CppCLRWinFormsProject {
 			legend1->Enabled = false;
 			legend1->Name = L"Legend1";
 			this->chart_stockData->Legends->Add(legend1);
-			this->chart_stockData->Location = System::Drawing::Point(613, 38);
+			this->chart_stockData->Location = System::Drawing::Point(686, 11);
 			this->chart_stockData->Margin = System::Windows::Forms::Padding(2);
 			this->chart_stockData->Name = L"chart_stockData";
 			series1->ChartArea = L"ChartArea_OHLC";
@@ -170,15 +184,37 @@ namespace CppCLRWinFormsProject {
 			series2->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
 			this->chart_stockData->Series->Add(series1);
 			this->chart_stockData->Series->Add(series2);
-			this->chart_stockData->Size = System::Drawing::Size(817, 496);
+			this->chart_stockData->Size = System::Drawing::Size(618, 883);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
+			// 
+			// label_startDate
+			// 
+			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->label_startDate->AutoSize = true;
+			this->label_startDate->Location = System::Drawing::Point(369, 920);
+			this->label_startDate->Name = L"label_startDate";
+			this->label_startDate->Size = System::Drawing::Size(66, 16);
+			this->label_startDate->TabIndex = 7;
+			this->label_startDate->Text = L"Start Date";
+			// 
+			// label_endDate
+			// 
+			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->label_endDate->AutoSize = true;
+			this->label_endDate->Location = System::Drawing::Point(906, 920);
+			this->label_endDate->Name = L"label_endDate";
+			this->label_endDate->Size = System::Drawing::Size(63, 16);
+			this->label_endDate->TabIndex = 8;
+			this->label_endDate->Text = L"End Date";
 			// 
 			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1438, 724);
+			this->ClientSize = System::Drawing::Size(1315, 996);
+			this->Controls->Add(this->label_endDate);
+			this->Controls->Add(this->label_startDate);
 			this->Controls->Add(this->chart_stockData);
 			this->Controls->Add(this->dateTimePicker_end);
 			this->Controls->Add(this->dateTimePicker_start);
@@ -189,6 +225,7 @@ namespace CppCLRWinFormsProject {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->EndInit();
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -376,5 +413,6 @@ namespace CppCLRWinFormsProject {
 		// Normalize chart
 		normalizeCandlestickChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
+
 };
 }
