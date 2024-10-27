@@ -10,16 +10,16 @@ private:
     System::Decimal _close;     // Closing price
     System::Int64 _volume;      // Volume of stock traded
 
-    /**
-    * Set the candlestick properties
-    * @param date Date of the candlestick
-    * @param open Opening price
-    * @param high Highest price
-    * @param low Lowest price
-    * @param close Closing price
-    * @param volume Volume of stock traded
-    * @returns void
-    */
+    /// <summary>
+    /// Set the candlestick properties
+    /// </summary>
+    /// <param name="date">Date of the candlestick</param>
+    /// <param name="open">Opening price</param>
+    /// <param name="high">Highest price</param>
+	/// <param name="low">Lowest price</param>
+    /// <param name="close">Closing price</param>
+    /// <param name="volume">Volume of stock traded</param>
+    /// <returns>void</returns>
     System::Void setCandlestickProperties(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume);
 public:
     // Property for date
@@ -70,31 +70,31 @@ public:
         void set(System::Int64 value) { _volume = value; }
     }
 
-    /**
-    * Default constructor
-    */
+    /// <summary>
+    /// Default constructor, sets all properties to 0 and date to today
+    /// </summary>
     aCandlestick();
 
-    /**
-    * aCandlestick constructor
-    * @param Line from a csv file formatted "date,open,high,low,close,adj close,volume"
-    */
+    /// <summary>
+    /// Constructor for aCandlestick
+    /// </summary>
+    /// <param name="row">Line from a csv file formatted "date,open,high,low,close,adj close,volume"</param>
     aCandlestick(System::String^ row);
 
-    /**
-    * aCandlestick constructor
-    * @param date Time of the candlestick
-    * @param open Opening price
-    * @param high Highest price
-    * @param low Lowest price
-    * @param close Closing price
-    * @param volume Volume of stock traded
-    */
+    /// <summary>
+    /// Constructs a candlestick object representing a stock's performance for a specific time period.
+    /// </summary>
+    /// <param name="date">The time of the candlestick.</param>
+    /// <param name="open">The opening price.</param>
+    /// <param name="high">The highest price.</param>
+    /// <param name="low">The lowest price.</param>
+    /// <param name="close">The closing price.</param>
+    /// <param name="volume">The volume of stock traded.</param>
     aCandlestick(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume);
 
-    /**
-    * Copy constructor
-    * @param candlestick The candlestick to copy
-    */
+    /// <summary>
+    /// Copy constructor that creates a new candlestick object by copying the data from an existing candlestick.
+    /// </summary>
+    /// <param name="candlestick">The candlestick to copy.</param>
     aCandlestick(aCandlestick^ candlestick);
 };

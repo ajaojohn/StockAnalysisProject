@@ -271,29 +271,30 @@ namespace CppCLRWinFormsProject {
 		}
 	}
 
-	/**
-	* Read candlesticks from file
-	* @param filename The name of the file to read
-	* @return A list of candlesticks read from the file
-	*/
+	/// <summary>
+	/// Reads candlesticks from a file and returns a list of candlestick objects.
+	/// </summary>
+	/// <param name="filename">The name of the file to read.</param>
+	/// <returns>A list of candlesticks read from the file.</returns>
 	private: Generic::List<aCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
 		aCandlestickLoader^ loader = gcnew aCandlestickLoader();
 		return loader->load(filename);
 	}
-	/**
-	* Read candlesticks from file
-	*/
+	/// <summary>
+	/// Reads candlesticks from a file and saves it to private parameter
+	/// </summary>
+	/// <returns>void</returns>
 	private: System::Void readCandlesticksFromFile() {
 		this->listOfCandlesticks = this->readCandlesticksFromFile(this->selectedFilename);
 	}
 
 
-	/**
-	* Get filtered list of candlesticks in a time frame
-	* @param startDate The start date of the time frame
-	* @param endDate The end date of the time frame
-	* @return A list of candlesticks in the time frame
-	*/
+	/// <summary>
+	/// Gets a filtered list of candlesticks within a specified time frame.
+	/// </summary>
+	/// <param name="startDate">The start date of the time frame.</param>
+	/// <param name="endDate">The end date of the time frame.</param>
+	/// <returns>A list of candlesticks within the specified time frame.</returns>
 	private: Generic::List<aCandlestick^>^ filterCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aCandlestick^>^  listOfCandlesticks) {
 		// Create a new list
 		Generic::List<aCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aCandlestick^>();
@@ -308,9 +309,10 @@ namespace CppCLRWinFormsProject {
 		// Return the list
 		return filteredCandlesticks;
 	}
-	/**
-	* Set filteredListOfCandlesticks to candlesticks in the time frame selected using the date time pickers
-	*/
+	/// <summary>
+	/// Set filteredListOfCandlesticks to candlesticks in the time frame selected using the date time pickers
+	/// </summary>
+	/// <returns>void</returns>
 	private: System::Void filterCandlesticks() {
 		// Get candlesticks in time frame
 		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(
@@ -325,12 +327,12 @@ namespace CppCLRWinFormsProject {
 	}
 
 
-	/**
-	* Populate a chart series with candlestick data
-	* @param chart The chart to populate
-	* @param seriesName The name of the Candlestick series to populate
-	* @param listOfCandlesticks The list of candlesticks to display
-	*/
+	/// <summary>
+	/// Populates a chart series with candlestick data.
+	/// </summary>
+	/// <param name="chart">The chart to populate.</param>
+	/// <param name="seriesName">The name of the candlestick series to populate.</param>
+	/// <param name="listOfCandlesticks">The list of candlesticks to display in the chart.</param>
 	private: System::Void displayChart(
 		DataVisualization::Charting::Chart^ chart,
 		System::String^ candlestickSeriesName,
@@ -386,22 +388,22 @@ namespace CppCLRWinFormsProject {
 			chart->Series[candlestickSeriesName]->Points->Add(csPoint);
 		}
 	}
-	/**
-	* Populate chart_stockData with data
-	* @param listOfCandlesticks The list of candlesticks to display
-	*/
+	/// <summary>
+	/// Populates the chart_stockData with candlestick data.
+	/// </summary>
+	/// <param name="listOfCandlesticks">The list of candlesticks to display in chart_stockData.</param>
 	private: System::Void displayChart() {
 		// Populate chart with candlestick data
 		this->displayChart(chart_stockData, "Series_OHLC", "Series_Volume", filteredListOfCandlesticks);
 	}
 	
 
-	/**
-	* Normalize a chart series according to min and max values
-	* @param chart The chart to normalize
-	* @param seriesName The name of the chart series to normalize
-	* @param areaName The name of the chart area to normalize
-	*/
+	/// <summary>
+	/// Normalizes a chart series according to specified minimum and maximum values.
+	/// </summary>
+	/// <param name="chart">The chart to normalize.</param>
+	/// <param name="seriesName">The name of the chart series to normalize.</param>
+	/// <param name="areaName">The name of the chart area to normalize.</param>
 	private: System::Void normalizeCandlestickChart(Windows::Forms::DataVisualization::Charting::Chart^ chart, String^ seriesName, String^ areaName) {
 		// Variable to store min
 		double minY = 0;
@@ -430,20 +432,21 @@ namespace CppCLRWinFormsProject {
 		// Set chart area maximum
 		chart->ChartAreas[areaName]->AxisY->Maximum = Math::Round(maxY * 1.02, 2);
 	}
-	/**
-	* Normalize a chart series according to min and max values
-	*/
+	/// <summary>
+	/// Normalize a chart series according to min and max values
+	/// </summary>
+	/// <returns>void</returns>
 	private: System::Void normalizeCandlestickChart() {
 		// Normalize chart
 		normalizeCandlestickChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
 
 
-	/**
-	* Update stocks being displayed according to the provided start and end dates
-	* @param startDate The start date for the filter
-	* @param endDate The end date for the filter
-	*/
+	/// <summary>
+	/// Updates the stocks being displayed by filtering according to the provided start and end dates.
+	/// </summary>
+	/// <param name="startDate">The start date for the filter.</param>
+	/// <param name="endDate">The end date for the filter.</param>
 	private: System::Void update(System::DateTime^ startDate, System::DateTime^ endDate) {
 		// Filter candlesticks using the provided dates
 		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(startDate, endDate, this->listOfCandlesticks);
@@ -462,12 +465,15 @@ namespace CppCLRWinFormsProject {
 		// Normalize chart
 		this->normalizeCandlestickChart();
 	}
-	/**
-	* Update stocks being displayed according to filters from form controls
-	*/
+	/// <summary>
+	/// Update stocks being displayed according to filters from form controls
+	/// </summary>
+	/// <returns>void</returns>
 	private: System::Void update() {
-		// Get the start and end dates from the date pickers
+		// Get the start date from the date picker
+		// Get the start date from the date picker
 		System::DateTime^ startDate = this->dateTimePicker_start->Value;
+		// Get the end date from the date picker
 		System::DateTime^ endDate = this->dateTimePicker_end->Value;
 
 		// Call the overloaded update method with the date range

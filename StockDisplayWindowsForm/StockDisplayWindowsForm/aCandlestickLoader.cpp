@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "aCandlestickLoader.h"
 
+/// <summary>
+/// Loads a csv data file and returns a list of candlesticks
+/// </summary>
+/// <param name="filename">File path to the csv file</param>
+/// <returns>A List of aCandlestick objects created from rows in the file</returns>
 List<aCandlestick^>^ aCandlestickLoader::load(System::String^ filename) {
 	// Create empty list of candlesticks
 	List<aCandlestick^>^ listOfCandlesticks = gcnew List<aCandlestick^>();
