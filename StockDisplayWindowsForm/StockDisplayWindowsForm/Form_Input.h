@@ -436,17 +436,42 @@ namespace CppCLRWinFormsProject {
 		normalizeCandlestickChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
 
+
 	/**
-	* Update stocks beign displayed according to filters
+	* Update stocks being displayed according to the provided start and end dates
+	* @param startDate The start date for the filter
+	* @param endDate The end date for the filter
 	*/
-	private: System::Void update() {
-		// Filter candlesticks
-		this->filterCandlesticks();
+	private: System::Void update(System::DateTime^ startDate, System::DateTime^ endDate) {
+		// Filter candlesticks using the provided dates
+		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(startDate, endDate, this->listOfCandlesticks);
+
+		// Clear binding list
+		this->filteredListOfCandlesticks->Clear();
+
+		// Add filtered candlesticks to binding list
+		for (int i = 0; i < filteredCandlesticks->Count; i++) {
+			this->filteredListOfCandlesticks->Add(filteredCandlesticks[i]);
+		}
+
 		// Update chart
 		this->displayChart();
+
 		// Normalize chart
 		this->normalizeCandlestickChart();
 	}
+	/**
+	* Update stocks being displayed according to filters from form controls
+	*/
+	private: System::Void update() {
+		// Get the start and end dates from the date pickers
+		System::DateTime^ startDate = this->dateTimePicker_start->Value;
+		System::DateTime^ endDate = this->dateTimePicker_end->Value;
+
+		// Call the overloaded update method with the date range
+		this->update(startDate, endDate);
+	}
+
 
 private: System::Void button_update_Click(System::Object^ sender, System::EventArgs^ e) {
 	// Update displays
