@@ -23,6 +23,7 @@ namespace CppCLRWinFormsProject {
 
 	private: System::Windows::Forms::Label^ label_startDate;
 	private: System::Windows::Forms::Label^ label_endDate;
+	private: System::Windows::Forms::Button^ button_update;
 
 		   // List of candlesticks to display
 	private: BindingList<aCandlestick^>^ filteredListOfCandlesticks;
@@ -97,6 +98,7 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData = (gcnew System::Windows::Forms::DataVisualization::Charting::Chart());
 			this->label_startDate = (gcnew System::Windows::Forms::Label());
 			this->label_endDate = (gcnew System::Windows::Forms::Label());
+			this->button_update = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView_stockData))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->BeginInit();
 			this->SuspendLayout();
@@ -120,9 +122,9 @@ namespace CppCLRWinFormsProject {
 			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
 			this->button_load->Location = System::Drawing::Point(560, 924);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(245, 49);
+			this->button_load->Size = System::Drawing::Size(121, 49);
 			this->button_load->TabIndex = 1;
-			this->button_load->Text = L"Load";
+			this->button_load->Text = L"Load File";
 			this->button_load->UseVisualStyleBackColor = true;
 			this->button_load->Click += gcnew System::EventHandler(this, &Form_Input::button_load_Click);
 			// 
@@ -208,11 +210,23 @@ namespace CppCLRWinFormsProject {
 			this->label_endDate->TabIndex = 8;
 			this->label_endDate->Text = L"End Date";
 			// 
+			// button_update
+			// 
+			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->button_update->Location = System::Drawing::Point(687, 924);
+			this->button_update->Name = L"button_update";
+			this->button_update->Size = System::Drawing::Size(121, 49);
+			this->button_update->TabIndex = 9;
+			this->button_update->Text = L"Update";
+			this->button_update->UseVisualStyleBackColor = true;
+			this->button_update->Click += gcnew System::EventHandler(this, &Form_Input::button_update_Click);
+			// 
 			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1315, 996);
+			this->Controls->Add(this->button_update);
 			this->Controls->Add(this->label_endDate);
 			this->Controls->Add(this->label_startDate);
 			this->Controls->Add(this->chart_stockData);
@@ -414,5 +428,21 @@ namespace CppCLRWinFormsProject {
 		normalizeCandlestickChart(chart_stockData, "Series_OHLC", "ChartArea_OHLC");
 	}
 
+	/**
+	* Update stocks beign displayed according to filters
+	*/
+	private: System::Void update() {
+		// Filter candlesticks
+		filterCandlesticks();
+		// Update chart
+		this->displayChart();
+		// Normalize chart
+		this->normalizeCandlestickChart();
+	}
+
+private: System::Void button_update_Click(System::Object^ sender, System::EventArgs^ e) {
+	// Update displays
+	this->update();
+}
 };
 }
