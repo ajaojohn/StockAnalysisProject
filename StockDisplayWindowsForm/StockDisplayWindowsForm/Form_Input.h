@@ -19,6 +19,7 @@ namespace CppCLRWinFormsProject {
 	private: System::String^ selectedFilename;
 	// List to store all candlesticks loaded from a file
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
+	private: aCandlestickLoader^ candlestickLoader;
 
 
 	private: System::Windows::Forms::Label^ label_startDate;
@@ -35,6 +36,8 @@ namespace CppCLRWinFormsProject {
 		{
 			InitializeComponent();
 
+			// Initialize loader
+			candlestickLoader = gcnew aCandlestickLoader();
 			// Generate initial  directory for open file dialog
 			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\Stock Data");
 			// Set initial directory for open file dialog
@@ -277,15 +280,21 @@ namespace CppCLRWinFormsProject {
 	/// <param name="filename">The name of the file to read.</param>
 	/// <returns>A list of candlesticks read from the file.</returns>
 	private: Generic::List<aCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
-		aCandlestickLoader^ loader = gcnew aCandlestickLoader();
-		return loader->load(filename);
+		// Call loader
+		return candlestickLoader->load(filename);
 	}
 	/// <summary>
 	/// Reads candlesticks from a file and saves it to private parameter
 	/// </summary>
 	/// <returns>void</returns>
 	private: System::Void readCandlesticksFromFile() {
+		// Use candlestick loader to read candlesticks
 		this->listOfCandlesticks = this->readCandlesticksFromFile(this->selectedFilename);
+		// If the first candlestick is after the last candlestick (chronological order), reverse the list
+		if (this->listOfCandlesticks[0]->date->CompareTo(this->listOfCandlesticks[this->listOfCandlesticks->Count - 1]->date) > 0) {
+			// Reverse the list
+			this->listOfCandlesticks->Reverse();
+		}
 	}
 
 
@@ -345,10 +354,7 @@ namespace CppCLRWinFormsProject {
 		chart->Series[volumeSeriesName]->Points->Clear();
 
 		// Add each candlestick to the chart
-		for (int i = listOfCandlesticks->Count - 1; i >= 0; i--)
-		{
-			// Get candlestick
-			aCandlestick ^ candlestick = listOfCandlesticks[i];
+		for  each (aCandlestick ^ candlestick in listOfCandlesticks) {
 			// Create a new data point
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ csPoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
