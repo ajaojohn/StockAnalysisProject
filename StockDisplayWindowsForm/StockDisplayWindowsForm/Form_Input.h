@@ -264,6 +264,11 @@ namespace CppCLRWinFormsProject {
 		if (result == System::Windows::Forms::DialogResult::OK) {
 			// Get file selected
 			this->selectedFilename = this->openFileDialog_load->FileName;
+			// Get filename without extension
+			String^ filenameWithoutExtension = System::IO::Path::GetFileNameWithoutExtension(this->selectedFilename);
+			// Set title
+			this->Text = "Displaying: " + filenameWithoutExtension;
+
 			// Load candlesticks from the selected file
 			readCandlesticksFromFile();
 			// Filter candlesticks
