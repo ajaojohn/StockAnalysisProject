@@ -19,6 +19,7 @@ namespace CppCLRWinFormsProject {
 	private: System::String^ selectedFilename;
 	// List to store all candlesticks loaded from a file
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
+	// CandlestickLoader object to be used to load candlesticks from csv files
 	private: aCandlestickLoader^ candlestickLoader;
 
 
