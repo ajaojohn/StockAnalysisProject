@@ -36,19 +36,45 @@ namespace CppCLRWinFormsProject {
 		Form_Input(void)
 		{
 			InitializeComponent();
-
-			// Initialize loader
-			candlestickLoader = gcnew aCandlestickLoader();
-			// Generate initial  directory for open file dialog
-			System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\Stock Data");
-			// Set initial directory for open file dialog
-			this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath);
-
-			// Initialize list as empty
-			this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
-			// Intialize filtered list as empty
-			this->filteredListOfCandlesticks = gcnew BindingList<aCandlestick^>();
+			initializeCustomProperties();
 		}
+
+		Form_Input(String^ filename, DateTime startDate, DateTime endDate)
+		{
+			// Initialize form components
+			InitializeComponent();
+			// Initialize self-written properties
+			initializeCustomProperties();
+
+			// Set selected filename
+			this->selectedFilename = filename;
+			// Set start date picker
+			this->dateTimePicker_start->Value = startDate;
+			// Set end date picker
+			this->dateTimePicker_end->Value = endDate;
+
+			// Set title of the form using the selected filename
+			setTitleUsingFilename(false);
+			// Retrieve and display stock data on current form
+			getAndDisplayStockData();
+		}
+	
+	/// <summary>
+	/// Initialize custom properties not defined by form
+	/// </summary>
+	private: void initializeCustomProperties() {
+		// Initialize loader
+		candlestickLoader = gcnew aCandlestickLoader();
+		// Generate initial  directory for open file dialog
+		System::String^ CombinedPath = System::IO::Path::Combine(System::IO::Directory::GetCurrentDirectory(), "..\\Stock Data");
+		// Set initial directory for open file dialog
+		this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath);
+
+		// Initialize list as empty
+		this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
+		// Intialize filtered list as empty
+		this->filteredListOfCandlesticks = gcnew BindingList<aCandlestick^>();
+	}
 
 	protected:
 		/// <summary>
@@ -118,6 +144,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->openFileDialog_load->FileName = L"openFileDialog1";
 			this->openFileDialog_load->Filter = L"CSV Files (*.csv)|*.csv|Monthly|*-Month.csv|Weekly|*-Week.csv|Daily|*-Day.csv";
+			this->openFileDialog_load->Multiselect = true;
 			// 
 			// dateTimePicker_start
 			// 
@@ -240,22 +267,60 @@ namespace CppCLRWinFormsProject {
 
 		// If the user selected a file
 		if (result == System::Windows::Forms::DialogResult::OK) {
-			// Get file selected
-			this->selectedFilename = this->openFileDialog_load->FileName;
-			// Get filename without extension
-			String^ filenameWithoutExtension = System::IO::Path::GetFileNameWithoutExtension(this->selectedFilename);
-			// Set title
-			this->Text = "Displaying: " + filenameWithoutExtension;
 
-			// Load candlesticks from the selected file
-			readCandlesticksFromFile();
-			// Filter candlesticks
-			filterCandlesticks();
-			// Fill chart with filtered candlestick data
-			displayChart();
-			// Normalize the chart
-			normalizeCandlestickChart();
+			// Get array of all selected files
+			array<System::String^>^ selectedFilenames = this->openFileDialog_load->FileNames;
+
+			// Get file selected
+			this->selectedFilename = selectedFilenames[0];
+			// Set title of the form using the selected filename
+			setTitleUsingFilename(true);
+			// Display stock data on current form
+			getAndDisplayStockData();
+			
+			// Iterate through each selected file
+			for (int i = 1; i < selectedFilenames->Length; i++) {
+				// Construct child form using the selected file and time range
+				Form_Input^ childForm = gcnew Form_Input(selectedFilenames[i], this->dateTimePicker_start->Value, this->dateTimePicker_end->Value);
+				// Display/show child form
+				childForm->Show();
+			}
 		}
+	}
+	
+	/// <summary>
+	/// Displays stock data on the current form by reading candlesticks from the selected file stored in a member variable
+	/// </summary>
+	/// <returns>void</returns>
+	private: System::Void getAndDisplayStockData() {
+		// Load candlesticks from the selected file
+		readCandlesticksFromFile();
+		// Filter candlesticks
+		filterCandlesticks();
+		// Fill chart with filtered candlestick data
+		displayChart();
+		// Normalize the chart
+		normalizeCandlestickChart();
+	}
+
+	/// <summary>
+	/// Set title of the form using the selected filename
+	/// </summary>
+	/// <param name="isParentForm">Indicates if the form is a parent form</param>
+	/// <returns></returns>
+	private: System::Void setTitleUsingFilename(bool isParentForm) {
+		// Get filename without extension
+		String^ filenameWithoutExtension = System::IO::Path::GetFileNameWithoutExtension(this->selectedFilename);
+		// Create string for form title
+		String^ formTitle = "";
+		// Add text indicating if the form is a child form
+		if (isParentForm) {
+			formTitle += "(Parent Form) ";
+		}
+		// Append filename
+		formTitle += filenameWithoutExtension;
+		// Set form title
+		this->Text = formTitle;
 	}
 
 	/// <summary>
