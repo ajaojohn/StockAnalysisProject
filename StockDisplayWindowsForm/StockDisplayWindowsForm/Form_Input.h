@@ -21,6 +21,8 @@ namespace CppCLRWinFormsProject {
 	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
 	// CandlestickLoader object to be used to load candlesticks from csv files
 	private: aCandlestickLoader^ candlestickLoader;
+	// Bool to identify parent form
+	private: bool isParentForm;
 
 
 	private: System::Windows::Forms::Label^ label_startDate;
@@ -37,6 +39,7 @@ namespace CppCLRWinFormsProject {
 		{
 			InitializeComponent();
 			initializeCustomProperties();
+			isParentForm = true;
 		}
 
 		Form_Input(String^ filename, DateTime startDate, DateTime endDate)
@@ -46,6 +49,8 @@ namespace CppCLRWinFormsProject {
 			// Initialize self-written properties
 			initializeCustomProperties();
 
+			// Set isParentForm to false
+			isParentForm = false;
 			// Set selected filename
 			this->selectedFilename = filename;
 			// Set start date picker
@@ -54,7 +59,7 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_end->Value = endDate;
 
 			// Set title of the form using the selected filename
-			setTitleUsingFilename(false);
+			setTitleUsingFilename();
 			// Retrieve and display stock data on current form
 			getAndDisplayStockData();
 		}
@@ -274,7 +279,7 @@ namespace CppCLRWinFormsProject {
 			// Get file selected
 			this->selectedFilename = selectedFilenames[0];
 			// Set title of the form using the selected filename
-			setTitleUsingFilename(true);
+			setTitleUsingFilename();
 			// Display stock data on current form
 			getAndDisplayStockData();
 			
@@ -306,9 +311,8 @@ namespace CppCLRWinFormsProject {
 	/// <summary>
 	/// Set title of the form using the selected filename
 	/// </summary>
-	/// <param name="isParentForm">Indicates if the form is a parent form</param>
 	/// <returns></returns>
-	private: System::Void setTitleUsingFilename(bool isParentForm) {
+	private: System::Void setTitleUsingFilename() {
 		// Get filename without extension
 		String^ filenameWithoutExtension = System::IO::Path::GetFileNameWithoutExtension(this->selectedFilename);
 		// Create string for form title
