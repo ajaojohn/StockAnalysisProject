@@ -298,7 +298,7 @@ namespace CppCLRWinFormsProject {
 		// Filter candlesticks
 		filterCandlesticks();
 		// Fill chart with filtered candlestick data
-		displayChart();
+		displayDataOnChart();
 		// Normalize the chart
 		normalizeCandlestickChart();
 	}
@@ -391,7 +391,7 @@ namespace CppCLRWinFormsProject {
 	/// <param name="chart">The chart to populate.</param>
 	/// <param name="seriesName">The name of the candlestick series to populate.</param>
 	/// <param name="listOfCandlesticks">The list of candlesticks to display in the chart.</param>
-	private: System::Void displayChart(
+	private: System::Void displayDataOnChart(
 		DataVisualization::Charting::Chart^ chart,
 		System::String^ candlestickSeriesName,
 		System::String^ volumeSeriesName,
@@ -404,7 +404,7 @@ namespace CppCLRWinFormsProject {
 
 		// Add each candlestick to the chart
 		for  each (aCandlestick ^ candlestick in listOfCandlesticks) {
-			// Create a new data point
+			// Create a new data point for candlestick OHLC area
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ csPoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
 			csPoint->XValue = candlestick->date->ToOADate();
@@ -425,9 +425,10 @@ namespace CppCLRWinFormsProject {
 				// If point is bearish, set color to red
 				csPoint->Color = System::Drawing::Color::Red;
 			}
-			csPoint->BorderWidth = 1.5;
+			// Set point's border width
+			csPoint->BorderWidth = 1;
 
-			// Create data point for volume
+			// Create data point for volume area
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ volumePoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
 			volumePoint->XValue = candlestick->date->ToOADate();
@@ -443,13 +444,14 @@ namespace CppCLRWinFormsProject {
 			chart->Series[candlestickSeriesName]->Points->Add(csPoint);
 		}
 	}
+	
 	/// <summary>
 	/// Populates the chart_stockData with candlestick data.
 	/// </summary>
 	/// <param name="listOfCandlesticks">The list of candlesticks to display in chart_stockData.</param>
-	private: System::Void displayChart() {
+	private: System::Void displayDataOnChart() {
 		// Populate chart with candlestick data
-		this->displayChart(chart_stockData, "Series_OHLC", "Series_Volume", filteredListOfCandlesticks);
+		this->displayDataOnChart(chart_stockData, "Series_OHLC", "Series_Volume", filteredListOfCandlesticks);
 	}
 	
 
@@ -515,7 +517,7 @@ namespace CppCLRWinFormsProject {
 		}
 
 		// Update chart
-		this->displayChart();
+		this->displayDataOnChart();
 
 		// Normalize chart
 		this->normalizeCandlestickChart();
