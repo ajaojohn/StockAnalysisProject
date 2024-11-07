@@ -150,6 +150,7 @@ namespace CppCLRWinFormsProject {
 			this->openFileDialog_load->FileName = L"openFileDialog1";
 			this->openFileDialog_load->Filter = L"CSV Files (*.csv)|*.csv|Monthly|*-Month.csv|Weekly|*-Week.csv|Daily|*-Day.csv";
 			this->openFileDialog_load->Multiselect = true;
+			this->openFileDialog_load->FileOk += gcnew System::ComponentModel::CancelEventHandler(this, &Form_Input::openFileDialog_load_FileOk);
 			// 
 			// dateTimePicker_start
 			// 
@@ -269,27 +270,25 @@ namespace CppCLRWinFormsProject {
 	private: System::Void button_load_Click(System::Object^ sender, System::EventArgs^ e) {
 		// On button click, trigger the open file dialog
 		System::Windows::Forms::DialogResult result = this->openFileDialog_load->ShowDialog();
+	}
 
-		// If the user selected a file
-		if (result == System::Windows::Forms::DialogResult::OK) {
+	private: System::Void openFileDialog_load_FileOk(System::Object^ sender, System::ComponentModel::CancelEventArgs^ e) {
+		// Get array of all selected files
+		array<System::String^>^ selectedFilenames = this->openFileDialog_load->FileNames;
 
-			// Get array of all selected files
-			array<System::String^>^ selectedFilenames = this->openFileDialog_load->FileNames;
+		// Get file selected
+		this->selectedFilename = selectedFilenames[0];
+		// Set title of the form using the selected filename
+		setTitleUsingFilename();
+		// Display stock data on current form
+		getAndDisplayStockData();
 
-			// Get file selected
-			this->selectedFilename = selectedFilenames[0];
-			// Set title of the form using the selected filename
-			setTitleUsingFilename();
-			// Display stock data on current form
-			getAndDisplayStockData();
-			
-			// Iterate through each selected file
-			for (int i = 1; i < selectedFilenames->Length; i++) {
-				// Construct child form using the selected file and time range
-				Form_Input^ childForm = gcnew Form_Input(selectedFilenames[i], this->dateTimePicker_start->Value, this->dateTimePicker_end->Value);
-				// Display/show child form
-				childForm->Show();
-			}
+		// Iterate through each selected file
+		for (int i = 1; i < selectedFilenames->Length; i++) {
+			// Construct child form using the selected file and time range
+			Form_Input^ childForm = gcnew Form_Input(selectedFilenames[i], this->dateTimePicker_start->Value, this->dateTimePicker_end->Value);
+			// Display/show child form
+			childForm->Show();
 		}
 	}
 	
