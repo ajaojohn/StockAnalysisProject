@@ -35,9 +35,6 @@
     <ClInclude Include="aCandlestickLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="aSmartCandlestick.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CppCLR_WinFormsProject.cpp">
@@ -56,9 +53,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="aCandlestickLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="aSmartCandlestick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

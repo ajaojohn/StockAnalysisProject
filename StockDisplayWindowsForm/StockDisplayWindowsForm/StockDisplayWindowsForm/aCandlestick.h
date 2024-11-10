@@ -1,7 +1,7 @@
 #pragma once
 ref class aCandlestick
 {
-protected:
+private:
     /// Private fields
     System::DateTime^ _date;    // Date of the candlestick
     System::Decimal _open;      // Opening price
