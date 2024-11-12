@@ -18,7 +18,7 @@ namespace CppCLRWinFormsProject {
 	// String to store selected file
 	private: System::String^ selectedFilename;
 	// List to store all candlesticks loaded from a file
-	private: Generic::List<aCandlestick^>^ listOfCandlesticks;
+	private: Generic::List<aSmartCandlestick^>^ listOfCandlesticks;
 	// CandlestickLoader object to be used to load candlesticks from csv files
 	private: aCandlestickLoader^ candlestickLoader;
 	// Bool to identify parent form
@@ -30,7 +30,7 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Button^ button_update;
 
 		   // List of candlesticks to display
-	private: BindingList<aCandlestick^>^ filteredListOfCandlesticks;
+	private: BindingList<aSmartCandlestick^>^ filteredListOfCandlesticks;
 
 #pragma endregion
 
@@ -76,9 +76,9 @@ namespace CppCLRWinFormsProject {
 		this->openFileDialog_load->InitialDirectory = System::IO::Path::GetFullPath(CombinedPath);
 
 		// Initialize list as empty
-		this->listOfCandlesticks = gcnew Generic::List<aCandlestick^>();
+		this->listOfCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 		// Intialize filtered list as empty
-		this->filteredListOfCandlesticks = gcnew BindingList<aCandlestick^>();
+		this->filteredListOfCandlesticks = gcnew BindingList<aSmartCandlestick^>();
 	}
 
 	protected:
@@ -331,9 +331,18 @@ namespace CppCLRWinFormsProject {
 	/// </summary>
 	/// <param name="filename">The name of the file to read.</param>
 	/// <returns>A list of candlesticks read from the file.</returns>
-	private: Generic::List<aCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
+	private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
 		// Call loader
-		return candlestickLoader->load(filename);
+		Generic::List<aCandlestick^>^ candlesticks = candlestickLoader->load(filename);
+		// Create list of smart candlesticks
+		Generic::List<aSmartCandlestick^>^ smartCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
+		// Iterate through each candlestick
+		for each (aCandlestick^ candlestick in candlesticks) {
+			// Add smart candlestick
+			smartCandlesticks->Add(gcnew aSmartCandlestick(candlestick));
+		}
+		// Return smart candlesticks
+		return smartCandlesticks;
 	}
 	/// <summary>
 	/// Reads candlesticks from a file and saves it to private parameter
@@ -356,9 +365,9 @@ namespace CppCLRWinFormsProject {
 	/// <param name="startDate">The start date of the time frame.</param>
 	/// <param name="endDate">The end date of the time frame.</param>
 	/// <returns>A list of candlesticks within the specified time frame.</returns>
-	private: Generic::List<aCandlestick^>^ filterCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aCandlestick^>^  listOfCandlesticks) {
+	private: Generic::List<aSmartCandlestick^>^ filterCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aSmartCandlestick^>^  listOfCandlesticks) {
 		// Create a new list
-		Generic::List<aCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aCandlestick^>();
+		Generic::List<aSmartCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 		// Loop through each candlestick
 		for (int i = 0; i < listOfCandlesticks->Count; i++) {
 			// If the candlestick is in the time frame
@@ -376,7 +385,7 @@ namespace CppCLRWinFormsProject {
 	/// <returns>void</returns>
 	private: System::Void filterCandlesticks() {
 		// Get candlesticks in time frame
-		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(
+		Generic::List<aSmartCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(
 			this->dateTimePicker_start->Value, this->dateTimePicker_end->Value, this->listOfCandlesticks
 		);
 		// Clear binding list
@@ -398,7 +407,7 @@ namespace CppCLRWinFormsProject {
 		DataVisualization::Charting::Chart^ chart,
 		System::String^ candlestickSeriesName,
 		System::String^ volumeSeriesName,
-		System::Collections::Generic::IList<aCandlestick^>^ listOfCandlesticks) 
+		System::Collections::Generic::IList<aSmartCandlestick^>^ listOfCandlesticks)
 	{
 		// Clear prior candlestick series data
 		chart->Series[candlestickSeriesName]->Points->Clear();
@@ -406,7 +415,7 @@ namespace CppCLRWinFormsProject {
 		chart->Series[volumeSeriesName]->Points->Clear();
 
 		// Add each candlestick to the chart
-		for  each (aCandlestick ^ candlestick in listOfCandlesticks) {
+		for  each (aSmartCandlestick ^ candlestick in listOfCandlesticks) {
 			// Create a new data point for candlestick OHLC area
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ csPoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
@@ -509,7 +518,7 @@ namespace CppCLRWinFormsProject {
 	/// <param name="endDate">The end date for the filter.</param>
 	private: System::Void update(System::DateTime^ startDate, System::DateTime^ endDate) {
 		// Filter candlesticks using the provided dates
-		Generic::List<aCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(startDate, endDate, this->listOfCandlesticks);
+		Generic::List<aSmartCandlestick^>^ filteredCandlesticks = this->filterCandlesticks(startDate, endDate, this->listOfCandlesticks);
 
 		// Clear binding list
 		this->filteredListOfCandlesticks->Clear();
