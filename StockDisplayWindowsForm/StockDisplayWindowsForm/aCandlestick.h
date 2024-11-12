@@ -23,7 +23,7 @@ protected:
     System::Void setCandlestickProperties(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume);
 public:
     // Property for date
-    property System::DateTime^ date {
+    property System::DateTime^ Date {
         // Date getter
         System::DateTime^ get() { return _date; }
         // Date setter
@@ -31,7 +31,7 @@ public:
     }
 
     // Property for open
-    property System::Decimal open {
+    property System::Decimal Open {
 		// Open price getter
         System::Decimal get() { return _open; }
 		// Open price setter
@@ -39,7 +39,7 @@ public:
     }
 
     // Property for high
-    property System::Decimal high {
+    property System::Decimal High {
 		// High price getter
         System::Decimal get() { return _high; }
 		// High price setter
@@ -47,7 +47,7 @@ public:
     }
 
     // Property for low
-    property System::Decimal low {
+    property System::Decimal Low {
 		// Low price getter
         System::Decimal get() { return _low; }
 		// Low price setter
@@ -55,7 +55,7 @@ public:
     }
 
     // Property for close
-    property System::Decimal close {
+    property System::Decimal Close {
 		// Close price getter
         System::Decimal get() { return _close; }
         // Close price setter
@@ -63,7 +63,7 @@ public:
     }
 
     // Property for volume
-    property System::Int64 volume {
+    property System::Int64 Volume {
 		// Volume getter
         System::Int64 get() { return _volume; }
 		// Volume setter

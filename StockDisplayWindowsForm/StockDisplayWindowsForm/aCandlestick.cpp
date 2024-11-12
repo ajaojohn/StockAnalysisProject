@@ -54,7 +54,7 @@ aCandlestick::aCandlestick(System::DateTime^ date, System::Decimal open, System:
 /// </summary>
 /// <param name="candlestick">Candlestick to copy</param>
 aCandlestick::aCandlestick(aCandlestick^ candlestick) {
-    setCandlestickProperties(candlestick->date, candlestick->open, candlestick->high, candlestick->low, candlestick->close, candlestick->volume);
+    setCandlestickProperties(candlestick->Date, candlestick->Open, candlestick->High, candlestick->Low, candlestick->Close, candlestick->Volume);
 }
 
 /// <summary>
@@ -69,15 +69,15 @@ aCandlestick::aCandlestick(aCandlestick^ candlestick) {
 /// <returns>void</returns>
 System::Void aCandlestick::setCandlestickProperties(System::DateTime^ date, System::Decimal open, System::Decimal high, System::Decimal low, System::Decimal close, System::Int64 volume) {
     // Set date variable
-    this->_date = date;
+    this->Date = date;
     // Set open variable
-    this->_open = open;
+    this->Open = open;
     // Set high variable
-    this->_high = high;
+    this->High = high;
     // Set low variable
-    this->_low = low;
+    this->Low = low;
     // Set close variable
-    this->_close = close;
+    this->Close = close;
     // Set volume variable
-    this->_volume = volume;
+    this->Volume = volume;
 }

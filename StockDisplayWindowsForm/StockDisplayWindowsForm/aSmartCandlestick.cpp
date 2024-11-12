@@ -6,15 +6,15 @@ using namespace System;
 
 System::Void aSmartCandlestick::calculateSmartProperties() {
 	// Calculate range
-	_range = Decimal::Subtract(_high, _low);
+	Range = Decimal::Subtract(High, Low);
 	// Calculate top price
-	_topPrice = Math::Max(_open, _close);
+	TopPrice = Math::Max(Open, Close);
 	// Calculate bottom price
-	_bottomPrice = Math::Min(_open, _close);
+	BottomPrice = Math::Min(Open, Close);
 	// Calculate upper tail
-	_upperTail = Decimal::Subtract(_high, _topPrice);
+	UpperTail = Decimal::Subtract(High, TopPrice);
 	// Calculate lower tail
-	_lowerTail = Decimal::Subtract(_bottomPrice, _low);
+	LowerTail = Decimal::Subtract(BottomPrice, Low);
 }
 
 aSmartCandlestick::aSmartCandlestick() : aCandlestick()
@@ -45,49 +45,49 @@ aSmartCandlestick::aSmartCandlestick(aCandlestick^ candlestick) : aCandlestick(c
 
 aSmartCandlestick::aSmartCandlestick(aSmartCandlestick^ smartCandlestick) {
 	// Set andlestick-only properties
-	setCandlestickProperties(smartCandlestick->date, smartCandlestick->open, smartCandlestick->high, smartCandlestick->low, smartCandlestick->close, smartCandlestick->volume);
+	setCandlestickProperties(smartCandlestick->Date, smartCandlestick->Open, smartCandlestick->High, smartCandlestick->Low, smartCandlestick->Close, smartCandlestick->Volume);
 	// Calculate extra smart properties
 	calculateSmartProperties();
 }
 
 bool aSmartCandlestick::isBearish() {
 	// Return true if the bottom price is equal to the close
-	return _bottomPrice == _close;
+	return BottomPrice == Close;
 }
 
 bool aSmartCandlestick::isBullish() {
 	// Return true if the top price is equal to the close
-	return _topPrice == _close;
+	return TopPrice == Close;
 }
 
 bool aSmartCandlestick::isNeutral() {
 	// Return true if the body range is less than 10% of the range
-	return _bodyRange < Decimal::Divide(_range, 10);
+	return BodyRange < Decimal::Divide(Range, 10);
 }
 
 bool aSmartCandlestick::isMarubozu() {
 	// Return true if the body range is more than 85% of the range
-	return _bodyRange >= Decimal(static_cast<double>(_range) * 0.85);
+	return BodyRange >= Decimal(static_cast<double>(Range) * 0.85);
 }
 
 bool aSmartCandlestick::isHammer() {
 	// Return true if the lower tail is greater than 60% of the range and the upper tail is less than 10%
-	return (_lowerTail >= Decimal(static_cast<double>(_range) * 0.6))
-		&& (_upperTail < Decimal(static_cast<double>(_range) * 0.1));
+	return (LowerTail >= Decimal(static_cast<double>(Range) * 0.6))
+		&& (UpperTail < Decimal(static_cast<double>(Range) * 0.1));
 }
 
 bool aSmartCandlestick::isDoji() {
 	// Return true if the body range is less than 25% of the range
-	return _bodyRange < Decimal::Divide(_range, 4);
+	return BodyRange < Decimal::Divide(Range, 4);
 }
 
 bool aSmartCandlestick::isDragonflyDoji() {
 	// Return true if the upper tail is greater than the lower tail
-	return isDoji() && (_lowerTail >= Decimal(static_cast<double>(_range) * 0.7));
+	return isDoji() && (LowerTail >= Decimal(static_cast<double>(Range) * 0.7));
 }
 
 bool aSmartCandlestick::isGravestoneDoji() {
 	// Return true if the upper tail is greater than the lower tail
-	return isDoji() && (_upperTail >= Decimal(static_cast<double>(_range) * 0.7));
+	return isDoji() && (UpperTail >= Decimal(static_cast<double>(Range) * 0.7));
 }
 

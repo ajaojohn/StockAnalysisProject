@@ -343,7 +343,7 @@ namespace CppCLRWinFormsProject {
 		// Use candlestick loader to read candlesticks
 		this->listOfCandlesticks = this->readCandlesticksFromFile(this->selectedFilename);
 		// If the first candlestick is after the last candlestick (chronological order), reverse the list
-		if (this->listOfCandlesticks[0]->date->CompareTo(this->listOfCandlesticks[this->listOfCandlesticks->Count - 1]->date) > 0) {
+		if (this->listOfCandlesticks[0]->Date->CompareTo(this->listOfCandlesticks[this->listOfCandlesticks->Count - 1]->Date) > 0) {
 			// Reverse the list
 			this->listOfCandlesticks->Reverse();
 		}
@@ -362,7 +362,7 @@ namespace CppCLRWinFormsProject {
 		// Loop through each candlestick
 		for (int i = 0; i < listOfCandlesticks->Count; i++) {
 			// If the candlestick is in the time frame
-			if (listOfCandlesticks[i]->date->CompareTo(startDate) >= 0 && listOfCandlesticks[i]->date->CompareTo(endDate) <= 0) {
+			if (listOfCandlesticks[i]->Date->CompareTo(startDate) >= 0 && listOfCandlesticks[i]->Date->CompareTo(endDate) <= 0) {
 				// Add the candlestick to the list
 				filteredCandlesticks->Add(listOfCandlesticks[i]);
 			}
@@ -410,17 +410,17 @@ namespace CppCLRWinFormsProject {
 			// Create a new data point for candlestick OHLC area
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ csPoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
-			csPoint->XValue = candlestick->date->ToOADate();
+			csPoint->XValue = candlestick->Date->ToOADate();
 			// Set point's x value
 			csPoint->YValues = gcnew cli::array<double>{
-				static_cast<double>(candlestick->high),
-				static_cast<double>(candlestick->low),
-				static_cast<double>(candlestick->open),
-				static_cast<double>(candlestick->close)
+				static_cast<double>(candlestick->High),
+				static_cast<double>(candlestick->Low),
+				static_cast<double>(candlestick->Open),
+				static_cast<double>(candlestick->Close)
 			};
 
 			// Check if point is bullish or bearish
-			if (candlestick->close > candlestick->open) {
+			if (candlestick->Close > candlestick->Open) {
 				// If point is bullish, set color to green
 				csPoint->Color = System::Drawing::Color::Green;
 			}
@@ -434,10 +434,10 @@ namespace CppCLRWinFormsProject {
 			// Create data point for volume area
 			System::Windows::Forms::DataVisualization::Charting::DataPoint^ volumePoint = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
 			// Set point's y-value
-			volumePoint->XValue = candlestick->date->ToOADate();
+			volumePoint->XValue = candlestick->Date->ToOADate();
 			// Set point's x value
 			volumePoint->YValues = gcnew cli::array<double>{
-				static_cast<double>(candlestick->volume)
+				static_cast<double>(candlestick->Volume)
 			};
 
 

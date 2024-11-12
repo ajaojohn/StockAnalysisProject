@@ -12,6 +12,37 @@ private:
     System::Decimal _upperTail; // height of upper tail
     System::Decimal _lowerTail; // height of lower tail
 
+    // Range property
+	property System::Decimal Range {
+        System::Decimal get() { return _range; }
+        System::Void set(System::Decimal value) { _range = value; }
+    }
+    // Body range property
+	property System::Decimal BodyRange {
+		System::Decimal get() { return _bodyRange; }
+		System::Void set(System::Decimal value) { _bodyRange = value; }
+	}
+    // Top Price property
+	property System::Decimal TopPrice {
+		System::Decimal get() { return _topPrice; }
+		System::Void set(System::Decimal value) { _topPrice = value; }
+	}
+    // Bottom Price property
+	property System::Decimal BottomPrice {
+		System::Decimal get() { return _bottomPrice; }
+		System::Void set(System::Decimal value) { _bottomPrice = value; }
+	}
+    // Upper tail property
+	property System::Decimal UpperTail {
+		System::Decimal get() { return _upperTail; }
+		System::Void set(System::Decimal value) { _upperTail = value; }
+	}
+    // Lower tail property
+    property System::Decimal LowerTail {
+		System::Decimal get() { return _lowerTail; }
+		System::Void set(System::Decimal value) { _lowerTail = value; }
+	}
+
     /// <summary>
     /// Calculates the smart candlestick properties
     /// </summary>
