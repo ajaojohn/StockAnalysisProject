@@ -41,6 +41,7 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::CheckBox^ checkBox_dojiPattern;
 	private: System::Windows::Forms::CheckBox^ checkBox_hammerPattern;
 	private: System::Windows::Forms::GroupBox^ groupBox_dateFiltering;
+	private: System::Windows::Forms::CheckBox^ checkBox_selectAllPatterns;
 
 
 
@@ -147,11 +148,11 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea3 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea4 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::Legend^ legend2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series4 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea5 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea6 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series5 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series6 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -161,6 +162,7 @@ namespace CppCLRWinFormsProject {
 			this->label_endDate = (gcnew System::Windows::Forms::Label());
 			this->button_update = (gcnew System::Windows::Forms::Button());
 			this->groupBox_patterns = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBox_selectAllPatterns = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_gravestoneDojiPattern = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_dragonflyDojiPattern = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_dojiPattern = (gcnew System::Windows::Forms::CheckBox());
@@ -178,10 +180,9 @@ namespace CppCLRWinFormsProject {
 			// button_load
 			// 
 			this->button_load->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->button_load->Location = System::Drawing::Point(1431, 841);
-			this->button_load->Margin = System::Windows::Forms::Padding(4);
+			this->button_load->Location = System::Drawing::Point(1019, 561);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(329, 69);
+			this->button_load->Size = System::Drawing::Size(261, 46);
 			this->button_load->TabIndex = 0;
 			this->button_load->Text = L"Load File";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -199,10 +200,9 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->dateTimePicker_start->CustomFormat = L"d MMM yyyy";
 			this->dateTimePicker_start->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
-			this->dateTimePicker_start->Location = System::Drawing::Point(14, 68);
-			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(4);
+			this->dateTimePicker_start->Location = System::Drawing::Point(10, 45);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(150, 29);
+			this->dateTimePicker_start->Size = System::Drawing::Size(120, 22);
 			this->dateTimePicker_start->TabIndex = 2;
 			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
 			// 
@@ -211,10 +211,9 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->dateTimePicker_end->CustomFormat = L"d MMM yyyy";
 			this->dateTimePicker_end->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
-			this->dateTimePicker_end->Location = System::Drawing::Point(176, 68);
-			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(4);
+			this->dateTimePicker_end->Location = System::Drawing::Point(136, 45);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(150, 29);
+			this->dateTimePicker_end->Size = System::Drawing::Size(121, 22);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
@@ -222,39 +221,38 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			chartArea3->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea3->AxisY->LabelStyle->Format = L"F2";
-			chartArea3->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea3->AxisY->Title = L"Price";
-			chartArea3->Name = L"ChartArea_OHLC";
-			chartArea4->AxisY->Title = L"Volume";
-			chartArea4->Name = L"ChartArea_Volume";
-			this->chart_stockData->ChartAreas->Add(chartArea3);
-			this->chart_stockData->ChartAreas->Add(chartArea4);
-			legend2->Enabled = false;
-			legend2->Name = L"Legend1";
-			this->chart_stockData->Legends->Add(legend2);
-			this->chart_stockData->Location = System::Drawing::Point(13, 13);
-			this->chart_stockData->Margin = System::Windows::Forms::Padding(4);
+			chartArea5->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea5->AxisY->LabelStyle->Format = L"F2";
+			chartArea5->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea5->AxisY->Title = L"Price";
+			chartArea5->Name = L"ChartArea_OHLC";
+			chartArea6->AxisY->Title = L"Volume";
+			chartArea6->Name = L"ChartArea_Volume";
+			this->chart_stockData->ChartAreas->Add(chartArea5);
+			this->chart_stockData->ChartAreas->Add(chartArea6);
+			legend3->Enabled = false;
+			legend3->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend3);
+			this->chart_stockData->Location = System::Drawing::Point(9, 9);
 			this->chart_stockData->Name = L"chart_stockData";
-			series3->ChartArea = L"ChartArea_OHLC";
-			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
-			series3->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
-			series3->IsXValueIndexed = true;
-			series3->Legend = L"Legend1";
-			series3->Name = L"Series_OHLC";
-			series3->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series3->YValuesPerPoint = 4;
-			series3->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
-			series4->ChartArea = L"ChartArea_Volume";
-			series4->IsXValueIndexed = true;
-			series4->Legend = L"Legend1";
-			series4->Name = L"Series_Volume";
-			series4->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series4->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
-			this->chart_stockData->Series->Add(series3);
-			this->chart_stockData->Series->Add(series4);
-			this->chart_stockData->Size = System::Drawing::Size(1410, 896);
+			series5->ChartArea = L"ChartArea_OHLC";
+			series5->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series5->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
+			series5->IsXValueIndexed = true;
+			series5->Legend = L"Legend1";
+			series5->Name = L"Series_OHLC";
+			series5->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series5->YValuesPerPoint = 4;
+			series5->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series6->ChartArea = L"ChartArea_Volume";
+			series6->IsXValueIndexed = true;
+			series6->Legend = L"Legend1";
+			series6->Name = L"Series_Volume";
+			series6->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series6->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			this->chart_stockData->Series->Add(series5);
+			this->chart_stockData->Series->Add(series6);
+			this->chart_stockData->Size = System::Drawing::Size(1004, 597);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
 			// 
@@ -262,10 +260,9 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_startDate->AutoSize = true;
-			this->label_startDate->Location = System::Drawing::Point(9, 39);
-			this->label_startDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label_startDate->Location = System::Drawing::Point(7, 26);
 			this->label_startDate->Name = L"label_startDate";
-			this->label_startDate->Size = System::Drawing::Size(99, 25);
+			this->label_startDate->Size = System::Drawing::Size(66, 16);
 			this->label_startDate->TabIndex = 7;
 			this->label_startDate->Text = L"Start Date";
 			// 
@@ -273,10 +270,9 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_endDate->AutoSize = true;
-			this->label_endDate->Location = System::Drawing::Point(177, 39);
-			this->label_endDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label_endDate->Location = System::Drawing::Point(137, 26);
 			this->label_endDate->Name = L"label_endDate";
-			this->label_endDate->Size = System::Drawing::Size(93, 25);
+			this->label_endDate->Size = System::Drawing::Size(63, 16);
 			this->label_endDate->TabIndex = 8;
 			this->label_endDate->Text = L"End Date";
 			// 
@@ -284,10 +280,9 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->button_update->BackColor = System::Drawing::SystemColors::ButtonFace;
-			this->button_update->Location = System::Drawing::Point(14, 115);
-			this->button_update->Margin = System::Windows::Forms::Padding(4);
+			this->button_update->Location = System::Drawing::Point(10, 73);
 			this->button_update->Name = L"button_update";
-			this->button_update->Size = System::Drawing::Size(308, 70);
+			this->button_update->Size = System::Drawing::Size(247, 47);
 			this->button_update->TabIndex = 9;
 			this->button_update->Text = L"Update";
 			this->button_update->UseVisualStyleBackColor = false;
@@ -298,6 +293,7 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_patterns->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->groupBox_patterns->BackColor = System::Drawing::SystemColors::Window;
+			this->groupBox_patterns->Controls->Add(this->checkBox_selectAllPatterns);
 			this->groupBox_patterns->Controls->Add(this->checkBox_gravestoneDojiPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_dragonflyDojiPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_dojiPattern);
@@ -306,19 +302,34 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_patterns->Controls->Add(this->checkBox_bearishPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_bullishPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_neutralPattern);
-			this->groupBox_patterns->Location = System::Drawing::Point(1431, 13);
+			this->groupBox_patterns->Location = System::Drawing::Point(1018, 9);
+			this->groupBox_patterns->Margin = System::Windows::Forms::Padding(2);
 			this->groupBox_patterns->Name = L"groupBox_patterns";
-			this->groupBox_patterns->Size = System::Drawing::Size(329, 579);
+			this->groupBox_patterns->Padding = System::Windows::Forms::Padding(2);
+			this->groupBox_patterns->Size = System::Drawing::Size(262, 386);
 			this->groupBox_patterns->TabIndex = 12;
 			this->groupBox_patterns->TabStop = false;
 			this->groupBox_patterns->Text = L"Select Patterns";
 			// 
+			// checkBox_selectAllPatterns
+			// 
+			this->checkBox_selectAllPatterns->AutoSize = true;
+			this->checkBox_selectAllPatterns->Location = System::Drawing::Point(10, 34);
+			this->checkBox_selectAllPatterns->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_selectAllPatterns->Name = L"checkBox_selectAllPatterns";
+			this->checkBox_selectAllPatterns->Size = System::Drawing::Size(107, 20);
+			this->checkBox_selectAllPatterns->TabIndex = 8;
+			this->checkBox_selectAllPatterns->Text = L"SELECT ALL";
+			this->checkBox_selectAllPatterns->UseVisualStyleBackColor = true;
+			this->checkBox_selectAllPatterns->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::checkBox_selectAllPatterns_CheckedChanged);
+			// 
 			// checkBox_gravestoneDojiPattern
 			// 
 			this->checkBox_gravestoneDojiPattern->AutoSize = true;
-			this->checkBox_gravestoneDojiPattern->Location = System::Drawing::Point(24, 282);
+			this->checkBox_gravestoneDojiPattern->Location = System::Drawing::Point(10, 221);
+			this->checkBox_gravestoneDojiPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_gravestoneDojiPattern->Name = L"checkBox_gravestoneDojiPattern";
-			this->checkBox_gravestoneDojiPattern->Size = System::Drawing::Size(225, 29);
+			this->checkBox_gravestoneDojiPattern->Size = System::Drawing::Size(157, 20);
 			this->checkBox_gravestoneDojiPattern->TabIndex = 7;
 			this->checkBox_gravestoneDojiPattern->Text = L"Gravestone Doji (GD)";
 			this->checkBox_gravestoneDojiPattern->UseVisualStyleBackColor = true;
@@ -327,9 +338,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_dragonflyDojiPattern
 			// 
 			this->checkBox_dragonflyDojiPattern->AutoSize = true;
-			this->checkBox_dragonflyDojiPattern->Location = System::Drawing::Point(24, 247);
+			this->checkBox_dragonflyDojiPattern->Location = System::Drawing::Point(10, 198);
+			this->checkBox_dragonflyDojiPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_dragonflyDojiPattern->Name = L"checkBox_dragonflyDojiPattern";
-			this->checkBox_dragonflyDojiPattern->Size = System::Drawing::Size(206, 29);
+			this->checkBox_dragonflyDojiPattern->Size = System::Drawing::Size(145, 20);
 			this->checkBox_dragonflyDojiPattern->TabIndex = 6;
 			this->checkBox_dragonflyDojiPattern->Text = L"Dragonfly Doji (DD)";
 			this->checkBox_dragonflyDojiPattern->UseVisualStyleBackColor = true;
@@ -338,9 +350,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_dojiPattern
 			// 
 			this->checkBox_dojiPattern->AutoSize = true;
-			this->checkBox_dojiPattern->Location = System::Drawing::Point(24, 212);
+			this->checkBox_dojiPattern->Location = System::Drawing::Point(10, 174);
+			this->checkBox_dojiPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_dojiPattern->Name = L"checkBox_dojiPattern";
-			this->checkBox_dojiPattern->Size = System::Drawing::Size(104, 29);
+			this->checkBox_dojiPattern->Size = System::Drawing::Size(74, 20);
 			this->checkBox_dojiPattern->TabIndex = 5;
 			this->checkBox_dojiPattern->Text = L"Doji (D)";
 			this->checkBox_dojiPattern->UseVisualStyleBackColor = true;
@@ -349,9 +362,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_hammerPattern
 			// 
 			this->checkBox_hammerPattern->AutoSize = true;
-			this->checkBox_hammerPattern->Location = System::Drawing::Point(24, 177);
+			this->checkBox_hammerPattern->Location = System::Drawing::Point(10, 151);
+			this->checkBox_hammerPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_hammerPattern->Name = L"checkBox_hammerPattern";
-			this->checkBox_hammerPattern->Size = System::Drawing::Size(145, 29);
+			this->checkBox_hammerPattern->Size = System::Drawing::Size(102, 20);
 			this->checkBox_hammerPattern->TabIndex = 4;
 			this->checkBox_hammerPattern->Text = L"Hammer (H)";
 			this->checkBox_hammerPattern->UseVisualStyleBackColor = true;
@@ -360,9 +374,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_marubozuPattern
 			// 
 			this->checkBox_marubozuPattern->AutoSize = true;
-			this->checkBox_marubozuPattern->Location = System::Drawing::Point(24, 142);
+			this->checkBox_marubozuPattern->Location = System::Drawing::Point(10, 128);
+			this->checkBox_marubozuPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_marubozuPattern->Name = L"checkBox_marubozuPattern";
-			this->checkBox_marubozuPattern->Size = System::Drawing::Size(162, 29);
+			this->checkBox_marubozuPattern->Size = System::Drawing::Size(110, 20);
 			this->checkBox_marubozuPattern->TabIndex = 3;
 			this->checkBox_marubozuPattern->Text = L"Marubozu (M)";
 			this->checkBox_marubozuPattern->UseVisualStyleBackColor = true;
@@ -371,9 +386,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_bearishPattern
 			// 
 			this->checkBox_bearishPattern->AutoSize = true;
-			this->checkBox_bearishPattern->Location = System::Drawing::Point(24, 37);
+			this->checkBox_bearishPattern->Location = System::Drawing::Point(10, 58);
+			this->checkBox_bearishPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_bearishPattern->Name = L"checkBox_bearishPattern";
-			this->checkBox_bearishPattern->Size = System::Drawing::Size(147, 29);
+			this->checkBox_bearishPattern->Size = System::Drawing::Size(103, 20);
 			this->checkBox_bearishPattern->TabIndex = 2;
 			this->checkBox_bearishPattern->Text = L"Bearish (Be)";
 			this->checkBox_bearishPattern->UseVisualStyleBackColor = true;
@@ -382,9 +398,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_bullishPattern
 			// 
 			this->checkBox_bullishPattern->AutoSize = true;
-			this->checkBox_bullishPattern->Location = System::Drawing::Point(24, 72);
+			this->checkBox_bullishPattern->Location = System::Drawing::Point(10, 81);
+			this->checkBox_bullishPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_bullishPattern->Name = L"checkBox_bullishPattern";
-			this->checkBox_bullishPattern->Size = System::Drawing::Size(138, 29);
+			this->checkBox_bullishPattern->Size = System::Drawing::Size(95, 20);
 			this->checkBox_bullishPattern->TabIndex = 1;
 			this->checkBox_bullishPattern->Text = L"Bullish (Bu)";
 			this->checkBox_bullishPattern->UseVisualStyleBackColor = true;
@@ -393,9 +410,10 @@ namespace CppCLRWinFormsProject {
 			// checkBox_neutralPattern
 			// 
 			this->checkBox_neutralPattern->AutoSize = true;
-			this->checkBox_neutralPattern->Location = System::Drawing::Point(24, 107);
+			this->checkBox_neutralPattern->Location = System::Drawing::Point(10, 104);
+			this->checkBox_neutralPattern->Margin = System::Windows::Forms::Padding(2);
 			this->checkBox_neutralPattern->Name = L"checkBox_neutralPattern";
-			this->checkBox_neutralPattern->Size = System::Drawing::Size(133, 29);
+			this->checkBox_neutralPattern->Size = System::Drawing::Size(93, 20);
 			this->checkBox_neutralPattern->TabIndex = 0;
 			this->checkBox_neutralPattern->Text = L"Neutral (N)";
 			this->checkBox_neutralPattern->UseVisualStyleBackColor = true;
@@ -410,23 +428,24 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_dateFiltering->Controls->Add(this->label_startDate);
 			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_end);
 			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_start);
-			this->groupBox_dateFiltering->Location = System::Drawing::Point(1431, 629);
+			this->groupBox_dateFiltering->Location = System::Drawing::Point(1018, 419);
+			this->groupBox_dateFiltering->Margin = System::Windows::Forms::Padding(2);
 			this->groupBox_dateFiltering->Name = L"groupBox_dateFiltering";
-			this->groupBox_dateFiltering->Size = System::Drawing::Size(329, 205);
+			this->groupBox_dateFiltering->Padding = System::Windows::Forms::Padding(2);
+			this->groupBox_dateFiltering->Size = System::Drawing::Size(262, 137);
 			this->groupBox_dateFiltering->TabIndex = 13;
 			this->groupBox_dateFiltering->TabStop = false;
 			this->groupBox_dateFiltering->Text = L"Filter Dates";
 			// 
 			// Form_Input
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
+			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1772, 919);
+			this->ClientSize = System::Drawing::Size(1289, 613);
 			this->Controls->Add(this->groupBox_dateFiltering);
 			this->Controls->Add(this->groupBox_patterns);
 			this->Controls->Add(this->chart_stockData);
 			this->Controls->Add(this->button_load);
-			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->EndInit();
@@ -944,12 +963,23 @@ private: System::Void outlinePeaksAndValleys() {
 	}
 }
 
+private: System::Void checkBox_selectAllPatterns_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {\
+	// Get list of all checkboxes
+	Generic::List<CheckBox^>^ listOfCheckboxes = gcnew Generic::List<CheckBox^>();
+	listOfCheckboxes->Add(checkBox_bearishPattern);
+	listOfCheckboxes->Add(checkBox_bullishPattern);
+	listOfCheckboxes->Add(checkBox_neutralPattern);
+	listOfCheckboxes->Add(checkBox_marubozuPattern);
+	listOfCheckboxes->Add(checkBox_hammerPattern);
+	listOfCheckboxes->Add(checkBox_dojiPattern);
+	listOfCheckboxes->Add(checkBox_dragonflyDojiPattern);
+	listOfCheckboxes->Add(checkBox_gravestoneDojiPattern);
 
-
-
-
-
-
+	// Set checked state of all checkboxes to match select all checkbox
+	for each (CheckBox^ checkbox in listOfCheckboxes) {
+		checkbox->Checked = checkBox_selectAllPatterns->Checked;
+	}
+}
 
 };
 }
