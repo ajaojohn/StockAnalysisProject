@@ -11,6 +11,8 @@ System::Void aSmartCandlestick::calculateSmartProperties() {
 	TopPrice = Math::Max(Open, Close);
 	// Calculate bottom price
 	BottomPrice = Math::Min(Open, Close);
+	// Calculate body range
+	BodyRange = Decimal::Subtract(TopPrice, BottomPrice);
 	// Calculate upper tail
 	UpperTail = Decimal::Subtract(High, TopPrice);
 	// Calculate lower tail
@@ -77,17 +79,17 @@ bool aSmartCandlestick::isHammer() {
 }
 
 bool aSmartCandlestick::isDoji() {
-	// Return true if the body range is less than 25% of the range
-	return BodyRange < Decimal::Divide(Range, 4);
+	// Return true if the body range is less than or equal to 20% of the range
+	return BodyRange <= Decimal::Divide(Range, 5);
 }
 
 bool aSmartCandlestick::isDragonflyDoji() {
-	// Return true if the upper tail is greater than the lower tail
-	return isDoji() && (LowerTail >= Decimal(static_cast<double>(Range) * 0.7));
+	// Return true if the upper tail is greater than or equal to the lower tail
+	return isDoji() && (LowerTail >= Decimal(static_cast<double>(Range) * 0.75));
 }
 
 bool aSmartCandlestick::isGravestoneDoji() {
-	// Return true if the upper tail is greater than the lower tail
-	return isDoji() && (UpperTail >= Decimal(static_cast<double>(Range) * 0.7));
+	// Return true if the upper tail is greater than or equal to the lower tail
+	return isDoji() && (UpperTail >= Decimal(static_cast<double>(Range) * 0.75));
 }
 

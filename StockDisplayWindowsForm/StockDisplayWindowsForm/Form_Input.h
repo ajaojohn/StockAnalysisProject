@@ -28,6 +28,9 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Label^ label_startDate;
 	private: System::Windows::Forms::Label^ label_endDate;
 	private: System::Windows::Forms::Button^ button_update;
+	private: System::Windows::Forms::ComboBox^ comboBox_patternSelection;
+	private: System::Windows::Forms::Label^ label_selectPattern;
+
 
 		   // List of candlesticks to display
 	private: BindingList<aSmartCandlestick^>^ filteredListOfCandlesticks;
@@ -79,6 +82,24 @@ namespace CppCLRWinFormsProject {
 		this->listOfCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 		// Intialize filtered list as empty
 		this->filteredListOfCandlesticks = gcnew BindingList<aSmartCandlestick^>();
+
+		// Create an array of strings
+		array<String^>^ patternArray = gcnew array<String^> {
+			"All",
+			"Bullish",
+			"Bearish",
+			"Neutral",
+			"Marubozu",
+			"Hammer",
+			"Doji",
+			"Dragonfly Doji",
+			"Gravestone Doji"
+		};
+		// Add patterns to combobox
+		this->comboBox_patternSelection->Items->AddRange(patternArray);
+		// Set default pattern selection to All
+		this->comboBox_patternSelection->SelectedIndex = 0;
+
 	}
 
 	protected:
@@ -117,11 +138,11 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea3 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea4 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series4 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -130,16 +151,18 @@ namespace CppCLRWinFormsProject {
 			this->label_startDate = (gcnew System::Windows::Forms::Label());
 			this->label_endDate = (gcnew System::Windows::Forms::Label());
 			this->button_update = (gcnew System::Windows::Forms::Button());
+			this->comboBox_patternSelection = (gcnew System::Windows::Forms::ComboBox());
+			this->label_selectPattern = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// button_load
 			// 
-			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->button_load->Location = System::Drawing::Point(691, 812);
+			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->button_load->Location = System::Drawing::Point(1424, 421);
 			this->button_load->Margin = System::Windows::Forms::Padding(4);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(167, 74);
+			this->button_load->Size = System::Drawing::Size(162, 69);
 			this->button_load->TabIndex = 1;
 			this->button_load->Text = L"Load File";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -154,21 +177,21 @@ namespace CppCLRWinFormsProject {
 			// 
 			// dateTimePicker_start
 			// 
-			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_start->Location = System::Drawing::Point(311, 846);
+			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->dateTimePicker_start->Location = System::Drawing::Point(1424, 262);
 			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(349, 29);
+			this->dateTimePicker_start->Size = System::Drawing::Size(329, 29);
 			this->dateTimePicker_start->TabIndex = 2;
 			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
 			// 
 			// dateTimePicker_end
 			// 
-			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->dateTimePicker_end->Location = System::Drawing::Point(1050, 846);
+			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->dateTimePicker_end->Location = System::Drawing::Point(1424, 378);
 			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(349, 29);
+			this->dateTimePicker_end->Size = System::Drawing::Size(329, 29);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
@@ -176,46 +199,46 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->LabelStyle->Format = L"F2";
-			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->Title = L"Price";
-			chartArea1->Name = L"ChartArea_OHLC";
-			chartArea2->AxisY->Title = L"Volume";
-			chartArea2->Name = L"ChartArea_Volume";
-			this->chart_stockData->ChartAreas->Add(chartArea1);
-			this->chart_stockData->ChartAreas->Add(chartArea2);
-			legend1->Enabled = false;
-			legend1->Name = L"Legend1";
-			this->chart_stockData->Legends->Add(legend1);
+			chartArea3->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->LabelStyle->Format = L"F2";
+			chartArea3->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->Title = L"Price";
+			chartArea3->Name = L"ChartArea_OHLC";
+			chartArea4->AxisY->Title = L"Volume";
+			chartArea4->Name = L"ChartArea_Volume";
+			this->chart_stockData->ChartAreas->Add(chartArea3);
+			this->chart_stockData->ChartAreas->Add(chartArea4);
+			legend2->Enabled = false;
+			legend2->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend2);
 			this->chart_stockData->Location = System::Drawing::Point(13, 13);
 			this->chart_stockData->Margin = System::Windows::Forms::Padding(4);
 			this->chart_stockData->Name = L"chart_stockData";
-			series1->ChartArea = L"ChartArea_OHLC";
-			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
-			series1->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
-			series1->IsXValueIndexed = true;
-			series1->Legend = L"Legend1";
-			series1->Name = L"Series_OHLC";
-			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series1->YValuesPerPoint = 4;
-			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
-			series2->ChartArea = L"ChartArea_Volume";
-			series2->Legend = L"Legend1";
-			series2->Name = L"Series_Volume";
-			series2->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series2->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
-			this->chart_stockData->Series->Add(series1);
-			this->chart_stockData->Series->Add(series2);
-			this->chart_stockData->Size = System::Drawing::Size(1625, 750);
+			series3->ChartArea = L"ChartArea_OHLC";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series3->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
+			series3->IsXValueIndexed = true;
+			series3->Legend = L"Legend1";
+			series3->Name = L"Series_OHLC";
+			series3->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series3->YValuesPerPoint = 4;
+			series3->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series4->ChartArea = L"ChartArea_Volume";
+			series4->Legend = L"Legend1";
+			series4->Name = L"Series_Volume";
+			series4->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series4->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			this->chart_stockData->Series->Add(series3);
+			this->chart_stockData->Series->Add(series4);
+			this->chart_stockData->Size = System::Drawing::Size(1374, 896);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
 			// 
 			// label_startDate
 			// 
-			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_startDate->AutoSize = true;
-			this->label_startDate->Location = System::Drawing::Point(428, 807);
+			this->label_startDate->Location = System::Drawing::Point(1419, 233);
 			this->label_startDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_startDate->Name = L"label_startDate";
 			this->label_startDate->Size = System::Drawing::Size(99, 25);
@@ -224,9 +247,9 @@ namespace CppCLRWinFormsProject {
 			// 
 			// label_endDate
 			// 
-			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
+			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_endDate->AutoSize = true;
-			this->label_endDate->Location = System::Drawing::Point(1167, 807);
+			this->label_endDate->Location = System::Drawing::Point(1419, 349);
 			this->label_endDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_endDate->Name = L"label_endDate";
 			this->label_endDate->Size = System::Drawing::Size(93, 25);
@@ -235,21 +258,44 @@ namespace CppCLRWinFormsProject {
 			// 
 			// button_update
 			// 
-			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Bottom;
-			this->button_update->Location = System::Drawing::Point(865, 812);
+			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->button_update->Location = System::Drawing::Point(1594, 420);
 			this->button_update->Margin = System::Windows::Forms::Padding(4);
 			this->button_update->Name = L"button_update";
-			this->button_update->Size = System::Drawing::Size(167, 74);
+			this->button_update->Size = System::Drawing::Size(159, 70);
 			this->button_update->TabIndex = 9;
 			this->button_update->Text = L"Update";
 			this->button_update->UseVisualStyleBackColor = true;
 			this->button_update->Click += gcnew System::EventHandler(this, &Form_Input::button_update_Click);
 			// 
+			// comboBox_patternSelection
+			// 
+			this->comboBox_patternSelection->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->comboBox_patternSelection->FormattingEnabled = true;
+			this->comboBox_patternSelection->Location = System::Drawing::Point(1424, 642);
+			this->comboBox_patternSelection->Name = L"comboBox_patternSelection";
+			this->comboBox_patternSelection->Size = System::Drawing::Size(329, 32);
+			this->comboBox_patternSelection->TabIndex = 10;
+			this->comboBox_patternSelection->SelectedIndexChanged += gcnew System::EventHandler(this, &Form_Input::comboBox_patternSelection_SelectedIndexChanged);
+			// 
+			// label_selectPattern
+			// 
+			this->label_selectPattern->Anchor = System::Windows::Forms::AnchorStyles::Right;
+			this->label_selectPattern->AutoSize = true;
+			this->label_selectPattern->Location = System::Drawing::Point(1419, 614);
+			this->label_selectPattern->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label_selectPattern->Name = L"label_selectPattern";
+			this->label_selectPattern->Size = System::Drawing::Size(134, 25);
+			this->label_selectPattern->TabIndex = 11;
+			this->label_selectPattern->Text = L"Select Pattern";
+			// 
 			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1651, 919);
+			this->ClientSize = System::Drawing::Size(1772, 919);
+			this->Controls->Add(this->label_selectPattern);
+			this->Controls->Add(this->comboBox_patternSelection);
 			this->Controls->Add(this->button_update);
 			this->Controls->Add(this->label_endDate);
 			this->Controls->Add(this->label_startDate);
@@ -305,6 +351,8 @@ namespace CppCLRWinFormsProject {
 		displayDataOnChart();
 		// Normalize the chart
 		normalizeCandlestickChart();
+		// Show annotations for selected pattern
+		showAnnotationsForSelectedPattern();
 	}
 
 	/// <summary>
@@ -533,6 +581,9 @@ namespace CppCLRWinFormsProject {
 
 		// Normalize chart
 		this->normalizeCandlestickChart();
+
+		// Show annotations for selected pattern
+		showAnnotationsForSelectedPattern();
 	}
 	/// <summary>
 	/// Update stocks being displayed according to filters from form controls
@@ -554,5 +605,156 @@ private: System::Void button_update_Click(System::Object^ sender, System::EventA
 	// Update displays
 	this->update();
 }
+
+
+private: System::Void comboBox_patternSelection_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
+	// Show annotations for selected pattern
+	showAnnotationsForSelectedPattern();
+}
+
+/// <summary>
+/// Display annotations for pattern selected using comboBox
+/// </summary>
+/// <returns>void</returns>
+private: System::Void showAnnotationsForSelectedPattern() {
+	// Get selected pattern
+	String^ selectedPattern = comboBox_patternSelection->SelectedItem->ToString();
+	// Clear prior annotations
+	chart_stockData->Annotations->Clear();
+
+	// Iterate through each displayed candlestick
+	for (int i = 0; i < filteredListOfCandlesticks->Count; i++) {
+		// Get current candlestick
+		aSmartCandlestick^ candlestick = filteredListOfCandlesticks[i];
+		// Initialize matchesPattern
+		bool matchesPattern = false;
+
+		// Check for if selected pattern matches candlestick pattern
+		if (selectedPattern->Equals("Bearish")) {
+			// If candlestick is bearish set matchesPattern
+			matchesPattern = candlestick->isBearish();
+		}
+		else if (selectedPattern->Equals("Bullish")) {
+			// If candlestick is bullish set matchesPattern
+			matchesPattern = candlestick->isBullish();
+		}
+		else if (selectedPattern->Equals("Neutral")) {
+			// If candlestick is neutral set matchesPattern
+			matchesPattern = candlestick->isNeutral();
+		}
+		else if (selectedPattern->Equals("Marubozu")) {
+			// If candlestick is marubozu set matchesPattern
+			matchesPattern = candlestick->isMarubozu();
+		}
+		else if (selectedPattern->Equals("Hammer")) {
+			// If candlestick is hammer set matchesPattern
+			matchesPattern = candlestick->isHammer();
+		}
+		else if (selectedPattern->Equals("Doji")) {
+			// If candlestick is doji set matchesPattern
+			matchesPattern = candlestick->isDoji();
+		}
+		else if (selectedPattern->Equals("Dragonfly Doji")) {
+			// If candlestick is dragonfly doji set matchesPattern
+			matchesPattern = candlestick->isDragonflyDoji();
+		}
+		else if (selectedPattern->Equals("Gravestone Doji")) {
+			// If candlestick is gravestone doji set matchesPattern
+			matchesPattern = candlestick->isGravestoneDoji();
+		}
+
+		// If candlestick's pattern matches selected pattern
+		if (matchesPattern) {
+			// Create arrow annotation
+			auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			// Set annotation colors
+			arrowAnnotation->BackColor = System::Drawing::Color::Purple;
+			arrowAnnotation->LineColor = System::Drawing::Color::Purple;
+			// Set annotation width
+			arrowAnnotation->Width = 0;
+			// Set annotation height
+			arrowAnnotation->Height = -5;
+			// Anchor annotation to corresponding data point
+			arrowAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
+
+			// Add annotation to chart candlestick series
+			chart_stockData->Annotations->Add(arrowAnnotation);
+		}
+	}
+	// Regenerate annotations for peaks and valleys
+	outlinePeaksAndValleys();
+}
+
+/// <summary>
+/// Outline peaks and valleys of candlestick displayed on the chart_stockData OHLC series
+/// </summary>
+/// <returns>void</returns>
+private: System::Void outlinePeaksAndValleys() {
+	// Iterate through each displayed candlestick, checking for peaks and valleys
+	for (int i = 1; i < filteredListOfCandlesticks->Count - 1; i++) {
+		// Get previous candlestick
+		aSmartCandlestick^ previous = filteredListOfCandlesticks[i - 1];
+		// Get current candlestick
+		aSmartCandlestick^ current = filteredListOfCandlesticks[i];
+		// Get next candlestick
+		aSmartCandlestick^ next = filteredListOfCandlesticks[i + 1];
+
+		// Calculate if current candlestick is a peak
+		bool isPeak = (current->High > previous->High) && (current->High > next->High);
+		// Calculate if current candlestick is a valley
+		bool isValley = (current->Low < previous->Low) && (current->Low < next->Low);
+
+		if (isPeak) {
+		// If current candlestick is a peak
+			// Create and configure a green annotation for peak
+			auto peakAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			peakAnnotation->BackColor = System::Drawing::Color::Green;
+			peakAnnotation->LineColor = System::Drawing::Color::Green;
+			peakAnnotation->Width = 0;
+			peakAnnotation->Height = -5;
+			peakAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
+			peakAnnotation->Y = Convert::ToDouble(current->High);
+			// Add peak annotation to chart
+			chart_stockData->Annotations->Add(peakAnnotation);
+
+			// Add a green horizontal line across the chart at the peak's high price
+			auto peakLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+			peakLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+			peakLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+			peakLine->IsInfinitive = true;
+			peakLine->ClipToChartArea = "ChartArea_OHLC";
+			peakLine->Y = Convert::ToDouble(current->High);
+			peakLine->LineColor = System::Drawing::Color::Green;
+			// Add peak line to chart
+			chart_stockData->Annotations->Add(peakLine);
+		}
+
+		if (isValley) {
+		// If current candlestick is a valley
+			// Create and configure a red annotation for valley
+			auto valleyAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			valleyAnnotation->BackColor = System::Drawing::Color::Red;
+			valleyAnnotation->LineColor = System::Drawing::Color::Red;
+			valleyAnnotation->Width = 0;
+			valleyAnnotation->Height = 5;
+			valleyAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
+			valleyAnnotation->Y = Convert::ToDouble(current->Low);
+			// Add valley annotation to chart
+			chart_stockData->Annotations->Add(valleyAnnotation);
+
+			// Add a red horizontal line across the chart at the valley's low price
+			auto valleyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+			valleyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+			valleyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+			valleyLine->IsInfinitive = true;
+			valleyLine->ClipToChartArea = "ChartArea_OHLC";
+			valleyLine->Y = Convert::ToDouble(current->Low);
+			valleyLine->LineColor = System::Drawing::Color::Red;
+			// Add valley line to chart
+			chart_stockData->Annotations->Add(valleyLine);
+		}
+	}
+}
+
 };
 }
