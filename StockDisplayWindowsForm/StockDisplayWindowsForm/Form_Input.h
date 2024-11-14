@@ -28,8 +28,22 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::Label^ label_startDate;
 	private: System::Windows::Forms::Label^ label_endDate;
 	private: System::Windows::Forms::Button^ button_update;
-	private: System::Windows::Forms::ComboBox^ comboBox_patternSelection;
-	private: System::Windows::Forms::Label^ label_selectPattern;
+	private: System::Windows::Forms::GroupBox^ groupBox_patterns;
+
+	private: System::Windows::Forms::CheckBox^ checkBox_neutralPattern;
+	private: System::Windows::Forms::CheckBox^ checkBox_marubozuPattern;
+
+	private: System::Windows::Forms::CheckBox^ checkBox_bearishPattern;
+	private: System::Windows::Forms::CheckBox^ checkBox_bullishPattern;
+	private: System::Windows::Forms::CheckBox^ checkBox_gravestoneDojiPattern;
+
+	private: System::Windows::Forms::CheckBox^ checkBox_dragonflyDojiPattern;
+	private: System::Windows::Forms::CheckBox^ checkBox_dojiPattern;
+	private: System::Windows::Forms::CheckBox^ checkBox_hammerPattern;
+	private: System::Windows::Forms::GroupBox^ groupBox_dateFiltering;
+
+
+
 
 
 		   // List of candlesticks to display
@@ -95,11 +109,6 @@ namespace CppCLRWinFormsProject {
 			"Dragonfly Doji",
 			"Gravestone Doji"
 		};
-		// Add patterns to combobox
-		this->comboBox_patternSelection->Items->AddRange(patternArray);
-		// Set default pattern selection to All
-		this->comboBox_patternSelection->SelectedIndex = 0;
-
 	}
 
 	protected:
@@ -138,11 +147,11 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea3 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea4 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series4 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -151,19 +160,29 @@ namespace CppCLRWinFormsProject {
 			this->label_startDate = (gcnew System::Windows::Forms::Label());
 			this->label_endDate = (gcnew System::Windows::Forms::Label());
 			this->button_update = (gcnew System::Windows::Forms::Button());
-			this->comboBox_patternSelection = (gcnew System::Windows::Forms::ComboBox());
-			this->label_selectPattern = (gcnew System::Windows::Forms::Label());
+			this->groupBox_patterns = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBox_gravestoneDojiPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_dragonflyDojiPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_dojiPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_hammerPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_marubozuPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_bearishPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_bullishPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->checkBox_neutralPattern = (gcnew System::Windows::Forms::CheckBox());
+			this->groupBox_dateFiltering = (gcnew System::Windows::Forms::GroupBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->BeginInit();
+			this->groupBox_patterns->SuspendLayout();
+			this->groupBox_dateFiltering->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// button_load
 			// 
-			this->button_load->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->button_load->Location = System::Drawing::Point(1424, 421);
+			this->button_load->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->button_load->Location = System::Drawing::Point(1431, 841);
 			this->button_load->Margin = System::Windows::Forms::Padding(4);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(162, 69);
-			this->button_load->TabIndex = 1;
+			this->button_load->Size = System::Drawing::Size(329, 69);
+			this->button_load->TabIndex = 0;
 			this->button_load->Text = L"Load File";
 			this->button_load->UseVisualStyleBackColor = true;
 			this->button_load->Click += gcnew System::EventHandler(this, &Form_Input::button_load_Click);
@@ -178,20 +197,24 @@ namespace CppCLRWinFormsProject {
 			// dateTimePicker_start
 			// 
 			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->dateTimePicker_start->Location = System::Drawing::Point(1424, 262);
+			this->dateTimePicker_start->CustomFormat = L"d MMM yyyy";
+			this->dateTimePicker_start->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
+			this->dateTimePicker_start->Location = System::Drawing::Point(14, 68);
 			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(329, 29);
+			this->dateTimePicker_start->Size = System::Drawing::Size(150, 29);
 			this->dateTimePicker_start->TabIndex = 2;
 			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
 			// 
 			// dateTimePicker_end
 			// 
 			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->dateTimePicker_end->Location = System::Drawing::Point(1424, 378);
+			this->dateTimePicker_end->CustomFormat = L"d MMM yyyy";
+			this->dateTimePicker_end->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
+			this->dateTimePicker_end->Location = System::Drawing::Point(176, 68);
 			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(329, 29);
+			this->dateTimePicker_end->Size = System::Drawing::Size(150, 29);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
@@ -199,39 +222,39 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->LabelStyle->Format = L"F2";
-			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->Title = L"Price";
-			chartArea1->Name = L"ChartArea_OHLC";
-			chartArea2->AxisY->Title = L"Volume";
-			chartArea2->Name = L"ChartArea_Volume";
-			this->chart_stockData->ChartAreas->Add(chartArea1);
-			this->chart_stockData->ChartAreas->Add(chartArea2);
-			legend1->Enabled = false;
-			legend1->Name = L"Legend1";
-			this->chart_stockData->Legends->Add(legend1);
+			chartArea3->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->LabelStyle->Format = L"F2";
+			chartArea3->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->Title = L"Price";
+			chartArea3->Name = L"ChartArea_OHLC";
+			chartArea4->AxisY->Title = L"Volume";
+			chartArea4->Name = L"ChartArea_Volume";
+			this->chart_stockData->ChartAreas->Add(chartArea3);
+			this->chart_stockData->ChartAreas->Add(chartArea4);
+			legend2->Enabled = false;
+			legend2->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend2);
 			this->chart_stockData->Location = System::Drawing::Point(13, 13);
 			this->chart_stockData->Margin = System::Windows::Forms::Padding(4);
 			this->chart_stockData->Name = L"chart_stockData";
-			series1->ChartArea = L"ChartArea_OHLC";
-			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
-			series1->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
-			series1->IsXValueIndexed = true;
-			series1->Legend = L"Legend1";
-			series1->Name = L"Series_OHLC";
-			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series1->YValuesPerPoint = 4;
-			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
-			series2->ChartArea = L"ChartArea_Volume";
-			series2->IsXValueIndexed = true;
-			series2->Legend = L"Legend1";
-			series2->Name = L"Series_Volume";
-			series2->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series2->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
-			this->chart_stockData->Series->Add(series1);
-			this->chart_stockData->Series->Add(series2);
-			this->chart_stockData->Size = System::Drawing::Size(1374, 896);
+			series3->ChartArea = L"ChartArea_OHLC";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series3->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
+			series3->IsXValueIndexed = true;
+			series3->Legend = L"Legend1";
+			series3->Name = L"Series_OHLC";
+			series3->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series3->YValuesPerPoint = 4;
+			series3->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series4->ChartArea = L"ChartArea_Volume";
+			series4->IsXValueIndexed = true;
+			series4->Legend = L"Legend1";
+			series4->Name = L"Series_Volume";
+			series4->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series4->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			this->chart_stockData->Series->Add(series3);
+			this->chart_stockData->Series->Add(series4);
+			this->chart_stockData->Size = System::Drawing::Size(1410, 896);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
 			// 
@@ -239,7 +262,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_startDate->AutoSize = true;
-			this->label_startDate->Location = System::Drawing::Point(1419, 233);
+			this->label_startDate->Location = System::Drawing::Point(9, 39);
 			this->label_startDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_startDate->Name = L"label_startDate";
 			this->label_startDate->Size = System::Drawing::Size(99, 25);
@@ -250,7 +273,7 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_endDate->AutoSize = true;
-			this->label_endDate->Location = System::Drawing::Point(1419, 349);
+			this->label_endDate->Location = System::Drawing::Point(177, 39);
 			this->label_endDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_endDate->Name = L"label_endDate";
 			this->label_endDate->Size = System::Drawing::Size(93, 25);
@@ -260,56 +283,158 @@ namespace CppCLRWinFormsProject {
 			// button_update
 			// 
 			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->button_update->Location = System::Drawing::Point(1594, 420);
+			this->button_update->BackColor = System::Drawing::SystemColors::ButtonFace;
+			this->button_update->Location = System::Drawing::Point(14, 115);
 			this->button_update->Margin = System::Windows::Forms::Padding(4);
 			this->button_update->Name = L"button_update";
-			this->button_update->Size = System::Drawing::Size(159, 70);
+			this->button_update->Size = System::Drawing::Size(308, 70);
 			this->button_update->TabIndex = 9;
 			this->button_update->Text = L"Update";
-			this->button_update->UseVisualStyleBackColor = true;
+			this->button_update->UseVisualStyleBackColor = false;
 			this->button_update->Click += gcnew System::EventHandler(this, &Form_Input::button_update_Click);
 			// 
-			// comboBox_patternSelection
+			// groupBox_patterns
 			// 
-			this->comboBox_patternSelection->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->comboBox_patternSelection->FormattingEnabled = true;
-			this->comboBox_patternSelection->Location = System::Drawing::Point(1424, 642);
-			this->comboBox_patternSelection->Name = L"comboBox_patternSelection";
-			this->comboBox_patternSelection->Size = System::Drawing::Size(329, 32);
-			this->comboBox_patternSelection->TabIndex = 10;
-			this->comboBox_patternSelection->SelectedIndexChanged += gcnew System::EventHandler(this, &Form_Input::comboBox_patternSelection_SelectedIndexChanged);
+			this->groupBox_patterns->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->groupBox_patterns->BackColor = System::Drawing::SystemColors::Window;
+			this->groupBox_patterns->Controls->Add(this->checkBox_gravestoneDojiPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_dragonflyDojiPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_dojiPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_hammerPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_marubozuPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_bearishPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_bullishPattern);
+			this->groupBox_patterns->Controls->Add(this->checkBox_neutralPattern);
+			this->groupBox_patterns->Location = System::Drawing::Point(1431, 13);
+			this->groupBox_patterns->Name = L"groupBox_patterns";
+			this->groupBox_patterns->Size = System::Drawing::Size(329, 579);
+			this->groupBox_patterns->TabIndex = 12;
+			this->groupBox_patterns->TabStop = false;
+			this->groupBox_patterns->Text = L"Select Patterns";
 			// 
-			// label_selectPattern
+			// checkBox_gravestoneDojiPattern
 			// 
-			this->label_selectPattern->Anchor = System::Windows::Forms::AnchorStyles::Right;
-			this->label_selectPattern->AutoSize = true;
-			this->label_selectPattern->Location = System::Drawing::Point(1419, 614);
-			this->label_selectPattern->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
-			this->label_selectPattern->Name = L"label_selectPattern";
-			this->label_selectPattern->Size = System::Drawing::Size(134, 25);
-			this->label_selectPattern->TabIndex = 11;
-			this->label_selectPattern->Text = L"Select Pattern";
+			this->checkBox_gravestoneDojiPattern->AutoSize = true;
+			this->checkBox_gravestoneDojiPattern->Location = System::Drawing::Point(24, 282);
+			this->checkBox_gravestoneDojiPattern->Name = L"checkBox_gravestoneDojiPattern";
+			this->checkBox_gravestoneDojiPattern->Size = System::Drawing::Size(225, 29);
+			this->checkBox_gravestoneDojiPattern->TabIndex = 7;
+			this->checkBox_gravestoneDojiPattern->Text = L"Gravestone Doji (GD)";
+			this->checkBox_gravestoneDojiPattern->UseVisualStyleBackColor = true;
+			this->checkBox_gravestoneDojiPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_dragonflyDojiPattern
+			// 
+			this->checkBox_dragonflyDojiPattern->AutoSize = true;
+			this->checkBox_dragonflyDojiPattern->Location = System::Drawing::Point(24, 247);
+			this->checkBox_dragonflyDojiPattern->Name = L"checkBox_dragonflyDojiPattern";
+			this->checkBox_dragonflyDojiPattern->Size = System::Drawing::Size(206, 29);
+			this->checkBox_dragonflyDojiPattern->TabIndex = 6;
+			this->checkBox_dragonflyDojiPattern->Text = L"Dragonfly Doji (DD)";
+			this->checkBox_dragonflyDojiPattern->UseVisualStyleBackColor = true;
+			this->checkBox_dragonflyDojiPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_dojiPattern
+			// 
+			this->checkBox_dojiPattern->AutoSize = true;
+			this->checkBox_dojiPattern->Location = System::Drawing::Point(24, 212);
+			this->checkBox_dojiPattern->Name = L"checkBox_dojiPattern";
+			this->checkBox_dojiPattern->Size = System::Drawing::Size(104, 29);
+			this->checkBox_dojiPattern->TabIndex = 5;
+			this->checkBox_dojiPattern->Text = L"Doji (D)";
+			this->checkBox_dojiPattern->UseVisualStyleBackColor = true;
+			this->checkBox_dojiPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_hammerPattern
+			// 
+			this->checkBox_hammerPattern->AutoSize = true;
+			this->checkBox_hammerPattern->Location = System::Drawing::Point(24, 177);
+			this->checkBox_hammerPattern->Name = L"checkBox_hammerPattern";
+			this->checkBox_hammerPattern->Size = System::Drawing::Size(145, 29);
+			this->checkBox_hammerPattern->TabIndex = 4;
+			this->checkBox_hammerPattern->Text = L"Hammer (H)";
+			this->checkBox_hammerPattern->UseVisualStyleBackColor = true;
+			this->checkBox_hammerPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_marubozuPattern
+			// 
+			this->checkBox_marubozuPattern->AutoSize = true;
+			this->checkBox_marubozuPattern->Location = System::Drawing::Point(24, 142);
+			this->checkBox_marubozuPattern->Name = L"checkBox_marubozuPattern";
+			this->checkBox_marubozuPattern->Size = System::Drawing::Size(162, 29);
+			this->checkBox_marubozuPattern->TabIndex = 3;
+			this->checkBox_marubozuPattern->Text = L"Marubozu (M)";
+			this->checkBox_marubozuPattern->UseVisualStyleBackColor = true;
+			this->checkBox_marubozuPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_bearishPattern
+			// 
+			this->checkBox_bearishPattern->AutoSize = true;
+			this->checkBox_bearishPattern->Location = System::Drawing::Point(24, 37);
+			this->checkBox_bearishPattern->Name = L"checkBox_bearishPattern";
+			this->checkBox_bearishPattern->Size = System::Drawing::Size(147, 29);
+			this->checkBox_bearishPattern->TabIndex = 2;
+			this->checkBox_bearishPattern->Text = L"Bearish (Be)";
+			this->checkBox_bearishPattern->UseVisualStyleBackColor = true;
+			this->checkBox_bearishPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_bullishPattern
+			// 
+			this->checkBox_bullishPattern->AutoSize = true;
+			this->checkBox_bullishPattern->Location = System::Drawing::Point(24, 72);
+			this->checkBox_bullishPattern->Name = L"checkBox_bullishPattern";
+			this->checkBox_bullishPattern->Size = System::Drawing::Size(138, 29);
+			this->checkBox_bullishPattern->TabIndex = 1;
+			this->checkBox_bullishPattern->Text = L"Bullish (Bu)";
+			this->checkBox_bullishPattern->UseVisualStyleBackColor = true;
+			this->checkBox_bullishPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// checkBox_neutralPattern
+			// 
+			this->checkBox_neutralPattern->AutoSize = true;
+			this->checkBox_neutralPattern->Location = System::Drawing::Point(24, 107);
+			this->checkBox_neutralPattern->Name = L"checkBox_neutralPattern";
+			this->checkBox_neutralPattern->Size = System::Drawing::Size(133, 29);
+			this->checkBox_neutralPattern->TabIndex = 0;
+			this->checkBox_neutralPattern->Text = L"Neutral (N)";
+			this->checkBox_neutralPattern->UseVisualStyleBackColor = true;
+			this->checkBox_neutralPattern->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::showAnnotationsForSelectedPattern);
+			// 
+			// groupBox_dateFiltering
+			// 
+			this->groupBox_dateFiltering->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
+			this->groupBox_dateFiltering->BackColor = System::Drawing::SystemColors::Window;
+			this->groupBox_dateFiltering->Controls->Add(this->button_update);
+			this->groupBox_dateFiltering->Controls->Add(this->label_endDate);
+			this->groupBox_dateFiltering->Controls->Add(this->label_startDate);
+			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_end);
+			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_start);
+			this->groupBox_dateFiltering->Location = System::Drawing::Point(1431, 629);
+			this->groupBox_dateFiltering->Name = L"groupBox_dateFiltering";
+			this->groupBox_dateFiltering->Size = System::Drawing::Size(329, 205);
+			this->groupBox_dateFiltering->TabIndex = 13;
+			this->groupBox_dateFiltering->TabStop = false;
+			this->groupBox_dateFiltering->Text = L"Filter Dates";
 			// 
 			// Form_Input
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(1772, 919);
-			this->Controls->Add(this->label_selectPattern);
-			this->Controls->Add(this->comboBox_patternSelection);
-			this->Controls->Add(this->button_update);
-			this->Controls->Add(this->label_endDate);
-			this->Controls->Add(this->label_startDate);
+			this->Controls->Add(this->groupBox_dateFiltering);
+			this->Controls->Add(this->groupBox_patterns);
 			this->Controls->Add(this->chart_stockData);
-			this->Controls->Add(this->dateTimePicker_end);
-			this->Controls->Add(this->dateTimePicker_start);
 			this->Controls->Add(this->button_load);
 			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->EndInit();
+			this->groupBox_patterns->ResumeLayout(false);
+			this->groupBox_patterns->PerformLayout();
+			this->groupBox_dateFiltering->ResumeLayout(false);
+			this->groupBox_dateFiltering->PerformLayout();
 			this->ResumeLayout(false);
-			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -353,7 +478,7 @@ namespace CppCLRWinFormsProject {
 		// Normalize the chart
 		normalizeCandlestickChart();
 		// Show annotations for selected pattern
-		showAnnotationsForSelectedPattern();
+		showAnnotationsForSelectedPattern(nullptr, nullptr);
 	}
 
 	/// <summary>
@@ -584,7 +709,7 @@ namespace CppCLRWinFormsProject {
 		this->normalizeCandlestickChart();
 
 		// Show annotations for selected pattern
-		showAnnotationsForSelectedPattern();
+		showAnnotationsForSelectedPattern(nullptr, nullptr);
 	}
 	/// <summary>
 	/// Update stocks being displayed according to filters from form controls
@@ -607,83 +732,141 @@ private: System::Void button_update_Click(System::Object^ sender, System::EventA
 	this->update();
 }
 
-
-private: System::Void comboBox_patternSelection_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e) {
-	// Show annotations for selected pattern
-	showAnnotationsForSelectedPattern();
-}
-
 /// <summary>
-/// Display annotations for pattern selected using comboBox
+/// Display annotations for patterns selected using checkboxes
 /// </summary>
 /// <returns>void</returns>
-private: System::Void showAnnotationsForSelectedPattern() {
-	// Get selected pattern
-	String^ selectedPattern = comboBox_patternSelection->SelectedItem->ToString();
-	// Clear prior annotations
+private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, System::EventArgs^ e) {
+	// Clear previous annotations
 	chart_stockData->Annotations->Clear();
 
-	// Iterate through each displayed candlestick
-	for (int i = 0; i < filteredListOfCandlesticks->Count; i++) {
-		// Get current candlestick
-		aSmartCandlestick^ candlestick = filteredListOfCandlesticks[i];
-		// Initialize matchesPattern
-		bool matchesPattern = false;
-
-		// Check for if selected pattern matches candlestick pattern
-		if (selectedPattern->Equals("Bearish")) {
-			// If candlestick is bearish set matchesPattern
-			matchesPattern = candlestick->isBearish();
-		}
-		else if (selectedPattern->Equals("Bullish")) {
-			// If candlestick is bullish set matchesPattern
-			matchesPattern = candlestick->isBullish();
-		}
-		else if (selectedPattern->Equals("Neutral")) {
-			// If candlestick is neutral set matchesPattern
-			matchesPattern = candlestick->isNeutral();
-		}
-		else if (selectedPattern->Equals("Marubozu")) {
-			// If candlestick is marubozu set matchesPattern
-			matchesPattern = candlestick->isMarubozu();
-		}
-		else if (selectedPattern->Equals("Hammer")) {
-			// If candlestick is hammer set matchesPattern
-			matchesPattern = candlestick->isHammer();
-		}
-		else if (selectedPattern->Equals("Doji")) {
-			// If candlestick is doji set matchesPattern
-			matchesPattern = candlestick->isDoji();
-		}
-		else if (selectedPattern->Equals("Dragonfly Doji")) {
-			// If candlestick is dragonfly doji set matchesPattern
-			matchesPattern = candlestick->isDragonflyDoji();
-		}
-		else if (selectedPattern->Equals("Gravestone Doji")) {
-			// If candlestick is gravestone doji set matchesPattern
-			matchesPattern = candlestick->isGravestoneDoji();
-		}
-
-		// If candlestick's pattern matches selected pattern
-		if (matchesPattern) {
-			// Create arrow annotation
-			auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
-			// Set annotation colors
-			arrowAnnotation->BackColor = System::Drawing::Color::Purple;
-			arrowAnnotation->LineColor = System::Drawing::Color::Purple;
-			// Set annotation width
-			arrowAnnotation->Width = 0;
-			// Set annotation height
-			arrowAnnotation->Height = -5;
-			// Anchor annotation to corresponding data point
-			arrowAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
-
-			// Add annotation to chart candlestick series
-			chart_stockData->Annotations->Add(arrowAnnotation);
-		}
-	}
 	// Regenerate annotations for peaks and valleys
 	outlinePeaksAndValleys();
+
+	// Get selected patterns
+	Generic::List<String^>^ selectedPatterns = gcnew Generic::List<String^>();
+	// If bearish checkbox is checked add pattern to list
+	if (checkBox_bearishPattern->Checked) selectedPatterns->Add("Bearish");
+	// If bullish checkbox is checked add pattern to list
+	if (checkBox_bullishPattern->Checked) selectedPatterns->Add("Bullish");
+	// If neutral checkbox is checked add pattern to list
+	if (checkBox_neutralPattern->Checked) selectedPatterns->Add("Neutral");
+	// If marubozu checkbox is checked add pattern to list
+	if (checkBox_marubozuPattern->Checked) selectedPatterns->Add("Marubozu");
+	// If hammer checkbox is checked add pattern to list
+	if (checkBox_hammerPattern->Checked) selectedPatterns->Add("Hammer");
+	// If doji checkbox is checked add pattern to list
+	if (checkBox_dojiPattern->Checked) selectedPatterns->Add("Doji");
+	// If dragonfly doji checkbox is checked add pattern to list
+	if (checkBox_dragonflyDojiPattern->Checked) selectedPatterns->Add("Dragonfly Doji");
+	// If gravestone doji checkbox is checked add pattern to list
+	if (checkBox_gravestoneDojiPattern->Checked) selectedPatterns->Add("Gravestone Doji");
+
+	// Dictionary to store text annotations per index
+	Generic::Dictionary<int, String^>^ textAnnotations = gcnew Generic::Dictionary<int, String^>();
+	// Pattern to abbreviation dictionary
+	Generic::Dictionary<String^, String^>^ patternToAbbr = gcnew Generic::Dictionary<String^, String^>();
+	
+	// Add patterns and respective abbreviations to dictionary
+	patternToAbbr->Add("Bearish", "Be");
+	patternToAbbr->Add("Bullish", "Bu");
+	patternToAbbr->Add("Neutral", "N");
+	patternToAbbr->Add("Marubozu", "M");
+	patternToAbbr->Add("Hammer", "H");
+	patternToAbbr->Add("Doji", "D");
+	patternToAbbr->Add("Dragonfly Doji", "DD");
+	patternToAbbr->Add("Gravestone Doji", "GD");
+
+	for each (String ^ selectedPattern in selectedPatterns) {
+		// Iterate through each displayed candlestick
+		for (int i = 0; i < filteredListOfCandlesticks->Count; i++) {
+			// Get current candlestick
+			aSmartCandlestick^ candlestick = filteredListOfCandlesticks[i];
+			// Initialize matchesPattern
+			bool matchesPattern = false;
+
+			// Check for if selected pattern matches candlestick pattern
+			if (selectedPattern->Equals("Bearish")) {
+				// If candlestick is bearish set matchesPattern
+				matchesPattern = candlestick->isBearish();
+			}
+			else if (selectedPattern->Equals("Bullish")) {
+				// If candlestick is bullish set matchesPattern
+				matchesPattern = candlestick->isBullish();
+			}
+			else if (selectedPattern->Equals("Neutral")) {
+				// If candlestick is neutral set matchesPattern
+				matchesPattern = candlestick->isNeutral();
+			}
+			else if (selectedPattern->Equals("Marubozu")) {
+				// If candlestick is marubozu set matchesPattern
+				matchesPattern = candlestick->isMarubozu();
+			}
+			else if (selectedPattern->Equals("Hammer")) {
+				// If candlestick is hammer set matchesPattern
+				matchesPattern = candlestick->isHammer();
+			}
+			else if (selectedPattern->Equals("Doji")) {
+				// If candlestick is doji set matchesPattern
+				matchesPattern = candlestick->isDoji();
+			}
+			else if (selectedPattern->Equals("Dragonfly Doji")) {
+				// If candlestick is dragonfly doji set matchesPattern
+				matchesPattern = candlestick->isDragonflyDoji();
+			}
+			else if (selectedPattern->Equals("Gravestone Doji")) {
+				// If candlestick is gravestone doji set matchesPattern
+				matchesPattern = candlestick->isGravestoneDoji();
+			}
+
+			// If candlestick's pattern matches selected pattern
+			if (matchesPattern) {
+				// Create arrow annotation
+				auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+				// Set annotation colors
+				arrowAnnotation->BackColor = System::Drawing::Color::DarkBlue;
+				arrowAnnotation->LineColor = System::Drawing::Color::Transparent;
+				// Set annotation width
+				arrowAnnotation->Width = 0;
+				// Set annotation height
+				arrowAnnotation->Height = -5;
+				// Anchor annotation to corresponding data point
+				arrowAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
+
+				if (!textAnnotations->ContainsKey(i)) {
+				// If dictionary does not contain key, add key and value
+					textAnnotations->Add(i, patternToAbbr[selectedPattern]);
+				}
+				else {
+				// If dictionary contains key, add value to existing key
+					textAnnotations[i] = textAnnotations[i] + "\n" + patternToAbbr[selectedPattern];
+				}
+
+				// Add arrow annotation to chart candlestick series
+				chart_stockData->Annotations->Add(arrowAnnotation);
+			}
+		}
+	}
+
+	for each (KeyValuePair<int, String^> ^ kvp in textAnnotations) {
+		// Get key
+		int key = kvp->Key;
+		// Get value
+		String^ value = kvp->Value;
+
+		// Create text annotation
+		auto textAnnotation = gcnew DataVisualization::Charting::TextAnnotation();
+		// Set anchor data point
+		textAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[key];
+		// Set annotation position to bottom of candlestick
+		textAnnotation->Y = (double)filteredListOfCandlesticks[key]->Low;
+		// Set annotation color
+		textAnnotation->ForeColor = System::Drawing::Color::DarkBlue;
+		// Set annotation text
+		textAnnotation->Text = value;
+		// Add text annotation to chart candlestick series
+		chart_stockData->Annotations->Add(textAnnotation);
+	}
 }
 
 /// <summary>
@@ -711,8 +894,10 @@ private: System::Void outlinePeaksAndValleys() {
 			auto peakAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
 			peakAnnotation->BackColor = System::Drawing::Color::Green;
 			peakAnnotation->LineColor = System::Drawing::Color::Green;
-			peakAnnotation->Width = 0;
-			peakAnnotation->Height = -5;
+			peakAnnotation->Width = 2;
+			peakAnnotation->Height = -4;
+			peakAnnotation->ArrowStyle = DataVisualization::Charting::ArrowStyle::Tailed;
+			peakAnnotation->ArrowSize = 2;
 			peakAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
 			peakAnnotation->Y = Convert::ToDouble(current->High);
 			// Add peak annotation to chart
@@ -736,8 +921,10 @@ private: System::Void outlinePeaksAndValleys() {
 			auto valleyAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
 			valleyAnnotation->BackColor = System::Drawing::Color::Red;
 			valleyAnnotation->LineColor = System::Drawing::Color::Red;
-			valleyAnnotation->Width = 0;
-			valleyAnnotation->Height = 5;
+			valleyAnnotation->Width = 2;
+			valleyAnnotation->Height = 4;
+			valleyAnnotation->ArrowStyle = DataVisualization::Charting::ArrowStyle::Tailed;
+			valleyAnnotation->ArrowSize = 2;
 			valleyAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[i];
 			valleyAnnotation->Y = Convert::ToDouble(current->Low);
 			// Add valley annotation to chart
@@ -756,6 +943,13 @@ private: System::Void outlinePeaksAndValleys() {
 		}
 	}
 }
+
+
+
+
+
+
+
 
 };
 }
