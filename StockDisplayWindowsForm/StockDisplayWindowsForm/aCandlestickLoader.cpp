@@ -10,6 +10,7 @@ List<aCandlestick^>^ aCandlestickLoader::load(System::String^ filename) {
 	// Create empty list of candlesticks
 	List<aCandlestick^>^ listOfCandlesticks = gcnew List<aCandlestick^>();
 
+	// Try reading candlesticks from the file
 	try {
 		// Create stream reader for new data file
 		System::IO::StreamReader^ reader = gcnew System::IO::StreamReader(filename);
@@ -42,6 +43,12 @@ List<aCandlestick^>^ aCandlestickLoader::load(System::String^ filename) {
 	catch (System::IO::IOException^ e) {
 		// If error reading file, show message box with what went wrong
 		System::Windows::Forms::MessageBox::Show("Error reading file: " + e->Message);
+	}
+
+	// If the first candlestick is after the last candlestick (chronological order), reverse the list
+	if (listOfCandlesticks[0]->Date->CompareTo(listOfCandlesticks[listOfCandlesticks->Count - 1]->Date) > 0) {
+		// Reverse the list
+		listOfCandlesticks->Reverse();
 	}
 
 	// Return the list

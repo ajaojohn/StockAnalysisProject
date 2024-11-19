@@ -544,11 +544,6 @@ namespace CppCLRWinFormsProject {
 	private: System::Void readCandlesticksFromFile() {
 		// Use candlestick loader to read candlesticks
 		this->listOfCandlesticks = this->readCandlesticksFromFile(this->selectedFilename);
-		// If the first candlestick is after the last candlestick (chronological order), reverse the list
-		if (this->listOfCandlesticks[0]->Date->CompareTo(this->listOfCandlesticks[this->listOfCandlesticks->Count - 1]->Date) > 0) {
-			// Reverse the list
-			this->listOfCandlesticks->Reverse();
-		}
 	}
 
 
