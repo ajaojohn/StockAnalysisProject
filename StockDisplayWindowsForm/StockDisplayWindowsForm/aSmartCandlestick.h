@@ -5,6 +5,7 @@ ref class aSmartCandlestick :
 {
 private:
     /// Private fields
+    System::Int64 _index; // Index
     System::Decimal _range;    // High minus low
     System::Decimal _bodyRange; // topPrice minus bottomPrice
     System::Decimal _topPrice; // max(open, close)
@@ -42,6 +43,12 @@ private:
 		System::Decimal get() { return _lowerTail; }
 		System::Void set(System::Decimal value) { _lowerTail = value; }
 	}
+
+    // Index property
+    public: property System::Int64 Index {
+        System::Int64 get() { return _index; }
+        System::Void set(System::Int64 value) { _index = value; }
+    }
 
     /// <summary>
     /// Calculates the smart candlestick properties

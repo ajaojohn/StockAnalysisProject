@@ -530,9 +530,16 @@ namespace CppCLRWinFormsProject {
 		// Create list of smart candlesticks
 		Generic::List<aSmartCandlestick^>^ smartCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 		// Iterate through each candlestick
+		int index = 0;
 		for each (aCandlestick^ candlestick in candlesticks) {
+			// Create smart candlestick
+			aSmartCandlestick^ smartCandlestick = gcnew aSmartCandlestick(candlestick);
+			// Set index
+			smartCandlestick->Index = index;
 			// Add smart candlestick
-			smartCandlesticks->Add(gcnew aSmartCandlestick(candlestick));
+			smartCandlesticks->Add(smartCandlestick);
+			// Increment index
+			index++;
 		}
 		// Return smart candlesticks
 		return smartCandlesticks;
