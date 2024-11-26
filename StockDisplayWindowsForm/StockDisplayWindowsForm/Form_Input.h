@@ -601,8 +601,6 @@ private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::Str
 			current->IsPeak = current->High > next->High;
 			// Determine if it's a valley
 			current->IsValley = current->Low < next->Low;
-
-			MessageBox::Show("First cs isPeak: " + current->IsPeak + "\nFirst cs isValley: " + current->IsValley + "\n");
 		}
 		else if (i == count - 1 && count > 1) {
 			// **Last Candlestick: Compare with the previous candlestick only**
@@ -611,8 +609,6 @@ private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::Str
 			current->IsPeak = current->High > prev->High;
 			// Determine if it's a valley
 			current->IsValley = current->Low < prev->Low;
-
-			MessageBox::Show("Last cs isPeak: " + current->IsPeak + "\Last cs isValley: " + current->IsValley + "\n");
 		}
 		else if (i > 0 && i < count - 1) {
 			// **Middle Candlesticks: Compare with both previous and next candlesticks**
