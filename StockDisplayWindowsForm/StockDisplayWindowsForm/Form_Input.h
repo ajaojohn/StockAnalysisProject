@@ -577,7 +577,7 @@ private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::Str
 		// Create a new list
 		Generic::List<aSmartCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 
-		int index = 0;
+		int index = 1;
 		// Loop through each candlestick
 		for (int i = 0; i < listOfCandlesticks->Count; i++) {
 			// If the candlestick is in the time frame
@@ -981,8 +981,11 @@ private: System::Void outlinePeaksAndValleys() {
 			auto peakLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
 			peakLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 			peakLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-			peakLine->IsInfinitive = true;
+			peakLine->IsInfinitive = false;
+			peakLine->IsSizeAlwaysRelative = false;
+			peakLine->Width = 3;
 			peakLine->ClipToChartArea = "ChartArea_OHLC";
+			peakLine->X = current->Index - 1.5;
 			peakLine->Y = Convert::ToDouble(current->High);
 			peakLine->LineColor = System::Drawing::Color::Green;
 			// Add peak line to chart
@@ -1008,8 +1011,11 @@ private: System::Void outlinePeaksAndValleys() {
 			auto valleyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
 			valleyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 			valleyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-			valleyLine->IsInfinitive = true;
+			valleyLine->IsInfinitive = false;
+			valleyLine->IsSizeAlwaysRelative = false;
+			valleyLine->Width = 3;
 			valleyLine->ClipToChartArea = "ChartArea_OHLC";
+			valleyLine->X = current->Index - 1.5;
 			valleyLine->Y = Convert::ToDouble(current->Low);
 			valleyLine->LineColor = System::Drawing::Color::Red;
 			// Add valley line to chart
@@ -1300,6 +1306,7 @@ private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSma
 			else {
 
 				// Show the information in a message box
+				drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
 				MessageBox::Show("Selected Candlesticks do not form a valid wave.", "Selection Error");
 				resetWaveSelections();
 			}			
@@ -1416,7 +1423,7 @@ private: DataVisualization::Charting::RectangleAnnotation^ drawRectangleBetweenC
 	// Set the position and size of the rectangle
 	rectangleAnnotation->Y = minY;
 	rectangleAnnotation->Height = maxY - minY;
-	rectangleAnnotation->X = firstCS->Index + 1;
+	rectangleAnnotation->X = firstCS->Index;
 	rectangleAnnotation->Width = secondCS->Index - firstCS->Index;
 
 	// Add the rectangle to the chart
