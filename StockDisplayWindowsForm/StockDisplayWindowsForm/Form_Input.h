@@ -42,12 +42,14 @@ namespace CppCLRWinFormsProject {
 	private: System::Windows::Forms::CheckBox^ checkBox_hammerPattern;
 	private: System::Windows::Forms::GroupBox^ groupBox_dateFiltering;
 	private: System::Windows::Forms::CheckBox^ checkBox_selectAllPatterns;
+	private: System::Windows::Forms::CheckBox^ checkBox_showPeaksAndValleys;
 
 
 
 
 
-		   // List of candlesticks to display
+
+	// List of candlesticks to display
 	private: BindingList<aSmartCandlestick^>^ filteredListOfCandlesticks;
 
 #pragma endregion
@@ -148,11 +150,11 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea5 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea6 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::Legend^ legend3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series5 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series6 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -162,6 +164,7 @@ namespace CppCLRWinFormsProject {
 			this->label_endDate = (gcnew System::Windows::Forms::Label());
 			this->button_update = (gcnew System::Windows::Forms::Button());
 			this->groupBox_patterns = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBox_showPeaksAndValleys = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_selectAllPatterns = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_gravestoneDojiPattern = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBox_dragonflyDojiPattern = (gcnew System::Windows::Forms::CheckBox());
@@ -180,9 +183,10 @@ namespace CppCLRWinFormsProject {
 			// button_load
 			// 
 			this->button_load->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Right));
-			this->button_load->Location = System::Drawing::Point(1019, 561);
+			this->button_load->Location = System::Drawing::Point(1401, 842);
+			this->button_load->Margin = System::Windows::Forms::Padding(4);
 			this->button_load->Name = L"button_load";
-			this->button_load->Size = System::Drawing::Size(261, 46);
+			this->button_load->Size = System::Drawing::Size(359, 69);
 			this->button_load->TabIndex = 0;
 			this->button_load->Text = L"Load File";
 			this->button_load->UseVisualStyleBackColor = true;
@@ -200,9 +204,10 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_start->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->dateTimePicker_start->CustomFormat = L"d MMM yyyy";
 			this->dateTimePicker_start->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
-			this->dateTimePicker_start->Location = System::Drawing::Point(10, 45);
+			this->dateTimePicker_start->Location = System::Drawing::Point(14, 68);
+			this->dateTimePicker_start->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
-			this->dateTimePicker_start->Size = System::Drawing::Size(120, 22);
+			this->dateTimePicker_start->Size = System::Drawing::Size(164, 29);
 			this->dateTimePicker_start->TabIndex = 2;
 			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
 			// 
@@ -211,9 +216,10 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_end->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->dateTimePicker_end->CustomFormat = L"d MMM yyyy";
 			this->dateTimePicker_end->Format = System::Windows::Forms::DateTimePickerFormat::Custom;
-			this->dateTimePicker_end->Location = System::Drawing::Point(136, 45);
+			this->dateTimePicker_end->Location = System::Drawing::Point(187, 68);
+			this->dateTimePicker_end->Margin = System::Windows::Forms::Padding(4);
 			this->dateTimePicker_end->Name = L"dateTimePicker_end";
-			this->dateTimePicker_end->Size = System::Drawing::Size(121, 22);
+			this->dateTimePicker_end->Size = System::Drawing::Size(165, 29);
 			this->dateTimePicker_end->TabIndex = 3;
 			// 
 			// chart_stockData
@@ -221,48 +227,54 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			chartArea5->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea5->AxisY->LabelStyle->Format = L"F2";
-			chartArea5->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea5->AxisY->Title = L"Price";
-			chartArea5->Name = L"ChartArea_OHLC";
-			chartArea6->AxisY->Title = L"Volume";
-			chartArea6->Name = L"ChartArea_Volume";
-			this->chart_stockData->ChartAreas->Add(chartArea5);
-			this->chart_stockData->ChartAreas->Add(chartArea6);
-			legend3->Enabled = false;
-			legend3->Name = L"Legend1";
-			this->chart_stockData->Legends->Add(legend3);
-			this->chart_stockData->Location = System::Drawing::Point(9, 9);
+			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea1->AxisY->LabelStyle->Format = L"F2";
+			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea1->AxisY->Title = L"Price";
+			chartArea1->Name = L"ChartArea_OHLC";
+			chartArea2->AxisY->Title = L"Volume";
+			chartArea2->Name = L"ChartArea_Volume";
+			this->chart_stockData->ChartAreas->Add(chartArea1);
+			this->chart_stockData->ChartAreas->Add(chartArea2);
+			legend1->Enabled = false;
+			legend1->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend1);
+			this->chart_stockData->Location = System::Drawing::Point(12, 14);
+			this->chart_stockData->Margin = System::Windows::Forms::Padding(4);
 			this->chart_stockData->Name = L"chart_stockData";
-			series5->ChartArea = L"ChartArea_OHLC";
-			series5->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
-			series5->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
-			series5->IsXValueIndexed = true;
-			series5->Legend = L"Legend1";
-			series5->Name = L"Series_OHLC";
-			series5->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series5->YValuesPerPoint = 4;
-			series5->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
-			series6->ChartArea = L"ChartArea_Volume";
-			series6->IsXValueIndexed = true;
-			series6->Legend = L"Legend1";
-			series6->Name = L"Series_Volume";
-			series6->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series6->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
-			this->chart_stockData->Series->Add(series5);
-			this->chart_stockData->Series->Add(series6);
-			this->chart_stockData->Size = System::Drawing::Size(1004, 597);
+			series1->ChartArea = L"ChartArea_OHLC";
+			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series1->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
+			series1->IsXValueIndexed = true;
+			series1->Legend = L"Legend1";
+			series1->Name = L"Series_OHLC";
+			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series1->YValuesPerPoint = 4;
+			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series2->ChartArea = L"ChartArea_Volume";
+			series2->IsXValueIndexed = true;
+			series2->Legend = L"Legend1";
+			series2->Name = L"Series_Volume";
+			series2->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series2->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::Double;
+			this->chart_stockData->Series->Add(series1);
+			this->chart_stockData->Series->Add(series2);
+			this->chart_stockData->Size = System::Drawing::Size(1380, 896);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
+			this->chart_stockData->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form_Input::chart_stockData_Paint);
+			this->chart_stockData->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &Form_Input::chart_stockData_MouseDown);
+			this->chart_stockData->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &Form_Input::chart_stockData_MouseMove);
+			this->chart_stockData->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &Form_Input::chart_stockData_MouseUp);
 			// 
 			// label_startDate
 			// 
 			this->label_startDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_startDate->AutoSize = true;
-			this->label_startDate->Location = System::Drawing::Point(7, 26);
+			this->label_startDate->Location = System::Drawing::Point(10, 39);
+			this->label_startDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_startDate->Name = L"label_startDate";
-			this->label_startDate->Size = System::Drawing::Size(66, 16);
+			this->label_startDate->Size = System::Drawing::Size(99, 25);
 			this->label_startDate->TabIndex = 7;
 			this->label_startDate->Text = L"Start Date";
 			// 
@@ -270,9 +282,10 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->label_endDate->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->label_endDate->AutoSize = true;
-			this->label_endDate->Location = System::Drawing::Point(137, 26);
+			this->label_endDate->Location = System::Drawing::Point(188, 39);
+			this->label_endDate->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
 			this->label_endDate->Name = L"label_endDate";
-			this->label_endDate->Size = System::Drawing::Size(63, 16);
+			this->label_endDate->Size = System::Drawing::Size(93, 25);
 			this->label_endDate->TabIndex = 8;
 			this->label_endDate->Text = L"End Date";
 			// 
@@ -280,9 +293,10 @@ namespace CppCLRWinFormsProject {
 			// 
 			this->button_update->Anchor = System::Windows::Forms::AnchorStyles::Right;
 			this->button_update->BackColor = System::Drawing::SystemColors::ButtonFace;
-			this->button_update->Location = System::Drawing::Point(10, 73);
+			this->button_update->Location = System::Drawing::Point(14, 110);
+			this->button_update->Margin = System::Windows::Forms::Padding(4);
 			this->button_update->Name = L"button_update";
-			this->button_update->Size = System::Drawing::Size(247, 47);
+			this->button_update->Size = System::Drawing::Size(340, 70);
 			this->button_update->TabIndex = 9;
 			this->button_update->Text = L"Update";
 			this->button_update->UseVisualStyleBackColor = false;
@@ -293,6 +307,7 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_patterns->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->groupBox_patterns->BackColor = System::Drawing::SystemColors::Window;
+			this->groupBox_patterns->Controls->Add(this->checkBox_showPeaksAndValleys);
 			this->groupBox_patterns->Controls->Add(this->checkBox_selectAllPatterns);
 			this->groupBox_patterns->Controls->Add(this->checkBox_gravestoneDojiPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_dragonflyDojiPattern);
@@ -302,22 +317,30 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_patterns->Controls->Add(this->checkBox_bearishPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_bullishPattern);
 			this->groupBox_patterns->Controls->Add(this->checkBox_neutralPattern);
-			this->groupBox_patterns->Location = System::Drawing::Point(1018, 9);
-			this->groupBox_patterns->Margin = System::Windows::Forms::Padding(2);
+			this->groupBox_patterns->Location = System::Drawing::Point(1400, 14);
 			this->groupBox_patterns->Name = L"groupBox_patterns";
-			this->groupBox_patterns->Padding = System::Windows::Forms::Padding(2);
-			this->groupBox_patterns->Size = System::Drawing::Size(262, 386);
+			this->groupBox_patterns->Size = System::Drawing::Size(360, 579);
 			this->groupBox_patterns->TabIndex = 12;
 			this->groupBox_patterns->TabStop = false;
 			this->groupBox_patterns->Text = L"Select Patterns";
 			// 
+			// checkBox_showPeaksAndValleys
+			// 
+			this->checkBox_showPeaksAndValleys->AutoSize = true;
+			this->checkBox_showPeaksAndValleys->Location = System::Drawing::Point(15, 531);
+			this->checkBox_showPeaksAndValleys->Name = L"checkBox_showPeaksAndValleys";
+			this->checkBox_showPeaksAndValleys->Size = System::Drawing::Size(258, 29);
+			this->checkBox_showPeaksAndValleys->TabIndex = 9;
+			this->checkBox_showPeaksAndValleys->Text = L"Show Peaks And Valleys";
+			this->checkBox_showPeaksAndValleys->UseVisualStyleBackColor = true;
+			this->checkBox_showPeaksAndValleys->CheckedChanged += gcnew System::EventHandler(this, &Form_Input::checkBox_showPeaksAndValleys_CheckedChanged);
+			// 
 			// checkBox_selectAllPatterns
 			// 
 			this->checkBox_selectAllPatterns->AutoSize = true;
-			this->checkBox_selectAllPatterns->Location = System::Drawing::Point(10, 34);
-			this->checkBox_selectAllPatterns->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_selectAllPatterns->Location = System::Drawing::Point(14, 51);
 			this->checkBox_selectAllPatterns->Name = L"checkBox_selectAllPatterns";
-			this->checkBox_selectAllPatterns->Size = System::Drawing::Size(107, 20);
+			this->checkBox_selectAllPatterns->Size = System::Drawing::Size(158, 29);
 			this->checkBox_selectAllPatterns->TabIndex = 8;
 			this->checkBox_selectAllPatterns->Text = L"SELECT ALL";
 			this->checkBox_selectAllPatterns->UseVisualStyleBackColor = true;
@@ -326,10 +349,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_gravestoneDojiPattern
 			// 
 			this->checkBox_gravestoneDojiPattern->AutoSize = true;
-			this->checkBox_gravestoneDojiPattern->Location = System::Drawing::Point(10, 221);
-			this->checkBox_gravestoneDojiPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_gravestoneDojiPattern->Location = System::Drawing::Point(14, 332);
 			this->checkBox_gravestoneDojiPattern->Name = L"checkBox_gravestoneDojiPattern";
-			this->checkBox_gravestoneDojiPattern->Size = System::Drawing::Size(157, 20);
+			this->checkBox_gravestoneDojiPattern->Size = System::Drawing::Size(225, 29);
 			this->checkBox_gravestoneDojiPattern->TabIndex = 7;
 			this->checkBox_gravestoneDojiPattern->Text = L"Gravestone Doji (GD)";
 			this->checkBox_gravestoneDojiPattern->UseVisualStyleBackColor = true;
@@ -338,10 +360,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_dragonflyDojiPattern
 			// 
 			this->checkBox_dragonflyDojiPattern->AutoSize = true;
-			this->checkBox_dragonflyDojiPattern->Location = System::Drawing::Point(10, 198);
-			this->checkBox_dragonflyDojiPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_dragonflyDojiPattern->Location = System::Drawing::Point(14, 297);
 			this->checkBox_dragonflyDojiPattern->Name = L"checkBox_dragonflyDojiPattern";
-			this->checkBox_dragonflyDojiPattern->Size = System::Drawing::Size(145, 20);
+			this->checkBox_dragonflyDojiPattern->Size = System::Drawing::Size(206, 29);
 			this->checkBox_dragonflyDojiPattern->TabIndex = 6;
 			this->checkBox_dragonflyDojiPattern->Text = L"Dragonfly Doji (DD)";
 			this->checkBox_dragonflyDojiPattern->UseVisualStyleBackColor = true;
@@ -350,10 +371,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_dojiPattern
 			// 
 			this->checkBox_dojiPattern->AutoSize = true;
-			this->checkBox_dojiPattern->Location = System::Drawing::Point(10, 174);
-			this->checkBox_dojiPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_dojiPattern->Location = System::Drawing::Point(14, 261);
 			this->checkBox_dojiPattern->Name = L"checkBox_dojiPattern";
-			this->checkBox_dojiPattern->Size = System::Drawing::Size(74, 20);
+			this->checkBox_dojiPattern->Size = System::Drawing::Size(104, 29);
 			this->checkBox_dojiPattern->TabIndex = 5;
 			this->checkBox_dojiPattern->Text = L"Doji (D)";
 			this->checkBox_dojiPattern->UseVisualStyleBackColor = true;
@@ -362,10 +382,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_hammerPattern
 			// 
 			this->checkBox_hammerPattern->AutoSize = true;
-			this->checkBox_hammerPattern->Location = System::Drawing::Point(10, 151);
-			this->checkBox_hammerPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_hammerPattern->Location = System::Drawing::Point(14, 226);
 			this->checkBox_hammerPattern->Name = L"checkBox_hammerPattern";
-			this->checkBox_hammerPattern->Size = System::Drawing::Size(102, 20);
+			this->checkBox_hammerPattern->Size = System::Drawing::Size(145, 29);
 			this->checkBox_hammerPattern->TabIndex = 4;
 			this->checkBox_hammerPattern->Text = L"Hammer (H)";
 			this->checkBox_hammerPattern->UseVisualStyleBackColor = true;
@@ -374,10 +393,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_marubozuPattern
 			// 
 			this->checkBox_marubozuPattern->AutoSize = true;
-			this->checkBox_marubozuPattern->Location = System::Drawing::Point(10, 128);
-			this->checkBox_marubozuPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_marubozuPattern->Location = System::Drawing::Point(14, 192);
 			this->checkBox_marubozuPattern->Name = L"checkBox_marubozuPattern";
-			this->checkBox_marubozuPattern->Size = System::Drawing::Size(110, 20);
+			this->checkBox_marubozuPattern->Size = System::Drawing::Size(162, 29);
 			this->checkBox_marubozuPattern->TabIndex = 3;
 			this->checkBox_marubozuPattern->Text = L"Marubozu (M)";
 			this->checkBox_marubozuPattern->UseVisualStyleBackColor = true;
@@ -386,10 +404,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_bearishPattern
 			// 
 			this->checkBox_bearishPattern->AutoSize = true;
-			this->checkBox_bearishPattern->Location = System::Drawing::Point(10, 58);
-			this->checkBox_bearishPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_bearishPattern->Location = System::Drawing::Point(14, 87);
 			this->checkBox_bearishPattern->Name = L"checkBox_bearishPattern";
-			this->checkBox_bearishPattern->Size = System::Drawing::Size(103, 20);
+			this->checkBox_bearishPattern->Size = System::Drawing::Size(147, 29);
 			this->checkBox_bearishPattern->TabIndex = 2;
 			this->checkBox_bearishPattern->Text = L"Bearish (Be)";
 			this->checkBox_bearishPattern->UseVisualStyleBackColor = true;
@@ -398,10 +415,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_bullishPattern
 			// 
 			this->checkBox_bullishPattern->AutoSize = true;
-			this->checkBox_bullishPattern->Location = System::Drawing::Point(10, 81);
-			this->checkBox_bullishPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_bullishPattern->Location = System::Drawing::Point(14, 122);
 			this->checkBox_bullishPattern->Name = L"checkBox_bullishPattern";
-			this->checkBox_bullishPattern->Size = System::Drawing::Size(95, 20);
+			this->checkBox_bullishPattern->Size = System::Drawing::Size(138, 29);
 			this->checkBox_bullishPattern->TabIndex = 1;
 			this->checkBox_bullishPattern->Text = L"Bullish (Bu)";
 			this->checkBox_bullishPattern->UseVisualStyleBackColor = true;
@@ -410,10 +426,9 @@ namespace CppCLRWinFormsProject {
 			// checkBox_neutralPattern
 			// 
 			this->checkBox_neutralPattern->AutoSize = true;
-			this->checkBox_neutralPattern->Location = System::Drawing::Point(10, 104);
-			this->checkBox_neutralPattern->Margin = System::Windows::Forms::Padding(2);
+			this->checkBox_neutralPattern->Location = System::Drawing::Point(14, 156);
 			this->checkBox_neutralPattern->Name = L"checkBox_neutralPattern";
-			this->checkBox_neutralPattern->Size = System::Drawing::Size(93, 20);
+			this->checkBox_neutralPattern->Size = System::Drawing::Size(133, 29);
 			this->checkBox_neutralPattern->TabIndex = 0;
 			this->checkBox_neutralPattern->Text = L"Neutral (N)";
 			this->checkBox_neutralPattern->UseVisualStyleBackColor = true;
@@ -428,24 +443,23 @@ namespace CppCLRWinFormsProject {
 			this->groupBox_dateFiltering->Controls->Add(this->label_startDate);
 			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_end);
 			this->groupBox_dateFiltering->Controls->Add(this->dateTimePicker_start);
-			this->groupBox_dateFiltering->Location = System::Drawing::Point(1018, 419);
-			this->groupBox_dateFiltering->Margin = System::Windows::Forms::Padding(2);
+			this->groupBox_dateFiltering->Location = System::Drawing::Point(1400, 628);
 			this->groupBox_dateFiltering->Name = L"groupBox_dateFiltering";
-			this->groupBox_dateFiltering->Padding = System::Windows::Forms::Padding(2);
-			this->groupBox_dateFiltering->Size = System::Drawing::Size(262, 137);
+			this->groupBox_dateFiltering->Size = System::Drawing::Size(360, 206);
 			this->groupBox_dateFiltering->TabIndex = 13;
 			this->groupBox_dateFiltering->TabStop = false;
 			this->groupBox_dateFiltering->Text = L"Filter Dates";
 			// 
 			// Form_Input
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
+			this->AutoScaleDimensions = System::Drawing::SizeF(11, 24);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1289, 613);
+			this->ClientSize = System::Drawing::Size(1772, 920);
 			this->Controls->Add(this->groupBox_dateFiltering);
 			this->Controls->Add(this->groupBox_patterns);
 			this->Controls->Add(this->chart_stockData);
 			this->Controls->Add(this->button_load);
+			this->Margin = System::Windows::Forms::Padding(4);
 			this->Name = L"Form_Input";
 			this->Text = L"Form_Input";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->chart_stockData))->EndInit();
@@ -519,31 +533,30 @@ namespace CppCLRWinFormsProject {
 		this->Text = formTitle;
 	}
 
+
+
 	/// <summary>
 	/// Reads candlesticks from a file and returns a list of candlestick objects.
 	/// </summary>
 	/// <param name="filename">The name of the file to read.</param>
 	/// <returns>A list of candlesticks read from the file.</returns>
-	private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
-		// Call loader
-		Generic::List<aCandlestick^>^ candlesticks = candlestickLoader->load(filename);
-		// Create list of smart candlesticks
-		Generic::List<aSmartCandlestick^>^ smartCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
-		// Iterate through each candlestick
-		int index = 0;
-		for each (aCandlestick^ candlestick in candlesticks) {
-			// Create smart candlestick
-			aSmartCandlestick^ smartCandlestick = gcnew aSmartCandlestick(candlestick);
-			// Set index
-			smartCandlestick->Index = index;
-			// Add smart candlestick
-			smartCandlesticks->Add(smartCandlestick);
-			// Increment index
-			index++;
-		}
-		// Return smart candlesticks
-		return smartCandlesticks;
+private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::String^ filename) {
+	// Call loader to get the list of candlesticks from the file
+	Generic::List<aCandlestick^>^ candlesticks = candlestickLoader->load(filename);
+	// Create a list to hold smart candlesticks
+	Generic::List<aSmartCandlestick^>^ smartCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
+
+	for each (aCandlestick ^ candlestick in candlesticks) {
+		// Create a smart candlestick instance
+		aSmartCandlestick^ smartCandlestick = gcnew aSmartCandlestick(candlestick);
+		// Add the smart candlestick to the list
+		smartCandlesticks->Add(smartCandlestick);
+		// Increment the index for the next candlestick
 	}
+
+	// Return the list of smart candlesticks with updated properties
+	return smartCandlesticks;
+}
 	/// <summary>
 	/// Reads candlesticks from a file and saves it to private parameter
 	/// </summary>
@@ -563,14 +576,60 @@ namespace CppCLRWinFormsProject {
 	private: Generic::List<aSmartCandlestick^>^ filterCandlesticks(System::DateTime^ startDate, System::DateTime^ endDate, Generic::List<aSmartCandlestick^>^  listOfCandlesticks) {
 		// Create a new list
 		Generic::List<aSmartCandlestick^>^ filteredCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
+
+		int index = 0;
 		// Loop through each candlestick
 		for (int i = 0; i < listOfCandlesticks->Count; i++) {
 			// If the candlestick is in the time frame
 			if (listOfCandlesticks[i]->Date->CompareTo(startDate) >= 0 && listOfCandlesticks[i]->Date->CompareTo(endDate) <= 0) {
+				// 
+				listOfCandlesticks[i]->Index = index++;
 				// Add the candlestick to the list
 				filteredCandlesticks->Add(listOfCandlesticks[i]);
 			}
 		}
+
+	// Total number of candlesticks
+	int count = filteredCandlesticks->Count;
+	// Iterate through the smart candlesticks to determine peaks and valleys
+	for (int i = 0; i < count; i++) {
+		aSmartCandlestick^ current = filteredCandlesticks[i];
+		if (i == 0 && count > 1) {
+			// **First Candlestick: Compare with the next candlestick only**
+			aSmartCandlestick^ next = filteredCandlesticks[i + 1];
+			// Determine if it's a peak
+			current->IsPeak = current->High > next->High;
+			// Determine if it's a valley
+			current->IsValley = current->Low < next->Low;
+
+			MessageBox::Show("First cs isPeak: " + current->IsPeak + "\nFirst cs isValley: " + current->IsValley + "\n");
+		}
+		else if (i == count - 1 && count > 1) {
+			// **Last Candlestick: Compare with the previous candlestick only**
+			aSmartCandlestick^ prev = filteredCandlesticks[i - 1];
+			// Determine if it's a peak
+			current->IsPeak = current->High > prev->High;
+			// Determine if it's a valley
+			current->IsValley = current->Low < prev->Low;
+
+			MessageBox::Show("Last cs isPeak: " + current->IsPeak + "\Last cs isValley: " + current->IsValley + "\n");
+		}
+		else if (i > 0 && i < count - 1) {
+			// **Middle Candlesticks: Compare with both previous and next candlesticks**
+			aSmartCandlestick^ prev = filteredCandlesticks[i - 1];
+			aSmartCandlestick^ next = filteredCandlesticks[i + 1];
+			// Determine if it's a peak
+			current->IsPeak = (current->High > prev->High) && (current->High > next->High);
+			// Determine if it's a valley
+			current->IsValley = (current->Low < prev->Low) && (current->Low < next->Low);
+		}
+		else {
+			// **Edge Case Handling:**
+			// If there's only one candlestick, it cannot be a peak or valley
+			current->IsPeak = false;
+			current->IsValley = false;
+		}
+	}
 		// Return the list
 		return filteredCandlesticks;
 	}
@@ -762,7 +821,9 @@ private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, 
 	chart_stockData->Annotations->Clear();
 
 	// Regenerate annotations for peaks and valleys
-	outlinePeaksAndValleys();
+	if (checkBox_showPeaksAndValleys->Checked) {
+		outlinePeaksAndValleys();
+	}
 
 	// Get selected patterns
 	Generic::List<String^>^ selectedPatterns = gcnew Generic::List<String^>();
@@ -896,18 +957,14 @@ private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, 
 /// <returns>void</returns>
 private: System::Void outlinePeaksAndValleys() {
 	// Iterate through each displayed candlestick, checking for peaks and valleys
-	for (int i = 1; i < filteredListOfCandlesticks->Count - 1; i++) {
-		// Get previous candlestick
-		aSmartCandlestick^ previous = filteredListOfCandlesticks[i - 1];
+	for (int i = 0; i < filteredListOfCandlesticks->Count ; i++) {
 		// Get current candlestick
 		aSmartCandlestick^ current = filteredListOfCandlesticks[i];
-		// Get next candlestick
-		aSmartCandlestick^ next = filteredListOfCandlesticks[i + 1];
 
 		// Calculate if current candlestick is a peak
-		bool isPeak = (current->High > previous->High) && (current->High > next->High);
+		bool isPeak = current->IsPeak;
 		// Calculate if current candlestick is a valley
-		bool isValley = (current->Low < previous->Low) && (current->Low < next->Low);
+		bool isValley = current->IsValley;
 
 		if (isPeak) {
 		// If current candlestick is a peak
@@ -983,5 +1040,400 @@ private: System::Void checkBox_selectAllPatterns_CheckedChanged(System::Object^ 
 	}
 }
 
+
+private:
+	const int SNAP_MARGIN = 5; // Number of candlesticks to search on either side
+	System::Drawing::Rectangle selectionRectangle; // Rectangle to draw during selection
+	DataVisualization::Charting::DataPoint^ currentDragDataPoint = nullptr;
+	bool isDragging; // Indicates if a drag operation is in progress
+	System::Drawing::Point dragStartPoint; // Starting point of the drag
+	aSmartCandlestick^ selectedCandlestickStart; // Candlestick at drag start
+	aSmartCandlestick^ selectedCandlestickEnd;   // Candlestick at drag end
+
+	DataVisualization::Charting::DataPoint^ selectedDataPointStart; // Data point at drag start
+	DataVisualization::Charting::DataPoint^ selectedDataPointEnd; // Data point at drag end
+	DataVisualization::Charting::RectangleAnnotation^ currentWaveRectangle;
+
+/// <summary>
+/// Finds the nearest peak or valley to a candlestick
+/// </summary>
+/// <param name="cs">Candlestick to search from</param>
+/// <param name="margin">Margin to search</param>
+/// <returns></returns>
+aSmartCandlestick^ Form_Input::findNearestPeakOrValley(aSmartCandlestick^ cs, int margin) {
+    if (cs == nullptr) return nullptr;
+    if (filteredListOfCandlesticks->Count == 0) return nullptr;
+
+    // Find the index of the reference candlestick
+    int index = filteredListOfCandlesticks->IndexOf(cs);
+    if (index == -1) return nullptr;
+
+    // Alternate search: for each distance d from 1 to margin
+    for (int d = 0; d < margin; d++) {
+        // Calculate backward and forward indices
+        int backIndex = index - d;
+        int forwardIndex = index + d;
+
+        // Search backward first
+        if (backIndex >= 0) {
+            aSmartCandlestick^ backCandlestick = filteredListOfCandlesticks[backIndex];
+            if (backCandlestick->IsPeak || backCandlestick->IsValley) {
+                return backCandlestick;
+            }
+        }
+
+        // Then search forward
+        if (forwardIndex < filteredListOfCandlesticks->Count) {
+            aSmartCandlestick^ forwardCandlestick = filteredListOfCandlesticks[forwardIndex];
+            if (forwardCandlestick->IsPeak || forwardCandlestick->IsValley) {
+                return forwardCandlestick;
+            }
+        }
+    }
+
+    // If no peak or valley is found within the margin
+    return nullptr;
+}
+
+private: aSmartCandlestick^ findCandlestickByXValue(double xValue) {
+	for each (aSmartCandlestick ^ cs in filteredListOfCandlesticks) {
+		if (cs->Date->ToOADate() == xValue) {
+			return cs;
+		}
+	}
+	return nullptr;
+}
+
+private: System::Void resetWaveSelections() {
+    if (selectedDataPointStart != nullptr) {
+        highlightDataPoint(selectedDataPointStart, false);
+    }
+    if (selectedDataPointEnd != nullptr) {
+        highlightDataPoint(selectedDataPointEnd, false);
+    }
+
+    // Remove the current rectangle annotation if it exists
+    if (currentWaveRectangle != nullptr) {
+        chart_stockData->Annotations->Remove(currentWaveRectangle);
+        currentWaveRectangle = nullptr;
+    }
+
+    selectedCandlestickStart = nullptr;
+    selectedCandlestickEnd = nullptr;
+    selectedDataPointStart = nullptr;
+    selectedDataPointEnd = nullptr;
+}
+
+private: System::Void highlightDataPoint(DataVisualization::Charting::DataPoint^ dp, bool isSelected) {
+	if (isSelected) {
+		dp->MarkerStyle = DataVisualization::Charting::MarkerStyle::Circle;
+		dp->MarkerSize = 10;
+		dp->MarkerColor = System::Drawing::Color::Yellow;
+		dp->BorderWidth = 2;
+		dp->BorderColor = System::Drawing::Color::Black;
+	}
+	else {
+		dp->MarkerStyle = DataVisualization::Charting::MarkerStyle::None;
+		dp->BorderWidth = 1;
+		dp->BorderColor = System::Drawing::Color::Transparent;
+	}
+}
+
+private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mouseX)
+{
+	// Access the relevant ChartArea
+	DataVisualization::Charting::ChartArea^ chartArea = chart_stockData->ChartAreas["ChartArea_OHLC"];
+
+	// Convert the mouse's X pixel position to the axis X-value (which is the index)
+	double xValue = chartArea->AxisX->PixelPositionToValue(static_cast<double>(mouseX));
+
+	// Round to the nearest integer index
+	int index = static_cast<int>(Math::Round(xValue));
+
+	// Check if the index is within the valid range
+	if (index > 0 && index <= chart_stockData->Series["Series_OHLC"]->Points->Count)
+	{
+		// Optional: Define a threshold to ensure the click is close enough to the DataPoint
+		// For indexed charts, a threshold of 0.5 is reasonable
+		double distance = Math::Abs(xValue - index);
+		double threshold = 0.5; // Adjust if necessary
+
+		if (distance <= threshold)
+		{
+			return chart_stockData->Series["Series_OHLC"]->Points[index-1];
+		}
+	}
+
+	// Return nullptr if no DataPoint is within the threshold
+	return nullptr;
+}
+
+
+private: System::Void chart_stockData_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+	if (e->Button == System::Windows::Forms::MouseButtons::Left) {
+		// Reset any previous selections
+		resetWaveSelections();
+
+		isDragging = true;
+		dragStartPoint = System::Drawing::Point(e->X, e->Y);
+		selectionRectangle = System::Drawing::Rectangle(e->X, e->Y, 0, 0);
+
+		// Use the helper method to get the closest DataPoint
+		DataVisualization::Charting::DataPoint^ startPoint = GetDataPointByXPosition(e->X);
+		if (startPoint != nullptr) {
+			selectedCandlestickStart = findCandlestickByXValue(startPoint->XValue);
+			selectedDataPointStart = startPoint;
+			highlightDataPoint(selectedDataPointStart, true);
+		}
+
+		// Unhighlight any existing drag DataPoint
+		if (currentDragDataPoint != nullptr) {
+			highlightDataPoint(currentDragDataPoint, false);
+			currentDragDataPoint = nullptr;
+		}
+	}
+}
+
+private: System::Void chart_stockData_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+	if (isDragging) {
+		// Update the selection rectangle based on mouse movement
+		int x = Math::Min(dragStartPoint.X, e->X);
+		int y = Math::Min(dragStartPoint.Y, e->Y);
+		int width = Math::Abs(e->X - dragStartPoint.X);
+		int height = Math::Abs(e->Y - dragStartPoint.Y);
+		selectionRectangle = System::Drawing::Rectangle(x, y, width, height);
+
+		// Redraw the chart to display the selection rectangle
+		chart_stockData->Invalidate();
+
+		// Use the helper method to get the closest DataPoint
+		DataVisualization::Charting::DataPoint^ currentPoint = GetDataPointByXPosition(e->X);
+
+		if (currentPoint != currentDragDataPoint && currentPoint != nullptr) {
+			// Unhighlight the previous DataPoint if it exists
+			if (currentDragDataPoint != nullptr) {
+				highlightDataPoint(currentDragDataPoint, false);
+			}
+
+			// Highlight the new DataPoint
+			highlightDataPoint(currentPoint, true);
+			currentDragDataPoint = currentPoint;
+		}
+		else if (currentPoint == nullptr && currentDragDataPoint != nullptr) {
+			// If not hovering over a DataPoint, remove any existing highlight
+			highlightDataPoint(currentDragDataPoint, false);
+			currentDragDataPoint = nullptr;
+		}
+	}
+}
+
+private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+	if (isDragging) {
+		isDragging = false;
+
+		// Redraw the chart to remove the selection rectangle
+		chart_stockData->Invalidate();
+
+		// Unhighlight the current drag DataPoint, if any
+		if (currentDragDataPoint != nullptr) {
+			highlightDataPoint(currentDragDataPoint, false);
+			currentDragDataPoint = nullptr;
+		}
+
+		// Use the helper method to get the closest DataPoint
+		DataVisualization::Charting::DataPoint^ endPoint = GetDataPointByXPosition(e->X);
+		if (endPoint != nullptr) {
+			selectedCandlestickEnd = findCandlestickByXValue(endPoint->XValue);
+			selectedDataPointEnd = endPoint;
+			highlightDataPoint(selectedDataPointEnd, true);
+
+			// Perform actions with the selected candlesticks
+			onTwoCandlesticksSelected(selectedCandlestickStart, selectedCandlestickEnd);
+		}
+	}
+}
+
+private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
+	if (csStart != nullptr && csEnd != nullptr) {
+		// Find the nearest peak or valley to the start candlestick
+		aSmartCandlestick^ snappedStart = findNearestPeakOrValley(csStart, SNAP_MARGIN);
+		// Find the nearest peak or valley to the end candlestick
+		aSmartCandlestick^ snappedEnd = csEnd;
+
+		// Check if both snapped candlesticks are found
+		if (snappedStart != nullptr && snappedEnd != nullptr) {
+			// Unhighlight the initially selected candlesticks
+			if (selectedDataPointStart != nullptr) {
+				highlightDataPoint(selectedDataPointStart, false);
+			}
+			if (selectedDataPointEnd != nullptr) {
+				highlightDataPoint(selectedDataPointEnd, false);
+			}
+
+			// Find the DataPoints corresponding to the snapped candlesticks
+			DataVisualization::Charting::DataPoint^ snappedStartPoint = nullptr;
+			DataVisualization::Charting::DataPoint^ snappedEndPoint = nullptr;
+
+			for each (DataVisualization::Charting::DataPoint ^ dp in chart_stockData->Series["Series_OHLC"]->Points) {
+				if (dp->XValue == snappedStart->Date->ToOADate()) {
+					snappedStartPoint = dp;
+				}
+				if (dp->XValue == snappedEnd->Date->ToOADate()) {
+					snappedEndPoint = dp;
+				}
+			}
+
+			// Highlight the snapped candlesticks
+			if (snappedStartPoint != nullptr) {
+				highlightDataPoint(snappedStartPoint, true);
+			}
+			if (snappedEndPoint != nullptr) {
+				highlightDataPoint(snappedEndPoint, true);
+			}
+
+			// Update selected candlesticks and DataPoints
+			selectedCandlestickStart = snappedStart;
+			selectedCandlestickEnd = snappedEnd;
+			selectedDataPointStart = snappedStartPoint;
+			selectedDataPointEnd = snappedEndPoint;
+
+			if (isValidWave(snappedStart, snappedEnd)) {
+				// Draw rectangle between the snapped candlesticks
+				drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
+			}
+			else {
+
+				// Show the information in a message box
+				MessageBox::Show("Selected Candlesticks do not form a valid wave.", "Selection Error");
+				resetWaveSelections();
+			}			
+		}
+		else {
+			MessageBox::Show("No nearby peak or valley found within the margin of error.", "Selection Error");
+		}
+	}
+}
+
+private: System::Void chart_stockData_Paint(System::Object^ sender, System::Windows::Forms::PaintEventArgs^ e) {
+	if (isDragging) {
+		// Define the pen for drawing the rectangle (e.g., Blue dashed line)
+		System::Drawing::Pen^ pen = gcnew System::Drawing::Pen(System::Drawing::Color::Blue, 2);
+		pen->DashStyle = System::Drawing::Drawing2D::DashStyle::Dash;
+
+		// Draw the selection rectangle
+		e->Graphics->DrawRectangle(pen, selectionRectangle);
+
+		// Clean up
+		delete pen;
+	}
+}
+
+	   bool Form_Input::isValidWave(aSmartCandlestick^ candlestick1, aSmartCandlestick^ candlestick2) {
+		   // Validate inputs
+		   if (candlestick1 == nullptr || candlestick2 == nullptr)
+			   return false;
+
+		   // Determine if the first candlestick is a peak or a valley
+		   bool c1Peak = candlestick1->IsPeak;
+		   bool c1Valley = candlestick1->IsValley;
+
+		   // Ensure the first candlestick is either a peak or a valley
+		   if (!(c1Peak || c1Valley))
+			   return false;
+
+		   // Find indices of the selected candlesticks in the filtered list
+		   int index1 = filteredListOfCandlesticks->IndexOf(candlestick1);
+		   int index2 = filteredListOfCandlesticks->IndexOf(candlestick2);
+
+		   // Ensure both candlesticks are present in the list
+		   if (index1 == -1 || index2 == -1)
+			   return false;
+
+		   // Determine the order based on index
+		   int startIndex = Math::Min(index1, index2);
+		   int endIndex = Math::Max(index1, index2);
+
+		   if (startIndex == endIndex) {
+			   MessageBox::Show("Selected candlesticks are the same.", "Selection Error");
+			   return false;
+		   }
+
+		   // Get the first candlestick in the selection
+		   aSmartCandlestick^ firstCandlestick = filteredListOfCandlesticks[startIndex];
+		   // Get the second candlestick in the selection
+		   aSmartCandlestick^ secondCandlestick = filteredListOfCandlesticks[endIndex];
+
+		   auto maxY = Math::Max((double)firstCandlestick->High, (double)secondCandlestick->High);
+		   auto minY = Math::Min((double)firstCandlestick->Low, (double)secondCandlestick->Low);
+		   
+
+		   // Iterate through candlesticks between startIndex and endIndex (exclusive)
+		   for (int i = startIndex + 1; i < endIndex; i++) {
+			   aSmartCandlestick^ curr = filteredListOfCandlesticks[i];
+
+			   // If first is a peak, ensure no intermediate high exceeds first's high
+			   if ((double)curr->High > maxY)
+				   return false;
+
+			   // If first is a valley, ensure no intermediate low falls below first's low
+			   if ((double)curr->Low < minY)
+				   return false;
+		   }
+
+		   // All conditions met; valid wave within selection
+		   return true;
+	   }
+private: DataVisualization::Charting::RectangleAnnotation^ drawRectangleBetweenCandlesticks(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+	// Remove existing rectangle annotation if any
+	if (currentWaveRectangle != nullptr) {
+		chart_stockData->Annotations->Remove(currentWaveRectangle);
+		currentWaveRectangle = nullptr;
+	}
+
+	// Create new rectangle annotation
+	auto rectangleAnnotation = gcnew DataVisualization::Charting::RectangleAnnotation();
+	rectangleAnnotation->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+	rectangleAnnotation->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+	rectangleAnnotation->LineColor = Color::Blue;
+	rectangleAnnotation->BackColor = Color::Transparent;
+	rectangleAnnotation->LineWidth = 2;
+	rectangleAnnotation->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+	rectangleAnnotation->IsSizeAlwaysRelative = false;
+
+	// Determine the highest and lowest Y values
+	double maxY = Math::Max((double)cs1->High, (double)cs2->High);
+	double minY = Math::Min((double)cs1->Low, (double)cs2->Low);
+
+	// Determine the order based on the X values (dates)
+	aSmartCandlestick^ firstCS;
+	aSmartCandlestick^ secondCS;
+
+	if (cs1->Date->ToOADate() < cs2->Date->ToOADate()) {
+		firstCS = cs1;
+		secondCS = cs2;
+	}
+	else {
+		firstCS = cs2;
+		secondCS = cs1;
+	}
+
+	// Set the position and size of the rectangle
+	rectangleAnnotation->Y = minY;
+	rectangleAnnotation->Height = maxY - minY;
+	rectangleAnnotation->X = firstCS->Index + 1;
+	rectangleAnnotation->Width = secondCS->Index - firstCS->Index;
+
+	// Add the rectangle to the chart
+	chart_stockData->Annotations->Add(rectangleAnnotation);
+
+	// Assign the newly created rectangle to the member variable
+	currentWaveRectangle = rectangleAnnotation;
+
+	return rectangleAnnotation;
+}
+
+private: System::Void checkBox_showPeaksAndValleys_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	showAnnotationsForSelectedPattern(nullptr, nullptr);
+}
 };
 }

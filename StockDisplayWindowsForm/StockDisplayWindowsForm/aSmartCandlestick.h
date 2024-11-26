@@ -12,6 +12,8 @@ private:
     System::Decimal _bottomPrice; // min(open, close)
     System::Decimal _upperTail; // height of upper tail
     System::Decimal _lowerTail; // height of lower tail
+    System::Boolean _isPeak;
+    System::Boolean _isValley;
 
     // Range property
 	property System::Decimal Range {
@@ -49,6 +51,18 @@ private:
         System::Int64 get() { return _index; }
         System::Void set(System::Int64 value) { _index = value; }
     }
+
+    // Is peak property
+	public: property System::Boolean IsPeak {
+		System::Boolean get() { return _isPeak; }
+		System::Void set(System::Boolean value) { _isPeak = value; }
+	}
+
+	// Is valley property
+	public: property System::Boolean IsValley {
+		System::Boolean get() { return _isValley; }
+		System::Void set(System::Boolean value) { _isValley = value; }
+	}
 
     /// <summary>
     /// Calculates the smart candlestick properties
