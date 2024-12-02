@@ -1764,6 +1764,63 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->Series["Series_Beauty"]->BorderWidth = 2;
 	chart_stockData->Series["Series_Beauty"]->IsValueShownAsLabel = true; // Show values on bars
 
+
+	// Find the maximum beauty score and its corresponding price level
+	double maxBeauty = 0.0;
+	int maxIndex = 0;
+	for (int i = 0; i < beautyScores->Length; i++) {
+		if (beautyScores[i] > maxBeauty) {
+			maxBeauty = beautyScores[i];
+			maxIndex = i;
+		}
+	}
+	double maxBeautyLevel = adjustedLevels[maxIndex];
+
+	// Remove any existing annotations related to the maximum beauty line
+	System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ existingMaxBeautyAnnotations =
+		gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
+
+	for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
+		if (annotation->Name->StartsWith("MaxBeautyLine") || annotation->Name->StartsWith("MaxBeautyLabel")) {
+			existingMaxBeautyAnnotations->Add(annotation);
+		}
+	}
+
+	for each (DataVisualization::Charting::Annotation ^ annotation in existingMaxBeautyAnnotations) {
+		chart_stockData->Annotations->Remove(annotation);
+	}
+
+	// Create and configure the HorizontalLineAnnotation
+	auto maxBeautyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+	maxBeautyLine->Name = "MaxBeautyLine";
+	maxBeautyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+	maxBeautyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+	maxBeautyLine->Y = maxBeautyLevel; // Set Y to the price level with max beauty
+	maxBeautyLine->LineColor = System::Drawing::Color::Red; // Distinct color
+	maxBeautyLine->LineWidth = 2;
+	maxBeautyLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+	maxBeautyLine->IsInfinitive = true; // Extend across the entire X-axis
+	maxBeautyLine->ToolTip = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
+	maxBeautyLine->ClipToChartArea = "ChartArea_OHLC";
+
+	// Optionally, add a label to the line
+	auto maxBeautyLabel = gcnew DataVisualization::Charting::TextAnnotation();
+	maxBeautyLabel->Name = "MaxBeautyLabel";
+	maxBeautyLabel->Text = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
+	maxBeautyLabel->ForeColor = System::Drawing::Color::Red;
+	maxBeautyLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
+	maxBeautyLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+	maxBeautyLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+	maxBeautyLabel->Y = maxBeautyLevel;
+	maxBeautyLabel->X = chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum; // Position at the end of the X-axis
+	maxBeautyLabel->Alignment = Drawing::ContentAlignment::MiddleRight;
+	maxBeautyLabel->ToolTip = "Maximum Beauty Score";
+
+	// Add the annotations to the chart
+	chart_stockData->Annotations->Add(maxBeautyLine);
+	chart_stockData->Annotations->Add(maxBeautyLabel);
+
+
 	// Refresh the chart to display the new data
 	chart_stockData->Invalidate();
 
