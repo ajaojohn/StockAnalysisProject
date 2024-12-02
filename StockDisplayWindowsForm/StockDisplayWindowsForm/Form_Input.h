@@ -1551,124 +1551,166 @@ private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlest
 	}
 }
 
-private: double calculateBeautyOfACandlestick(aSmartCandlestick^ target, aSmartCandlestick^ cs1, aSmartCandlestick^ cs2, String^ *message) {
-	// Initialize beauty score
-	double beauty = 0.0;
+/// <summary>
+/// Calculates the beauty score for a single candlestick based on Fibonacci levels and allowance.
+/// </summary>
+/// <param name="candlestick">The candlestick to evaluate.</param>
+/// <param name="fibonacciLevels">Array of Fibonacci level values.</param>
+/// <param name="allowance">Allowance value for matching.</param>
+/// <returns>The beauty score for the candlestick.</returns>
+private: double CalculateBeautyForACandlestick(aSmartCandlestick^ candlestick, array<double>^ fibonacciLevels, double allowance) {
+	double beautyScore = 0.0;
 
-	// Validate input candlesticks
-	if (target == nullptr || cs1 == nullptr || cs2 == nullptr) {
-		// Optionally, you can throw an exception or handle the error as needed
-		return beauty;
-	}
-
-	// Determine the highest high and lowest low between cs1 and cs2
-	double high = Math::Max((double)cs1->High, (double)cs2->High);
-	double low = Math::Min((double)cs1->Low, (double)cs2->Low);
-
-	// Handle the edge case where high equals low to avoid division by zero
-	if (high == low) {
-		// All Fibonacci levels collapse to a single point; beauty can be 0 or 4 based on exact match
-		// Here, we'll set beauty to 0 as no meaningful levels can be derived
-		return beauty;
-	}
-
-	// Define Fibonacci percentage levels
-	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.0, 68.0, 50.0, 32.0, 24.0, 0.0 };
-
-	// Calculate Fibonacci levels based on high and low
-	*message += "Fibonacci levels:\n";
-	array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
-	for (int i = 0; i < fibonacciPercentages->Length; i++) {
-		fibonacciLevels[i] = low + (high - low) * (fibonacciPercentages[i] / 100.0);
-		*message += fibonacciPercentages[i].ToString() + "%: " + fibonacciLevels[i].ToString() + "\n";
-	}
-	*message +=  "\n\n";
-
-	// Define the allowance percentage (1.5%)
-	const double ALLOWANCE_PERCENTAGE = 0.015;
-	const double allowance = (high - low) * ALLOWANCE_PERCENTAGE;
-	*message += "Allowance: " + allowance.ToString() + "\n\n";
-
-	// Array of candlestick attributes to evaluate
-	array<double>^ candlestickAttributes = gcnew array<double> {
-		(double)target->Open,
-		(double)target->High,
-		(double)target->Low,
-		(double)target->Close
+	// Array of candlestick attributes
+	cli::array<double>^ attributes = gcnew cli::array<double> {
+		static_cast<double>(candlestick->Open),
+			static_cast<double>(candlestick->High),
+			static_cast<double>(candlestick->Low),
+			static_cast<double>(candlestick->Close)
 	};
 
-	// Iterate over each attribute and check against all Fibonacci levels
-	for (int attrIndex = 0; attrIndex < candlestickAttributes->Length; attrIndex++) {
-		double attributeValue = candlestickAttributes[attrIndex];
-		*message += "Attribute: " + candlestickAttributes[attrIndex].ToString() + "\n";
-
-		// Iterate through each Fibonacci level to check for a match
-		for (int levelIndex = 0; levelIndex < fibonacciLevels->Length; levelIndex++) {
-			double levelValue = fibonacciLevels[levelIndex];
-
-			// Calculate the absolute difference
-			double difference = Math::Abs(attributeValue - levelValue);
-
-			//*message += "Attribute: " + candlestickAttributes[attrIndex].ToString() + ", Level: " + fibonacciLevels[levelIndex].ToString() + "\n";
-
-			// Check if the attribute is within the allowance of the Fibonacci level
+	// Check each attribute against all Fibonacci levels
+	for each (double attr in attributes) {
+		for each (double level in fibonacciLevels) {
+			double difference = Math::Abs(attr - level);
 			if (difference <= allowance) {
-				*message += "Matches " + fibonacciLevels[levelIndex].ToString() + "! with difference: " + difference.ToString() + "\n";
-				beauty += 1.0;
+				beautyScore += 1.0;
 				break; // Move to the next attribute after a successful match
 			}
-
 		}
-		*message += "-------------------------------------------------\n";
 	}
 
-	return beauty; // Beauty score ranges from 0.0 to 4.0
+	return beautyScore;
 }
 
-private: double calculateOverallBeauty(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
-	// Initialize variables to accumulate beauty scores and count
-	double totalBeauty = 0.0;
-	int count = 0;
-	String^ message = "Beauty Calculation: \n";
 
-	// Validate input candlesticks
+
+/// <summary>
+/// Calculates the theoretical beauty scores by varying the wave height and displays them in a chart.
+/// </summary>
+/// <param name="cs1">First selected candlestick.</param>
+/// <param name="cs2">Second selected candlestick.</param>
+/// <param name="maxIncrementPercentage">Maximum percentage to increment/decrement the wave height.</param>
+/// <param name="incrementStep">Step size for each increment/decrement.</param>
+/// <returns>void</returns>
+private: System::Void calculateTheoreticalBeauty(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2, double maxIncrementPercentage, double incrementStep) {
+	// Validate input
 	if (cs1 == nullptr || cs2 == nullptr) {
-		// Optionally, display an error message or handle accordingly
-		return 0.0;
+		MessageBox::Show("Invalid candlesticks for calculating theoretical beauty scores.", "Error");
+		return;
 	}
 
-	// Determine start and end indices based on the Index property (1-based to 0-based)
-	int startIndex = Math::Min(cs1->Index, cs2->Index) - 1;
-	int endIndex = Math::Max(cs1->Index, cs2->Index) - 1;
+	// Find indices of cs1 and cs2 in filteredListOfCandlesticks
+	int index1 = filteredListOfCandlesticks->IndexOf(cs1);
+	int index2 = filteredListOfCandlesticks->IndexOf(cs2);
 
-	// Ensure indices are within the bounds of the filteredListOfCandlesticks
-	if (startIndex < 0 || endIndex >= filteredListOfCandlesticks->Count || startIndex > endIndex) {
-		// Optionally, display an error message or handle accordingly
-		return 0.0;
+	// Validate that both candlesticks are in the list
+	if (index1 == -1 || index2 == -1) {
+		MessageBox::Show("One or both selected candlesticks are not in the filtered list.", "Error");
+		return;
 	}
 
-	// Iterate through each candlestick in the selection range
+	// Determine the start and end indices
+	int startIndex = Math::Min(index1, index2);
+	int endIndex = Math::Max(index1, index2);
+
+	// Extract the subset of candlesticks between cs1 and cs2 (inclusive)
+	Generic::List<aSmartCandlestick^>^ subsetCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
 	for (int i = startIndex; i <= endIndex; i++) {
-		aSmartCandlestick^ currentCandlestick = filteredListOfCandlesticks[i];
-
-		// Calculate beauty score for the current candlestick
-		double beautyScore = calculateBeautyOfACandlestick(currentCandlestick, cs1, cs2, &message);
-
-		// Accumulate the beauty scores
-		totalBeauty += beautyScore;
-		count++;
-		message += "Index: " + currentCandlestick->Index.ToString() + ", Beauty Score: " + beautyScore.ToString() + "\n\n\n";
+		subsetCandlesticks->Add(filteredListOfCandlesticks[i]);
 	}
 
-	// Calculate and return the average beauty score
-	if (count == 0) {
-		return 0.0;
+	// Determine if the wave is rising or falling based on the first and last candlesticks in the subset
+	bool isRising = subsetCandlesticks[endIndex - startIndex]->High > subsetCandlesticks[0]->High;
+
+	// Determine the base high and low within the subset
+	double baseHigh = 0.0;
+	double baseLow = 0.0;
+
+	if (isRising) {
+		baseHigh = Math::Max((double)subsetCandlesticks[0]->High, (double)subsetCandlesticks[subsetCandlesticks->Count - 1]->High);
+		baseLow = Math::Min((double)subsetCandlesticks[0]->Low, (double)subsetCandlesticks[subsetCandlesticks->Count - 1]->Low);
+	}
+	else {
+		baseHigh = Math::Max((double)subsetCandlesticks[0]->High, (double)subsetCandlesticks[subsetCandlesticks->Count - 1]->High);
+		baseLow = Math::Min((double)subsetCandlesticks[0]->Low, (double)subsetCandlesticks[subsetCandlesticks->Count - 1]->Low);
 	}
 
-	double averageBeauty = totalBeauty / count;
-	message += "Average Beauty Score: " + averageBeauty.ToString();
-	MessageBox::Show(message);
-	return averageBeauty; // Ranges from 0.0 to 4.0
+	double baseRange = baseHigh - baseLow;
+
+	if (baseRange == 0) {
+		MessageBox::Show("Selected wave has zero range. Cannot calculate theoretical beauty scores.", "Error");
+		return;
+	}
+
+	// Define increments (e.g., 0%, 5%, ..., maxIncrementPercentage)
+	int totalIncrements = static_cast<int>(maxIncrementPercentage / incrementStep) + 1;
+	array<double>^ incrementPercentages = gcnew array<double>(totalIncrements);
+	array<double>^ adjustedLevels = gcnew array<double>(totalIncrements);
+	array<double>^ beautyScores = gcnew array<double>(totalIncrements);
+
+	for (int i = 0; i < totalIncrements; i++) {
+		incrementPercentages[i] = i * incrementStep; // 0%, 5%, ..., maxIncrementPercentage
+		if (isRising) {
+			// For rising waves, increase the high
+			adjustedLevels[i] = baseHigh * (1.0 + (incrementPercentages[i] / 100.0));
+		}
+		else {
+			// For falling waves, decrease the low
+			adjustedLevels[i] = baseLow * (1.0 - (incrementPercentages[i] / 100.0));
+		}
+	}
+
+	// Iterate through each increment to calculate beauty scores
+	for (int i = 0; i < totalIncrements; i++) {
+		double adjustedValue = adjustedLevels[i];
+
+		// Define new high and low based on the increment
+		double newHigh = isRising ? adjustedValue : baseHigh;
+		double newLow = isRising ? baseLow : adjustedValue;
+		double newRange = newHigh - newLow;
+
+		// Define Fibonacci levels (0% to 100%)
+		array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.0, 68.0, 50.0, 32.0, 24.0, 0.0 };
+		array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+		for (int j = 0; j < fibonacciPercentages->Length; j++) {
+			fibonacciLevels[j] = newLow + newRange * (fibonacciPercentages[j] / 100.0);
+		}
+
+		// Define allowance (1.5% of the new range)
+		double allowance = newRange * 0.015;
+
+		// Iterate through each candlestick in the subset
+		for each (aSmartCandlestick ^ candlestick in subsetCandlesticks) {
+			// Calculate beauty score for the candlestick using the helper method
+			beautyScores[i] += CalculateBeautyForACandlestick(candlestick, fibonacciLevels, allowance);
+		}
+	}
+
+	//// Plot the beauty scores on the chart_beautyScores
+	//chart_beautyScores->Series["Series_Beauty"]->Points->Clear();
+	//for (int i = 0; i < totalIncrements; i++) {
+	//	System::String^ label = incrementPercentages[i].ToString() + "%";
+	//	chart_beautyScores->Series["Series_Beauty"]->Points->AddXY(label, beautyScores[i]);
+	//}
+
+	//// Customize the beauty scores chart
+	//chart_beautyScores->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Wave Height Increments (%)";
+	//chart_beautyScores->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score";
+	//chart_beautyScores->ChartAreas["ChartArea_Beauty"]->AxisX->Interval = static_cast<double>(incrementStep);
+	//chart_beautyScores->Series["Series_Beauty"]->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Line;
+	//chart_beautyScores->Series["Series_Beauty"]->Color = System::Drawing::Color::Blue;
+	//chart_beautyScores->Series["Series_Beauty"]->BorderWidth = 2;
+	//chart_beautyScores->Series["Series_Beauty"]->MarkerStyle = System::Windows::Forms::DataVisualization::Charting::MarkerStyle::Circle;
+	//chart_beautyScores->Series["Series_Beauty"]->MarkerSize = 6;
+	//chart_beautyScores->Series["Series_Beauty"]->MarkerColor = System::Drawing::Color::Red;
+
+	// Display results in a message box
+	System::Text::StringBuilder^ resultBuilder = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n");
+	for (int i = 0; i < totalIncrements; i++) {
+		resultBuilder->AppendFormat("{0}%: {1}\n", incrementPercentages[i], beautyScores[i]);
+	}
+	MessageBox::Show(resultBuilder->ToString(), "Theoretical Beauty Scores");
 }
 
 private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
@@ -1679,7 +1721,7 @@ private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick
 	drawFibonacciLevels(cs1, cs2);
 
 	// Calculate and display the average beauty score
-	double averageBeauty = calculateOverallBeauty(cs1, cs2);
+	calculateTheoreticalBeauty(cs1, cs2, 20, 1);
 }
 };
 }
