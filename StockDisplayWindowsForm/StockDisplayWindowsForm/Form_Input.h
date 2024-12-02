@@ -1748,7 +1748,11 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
 	double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
+	if (isRising) {
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
+	} else {
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum = theoreticalPrice; // Adjust based on your data
+	}
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
 
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
