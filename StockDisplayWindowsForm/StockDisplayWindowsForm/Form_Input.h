@@ -813,9 +813,19 @@ private: System::Void button_update_Click(System::Object^ sender, System::EventA
 /// </summary>
 /// <returns>void</returns>
 private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, System::EventArgs^ e) {
-	// Clear previous annotations
-	chart_stockData->Annotations->Clear();
+	// Create list to store prior pattern annotations
+	List<DataVisualization::Charting::Annotation^>^ annotationsToRemove = gcnew List<DataVisualization::Charting::Annotation^>();
 
+	// Find pattern annotations
+	for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
+		if (annotation->Name->StartsWith("Pattern_")) {
+			annotationsToRemove->Add(annotation);
+		}
+	}
+	// Remove prior pattern annotations
+	for each (DataVisualization::Charting::Annotation ^ annotation in annotationsToRemove) {
+		chart_stockData->Annotations->Remove(annotation);
+	}
 	// Regenerate annotations for peaks and valleys
 	if (checkBox_showPeaksAndValleys->Checked) {
 		outlinePeaksAndValleys();
@@ -901,6 +911,8 @@ private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, 
 			if (matchesPattern) {
 				// Create arrow annotation
 				auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+				// Set annotation name
+				arrowAnnotation->Name = "Pattern_" + selectedPattern + "_" + i.ToString();
 				// Set annotation colors
 				arrowAnnotation->BackColor = System::Drawing::Color::DarkBlue;
 				arrowAnnotation->LineColor = System::Drawing::Color::Transparent;
@@ -934,6 +946,8 @@ private: System::Void showAnnotationsForSelectedPattern(System::Object^ sender, 
 
 		// Create text annotation
 		auto textAnnotation = gcnew DataVisualization::Charting::TextAnnotation();
+		// Set annotation name
+		textAnnotation->Name = "Pattern_Text_" + key.ToString();
 		// Set anchor data point
 		textAnnotation->AnchorDataPoint = chart_stockData->Series["Series_OHLC"]->Points[key];
 		// Set annotation position to bottom of candlestick
@@ -966,6 +980,7 @@ private: System::Void outlinePeaksAndValleys() {
 		// If current candlestick is a peak
 			// Create and configure a green annotation for peak
 			auto peakAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			peakAnnotation->Name = "Pattern_PeakArrow_" + i.ToString();
 			peakAnnotation->BackColor = System::Drawing::Color::Green;
 			peakAnnotation->LineColor = System::Drawing::Color::Green;
 			peakAnnotation->Width = 2;
@@ -979,6 +994,7 @@ private: System::Void outlinePeaksAndValleys() {
 
 			// Add a green horizontal line across the chart at the peak's high price
 			auto peakLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+			peakLine->Name = "Pattern_PeakLine_" + i.ToString();
 			peakLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 			peakLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
 			peakLine->IsInfinitive = false;
@@ -996,6 +1012,7 @@ private: System::Void outlinePeaksAndValleys() {
 		// If current candlestick is a valley
 			// Create and configure a red annotation for valley
 			auto valleyAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			valleyAnnotation->Name = "Pattern_ValleyArrow_" + i.ToString();
 			valleyAnnotation->BackColor = System::Drawing::Color::Red;
 			valleyAnnotation->LineColor = System::Drawing::Color::Red;
 			valleyAnnotation->Width = 2;
@@ -1009,6 +1026,7 @@ private: System::Void outlinePeaksAndValleys() {
 
 			// Add a red horizontal line across the chart at the valley's low price
 			auto valleyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+			valleyLine->Name = "Pattern_ValleyLine_" + i.ToString();
 			valleyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 			valleyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
 			valleyLine->IsInfinitive = false;
@@ -1300,8 +1318,8 @@ private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSma
 			selectedDataPointEnd = snappedEndPoint;
 
 			if (isValidWave(snappedStart, snappedEnd)) {
-				// Draw rectangle between the snapped candlesticks
-				drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
+				// Run the onValidSelection method
+				onValidSelection(snappedStart, snappedEnd);
 			}
 			else {
 
@@ -1437,6 +1455,231 @@ private: DataVisualization::Charting::RectangleAnnotation^ drawRectangleBetweenC
 
 private: System::Void checkBox_showPeaksAndValleys_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 	showAnnotationsForSelectedPattern(nullptr, nullptr);
+}
+
+private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+	// Validate input
+	if (cs1 == nullptr || cs2 == nullptr) {
+		MessageBox::Show("Invalid candlesticks for drawing Fibonacci levels.", "Error");
+		return;
+	}
+
+	// Determine which candlestick has the higher high and which has the lower low
+	double high = Math::Max((double)cs1->High, (double)cs2->High);
+	double low = Math::Min((double)cs1->Low, (double)cs2->Low);
+
+	// Define Fibonacci levels
+	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.0, 68.0, 50.0, 32.0, 24.0, 0.0 };
+
+	// Define colors for each level for better distinction
+	array<System::Drawing::Color>^ levelColors = gcnew array<System::Drawing::Color> {
+		System::Drawing::Color::Red,        // 100%
+			System::Drawing::Color::Orange,     // 76%
+			System::Drawing::Color::Yellow,     // 68%
+			System::Drawing::Color::Green,      // 50%
+			System::Drawing::Color::Blue,       // 32%
+			System::Drawing::Color::Purple,     // 24%
+			System::Drawing::Color::Gray        // 0%
+	};
+
+	// Remove existing Fibonacci annotations to prevent duplication
+	List<DataVisualization::Charting::Annotation^>^ annotationsToRemove = gcnew List<DataVisualization::Charting::Annotation^>();
+
+	for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
+		if (annotation->Name->StartsWith("FibLevel_") || annotation->Name->StartsWith("FibLabel_")) {
+			annotationsToRemove->Add(annotation);
+		}
+	}
+
+	for each (DataVisualization::Charting::Annotation ^ annotation in annotationsToRemove) {
+		chart_stockData->Annotations->Remove(annotation);
+	}
+
+	// Determine the x-axis range based on the selected wave
+	int startIndex = Math::Min(cs1->Index, cs2->Index);
+	int endIndex = Math::Max(cs1->Index, cs2->Index);
+
+	// Calculate the y-values for each Fibonacci level
+	array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+	for (int i = 0; i < fibonacciPercentages->Length; i++) {
+		fibonacciLevels[i] = low + (high - low) * (fibonacciPercentages[i] / 100.0);
+	}
+
+	// Draw each Fibonacci level
+	for (int i = 0; i < fibonacciLevels->Length; i++) {
+		double levelValue = fibonacciLevels[i];
+		double percentage = fibonacciPercentages[i];
+		System::String^ levelName = "FibLevel_" + percentage.ToString() + "%";
+		System::String^ labelName = "FibLabel_" + percentage.ToString() + "%";
+
+		// Create HorizontalLineAnnotation
+		DataVisualization::Charting::HorizontalLineAnnotation^ fibLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+		fibLine->Name = "FibLevel_" + percentage.ToString() + "%";
+		fibLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		fibLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		fibLine->Y = levelValue;
+		fibLine->LineColor = levelColors[i];
+		fibLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+		fibLine->LineWidth = 2;
+		fibLine->ClipToChartArea = "ChartArea_OHLC";
+		fibLine->IsInfinitive = false;
+		fibLine->IsSizeAlwaysRelative = false;
+		fibLine->X = startIndex; // Slight offset for better visibility
+		fibLine->Width = endIndex - startIndex; // Span the wave
+
+		// Add the Fibonacci line to the chart
+		chart_stockData->Annotations->Add(fibLine);
+
+		// Create TextAnnotation for the label
+		DataVisualization::Charting::TextAnnotation^ fibLabel = gcnew DataVisualization::Charting::TextAnnotation();
+		fibLabel->Name = "FibLabel_" + percentage.ToString() + "%";
+		fibLabel->Name = labelName;
+		fibLabel->Text = percentage.ToString() + "%";
+		fibLabel->ForeColor = levelColors[i];
+		fibLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
+		fibLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		fibLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		fibLabel->Y = levelValue;
+		fibLabel->AnchorX = startIndex; // Align with the start of the wave
+		// Set to be aligned to left of point
+		fibLabel->Alignment = Drawing::ContentAlignment::TopCenter;
+		fibLabel->IsSizeAlwaysRelative = false;
+		fibLabel->ToolTip = "Fibonacci Level";
+
+		// Add the label to the chart
+		chart_stockData->Annotations->Add(fibLabel);
+	}
+}
+
+private: double calculateBeautyOfACandlestick(aSmartCandlestick^ target, aSmartCandlestick^ cs1, aSmartCandlestick^ cs2, String^ *message) {
+	// Initialize beauty score
+	double beauty = 0.0;
+
+	// Validate input candlesticks
+	if (target == nullptr || cs1 == nullptr || cs2 == nullptr) {
+		// Optionally, you can throw an exception or handle the error as needed
+		return beauty;
+	}
+
+	// Determine the highest high and lowest low between cs1 and cs2
+	double high = Math::Max((double)cs1->High, (double)cs2->High);
+	double low = Math::Min((double)cs1->Low, (double)cs2->Low);
+
+	// Handle the edge case where high equals low to avoid division by zero
+	if (high == low) {
+		// All Fibonacci levels collapse to a single point; beauty can be 0 or 4 based on exact match
+		// Here, we'll set beauty to 0 as no meaningful levels can be derived
+		return beauty;
+	}
+
+	// Define Fibonacci percentage levels
+	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.0, 68.0, 50.0, 32.0, 24.0, 0.0 };
+
+	// Calculate Fibonacci levels based on high and low
+	*message += "Fibonacci levels:\n";
+	array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+	for (int i = 0; i < fibonacciPercentages->Length; i++) {
+		fibonacciLevels[i] = low + (high - low) * (fibonacciPercentages[i] / 100.0);
+		*message += fibonacciPercentages[i].ToString() + "%: " + fibonacciLevels[i].ToString() + "\n";
+	}
+	*message +=  "\n\n";
+
+	// Define the allowance percentage (1.5%)
+	const double ALLOWANCE_PERCENTAGE = 0.015;
+	const double allowance = (high - low) * ALLOWANCE_PERCENTAGE;
+	*message += "Allowance: " + allowance.ToString() + "\n\n";
+
+	// Array of candlestick attributes to evaluate
+	array<double>^ candlestickAttributes = gcnew array<double> {
+		(double)target->Open,
+		(double)target->High,
+		(double)target->Low,
+		(double)target->Close
+	};
+
+	// Iterate over each attribute and check against all Fibonacci levels
+	for (int attrIndex = 0; attrIndex < candlestickAttributes->Length; attrIndex++) {
+		double attributeValue = candlestickAttributes[attrIndex];
+		*message += "Attribute: " + candlestickAttributes[attrIndex].ToString() + "\n";
+
+		// Iterate through each Fibonacci level to check for a match
+		for (int levelIndex = 0; levelIndex < fibonacciLevels->Length; levelIndex++) {
+			double levelValue = fibonacciLevels[levelIndex];
+
+			// Calculate the absolute difference
+			double difference = Math::Abs(attributeValue - levelValue);
+
+			//*message += "Attribute: " + candlestickAttributes[attrIndex].ToString() + ", Level: " + fibonacciLevels[levelIndex].ToString() + "\n";
+
+			// Check if the attribute is within the allowance of the Fibonacci level
+			if (difference <= allowance) {
+				*message += "Matches " + fibonacciLevels[levelIndex].ToString() + "! with difference: " + difference.ToString() + "\n";
+				beauty += 1.0;
+				break; // Move to the next attribute after a successful match
+			}
+
+		}
+		*message += "-------------------------------------------------\n";
+	}
+
+	return beauty; // Beauty score ranges from 0.0 to 4.0
+}
+
+private: double calculateOverallBeauty(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+	// Initialize variables to accumulate beauty scores and count
+	double totalBeauty = 0.0;
+	int count = 0;
+	String^ message = "Beauty Calculation: \n";
+
+	// Validate input candlesticks
+	if (cs1 == nullptr || cs2 == nullptr) {
+		// Optionally, display an error message or handle accordingly
+		return 0.0;
+	}
+
+	// Determine start and end indices based on the Index property (1-based to 0-based)
+	int startIndex = Math::Min(cs1->Index, cs2->Index) - 1;
+	int endIndex = Math::Max(cs1->Index, cs2->Index) - 1;
+
+	// Ensure indices are within the bounds of the filteredListOfCandlesticks
+	if (startIndex < 0 || endIndex >= filteredListOfCandlesticks->Count || startIndex > endIndex) {
+		// Optionally, display an error message or handle accordingly
+		return 0.0;
+	}
+
+	// Iterate through each candlestick in the selection range
+	for (int i = startIndex; i <= endIndex; i++) {
+		aSmartCandlestick^ currentCandlestick = filteredListOfCandlesticks[i];
+
+		// Calculate beauty score for the current candlestick
+		double beautyScore = calculateBeautyOfACandlestick(currentCandlestick, cs1, cs2, &message);
+
+		// Accumulate the beauty scores
+		totalBeauty += beautyScore;
+		count++;
+		message += "Index: " + currentCandlestick->Index.ToString() + ", Beauty Score: " + beautyScore.ToString() + "\n\n\n";
+	}
+
+	// Calculate and return the average beauty score
+	if (count == 0) {
+		return 0.0;
+	}
+
+	double averageBeauty = totalBeauty / count;
+	message += "Average Beauty Score: " + averageBeauty.ToString();
+	MessageBox::Show(message);
+	return averageBeauty; // Ranges from 0.0 to 4.0
+}
+
+private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+	// Draw rectangle between the snapped candlesticks
+	drawRectangleBetweenCandlesticks(cs1, cs2);
+
+	// Draw Fibonacci levels between the snapped candlesticks
+	drawFibonacciLevels(cs1, cs2);
+
+	// Calculate and display the average beauty score
+	double averageBeauty = calculateOverallBeauty(cs1, cs2);
 }
 };
 }
