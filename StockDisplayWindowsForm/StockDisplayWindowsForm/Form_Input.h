@@ -1837,7 +1837,7 @@ private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick
 	drawFibonacciLevels(cs1, cs2);
 
 	// Calculate and display the average beauty score
-	calculateTheoreticalBeauties(cs1, cs2, 20, 2);
+	calculateTheoreticalBeauties(cs1, cs2, 25, 1);
 }
 };
 }
