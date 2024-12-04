@@ -505,6 +505,10 @@ namespace CppCLRWinFormsProject {
 	/// </summary>
 	/// <returns>void</returns>
 	private: System::Void getAndDisplayStockData() {
+		// Remove existing Fibonacci and MaxBeauty annotations before loading new data
+		removeFibonacciAndMaxBeautyAnnotations();
+		// Reset any previous selections
+		resetWaveSelections();
 		// Load candlesticks from the selected file
 		readCandlesticksFromFile();
 		// Filter candlesticks
@@ -1114,39 +1118,97 @@ private: aSmartCandlestick^ findCandlestickByXValue(double xValue) {
 }
 
 private: System::Void resetWaveSelections() {
-    if (selectedDataPointStart != nullptr) {
-        highlightDataPoint(selectedDataPointStart, false);
-    }
-    if (selectedDataPointEnd != nullptr) {
-        highlightDataPoint(selectedDataPointEnd, false);
-    }
+	if (selectedDataPointStart != nullptr) {
+		highlightDataPoint(selectedDataPointStart, false); // Remove arrow
+	}
+	if (selectedDataPointEnd != nullptr) {
+		highlightDataPoint(selectedDataPointEnd, false); // Remove arrow
+	}
 
-    // Remove the current rectangle annotation if it exists
-    if (currentWaveRectangle != nullptr) {
-        chart_stockData->Annotations->Remove(currentWaveRectangle);
-        currentWaveRectangle = nullptr;
-    }
+	// Remove the current rectangle annotation if it exists
+	if (currentWaveRectangle != nullptr) {
+		chart_stockData->Annotations->Remove(currentWaveRectangle);
+		currentWaveRectangle = nullptr;
+	}
 
-    selectedCandlestickStart = nullptr;
-    selectedCandlestickEnd = nullptr;
-    selectedDataPointStart = nullptr;
-    selectedDataPointEnd = nullptr;
+	selectedCandlestickStart = nullptr;
+	selectedCandlestickEnd = nullptr;
+	selectedDataPointStart = nullptr;
+	selectedDataPointEnd = nullptr;
+
+	// Clear beauty chart
+	chart_stockData->Series["Series_Beauty"]->Points->Clear();
 }
+
 
 private: System::Void highlightDataPoint(DataVisualization::Charting::DataPoint^ dp, bool isSelected) {
+	if (dp == nullptr) return;
+
+	// Generate a unique annotation name based on the data point index
+	int pointIndex = dp->XValue;
+	String^ annotationName = "SelectionArrow_" + pointIndex.ToString();
+
 	if (isSelected) {
-		dp->MarkerStyle = DataVisualization::Charting::MarkerStyle::Circle;
-		dp->MarkerSize = 10;
-		dp->MarkerColor = System::Drawing::Color::Yellow;
-		dp->BorderWidth = 2;
-		dp->BorderColor = System::Drawing::Color::Black;
+		// Check if the annotation already exists to avoid duplicates
+		bool exists = false;
+		for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+			if (ann->Name == annotationName) {
+				exists = true;
+				break;
+			}
+		}
+
+		if (!exists) {
+			// Create and configure the arrow annotation
+			auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+			arrowAnnotation->Name = annotationName;
+			arrowAnnotation->BackColor = System::Drawing::Color::Yellow;
+			arrowAnnotation->LineColor = System::Drawing::Color::Black;
+			arrowAnnotation->Width = 0; // No width for a vertical arrow
+			arrowAnnotation->Height = -5; // Adjust the height as needed
+			arrowAnnotation->AnchorDataPoint = dp;
+			arrowAnnotation->Y = dp->YValues[0] + (dp->YValues[1] - dp->YValues[0]) * 0.05; // Position above the data point
+
+			// Optionally, add a label to the arrow
+			auto labelAnnotation = gcnew DataVisualization::Charting::TextAnnotation();
+			labelAnnotation->Name = "SelectionLabel_" + pointIndex.ToString();
+			labelAnnotation->Text = "Selected";
+			labelAnnotation->ForeColor = System::Drawing::Color::Black;
+			labelAnnotation->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
+			labelAnnotation->AnchorDataPoint = dp;
+			labelAnnotation->Y = arrowAnnotation->Y + 0.02; // Slightly above the arrow
+			labelAnnotation->X = dp->XValue;
+			labelAnnotation->Alignment = Drawing::ContentAlignment::MiddleCenter;
+
+			// Add the annotations to the chart
+			chart_stockData->Annotations->Add(arrowAnnotation);
+			chart_stockData->Annotations->Add(labelAnnotation);
+		}
 	}
 	else {
-		dp->MarkerStyle = DataVisualization::Charting::MarkerStyle::None;
-		dp->BorderWidth = 1;
-		dp->BorderColor = System::Drawing::Color::Transparent;
+		// Remove the arrow annotation if it exists
+		DataVisualization::Charting::Annotation^ annotationToRemove = nullptr;
+		DataVisualization::Charting::Annotation^ labelToRemove = nullptr;
+
+		for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+			if (ann->Name == annotationName) {
+				annotationToRemove = ann;
+			}
+			else if (ann->Name == "SelectionLabel_" + pointIndex.ToString()) {
+				labelToRemove = ann;
+			}
+		}
+
+		if (annotationToRemove != nullptr) {
+			chart_stockData->Annotations->Remove(annotationToRemove);
+		}
+
+		if (labelToRemove != nullptr) {
+			chart_stockData->Annotations->Remove(labelToRemove);
+		}
 	}
 }
+
 
 private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mouseX)
 {
@@ -1169,7 +1231,7 @@ private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mou
 
 		if (distance <= threshold)
 		{
-			return chart_stockData->Series["Series_OHLC"]->Points[index-1];
+			return chart_stockData->Series["Series_OHLC"]->Points[index - 1];
 		}
 	}
 
@@ -1178,8 +1240,12 @@ private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mou
 }
 
 
+
 private: System::Void chart_stockData_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
 	if (e->Button == System::Windows::Forms::MouseButtons::Left) {
+		// Remove existing Fibonacci and MaxBeauty annotations
+		removeFibonacciAndMaxBeautyAnnotations();
+
 		// Reset any previous selections
 		resetWaveSelections();
 
@@ -1192,16 +1258,17 @@ private: System::Void chart_stockData_MouseDown(System::Object^ sender, System::
 		if (startPoint != nullptr) {
 			selectedCandlestickStart = findCandlestickByXValue(startPoint->XValue);
 			selectedDataPointStart = startPoint;
-			highlightDataPoint(selectedDataPointStart, true);
+			highlightDataPoint(selectedDataPointStart, true); // Add arrow
 		}
 
 		// Unhighlight any existing drag DataPoint
 		if (currentDragDataPoint != nullptr) {
-			highlightDataPoint(currentDragDataPoint, false);
+			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
 			currentDragDataPoint = nullptr;
 		}
 	}
 }
+
 
 private: System::Void chart_stockData_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
 	if (isDragging) {
@@ -1219,22 +1286,23 @@ private: System::Void chart_stockData_MouseMove(System::Object^ sender, System::
 		DataVisualization::Charting::DataPoint^ currentPoint = GetDataPointByXPosition(e->X);
 
 		if (currentPoint != currentDragDataPoint && currentPoint != nullptr) {
-			// Unhighlight the previous DataPoint if it exists
+			// Unhighlight the previous DataPoint
 			if (currentDragDataPoint != nullptr) {
-				highlightDataPoint(currentDragDataPoint, false);
+				highlightDataPoint(currentDragDataPoint, false); // Remove arrow
 			}
 
 			// Highlight the new DataPoint
-			highlightDataPoint(currentPoint, true);
+			highlightDataPoint(currentPoint, true); // Add arrow
 			currentDragDataPoint = currentPoint;
 		}
 		else if (currentPoint == nullptr && currentDragDataPoint != nullptr) {
 			// If not hovering over a DataPoint, remove any existing highlight
-			highlightDataPoint(currentDragDataPoint, false);
+			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
 			currentDragDataPoint = nullptr;
 		}
 	}
 }
+
 
 private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
 	if (isDragging) {
@@ -1243,9 +1311,9 @@ private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Wi
 		// Redraw the chart to remove the selection rectangle
 		chart_stockData->Invalidate();
 
-		// Unhighlight the current drag DataPoint, if any
+		// Remove any existing drag DataPoint arrow
 		if (currentDragDataPoint != nullptr) {
-			highlightDataPoint(currentDragDataPoint, false);
+			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
 			currentDragDataPoint = nullptr;
 		}
 
@@ -1254,13 +1322,14 @@ private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Wi
 		if (endPoint != nullptr) {
 			selectedCandlestickEnd = findCandlestickByXValue(endPoint->XValue);
 			selectedDataPointEnd = endPoint;
-			highlightDataPoint(selectedDataPointEnd, true);
+			highlightDataPoint(selectedDataPointEnd, true); // Add arrow
 
 			// Perform actions with the selected candlesticks
 			onTwoCandlesticksSelected(selectedCandlestickStart, selectedCandlestickEnd);
 		}
 	}
 }
+
 
 private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
 	if (csStart != nullptr && csEnd != nullptr) {
@@ -1521,6 +1590,29 @@ private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlest
 	}
 }
 
+private: void removeFibonacciAndMaxBeautyAnnotations() {
+	// Create a list to hold annotations to remove
+	System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ annotationsToRemove =
+		gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
+
+	// Iterate through existing annotations and identify those to remove
+	for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+		if (ann->Name->StartsWith("FibLevel_") ||
+			ann->Name->StartsWith("FibLabel_") ||
+			ann->Name->StartsWith("MaxBeautyLine") ||
+			ann->Name->StartsWith("MaxBeautyLabel"))
+		{
+			annotationsToRemove->Add(ann);
+		}
+	}
+
+	// Remove the identified annotations from the chart
+	for each (DataVisualization::Charting::Annotation ^ ann in annotationsToRemove) {
+		chart_stockData->Annotations->Remove(ann);
+	}
+}
+
+
 /// <summary>
 /// Calculates the beauty score for a single candlestick based on Fibonacci levels and allowance.
 /// </summary>
@@ -1716,7 +1808,6 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->Series["Series_Beauty"]->Points->Clear();
 	for (int i = 0; i < totalIncrements; i++) {
 		double price = adjustedLevels[i];
-		double price = adjustedLevels[i];
 		double beauty = beautyScores[i];
 
 		// For Column chart, set X-value as category (Price) and Y-value as Beauty Score
@@ -1729,15 +1820,8 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
 	double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
-	if (isRising) {
-		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
-	}
-	else {
-		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum = theoreticalPrice; // Adjust based on your data
-	}
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Interval = incrementStep; // Optional
 
 	// Find the maximum beauty score and its corresponding price level
@@ -1800,7 +1884,7 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->Invalidate();
 
 	// Display detailed results in a message box
-	MessageBox::Show(detailedInfo->ToString(), "Theoretical Beauty Scores");
+	//MessageBox::Show(detailedInfo->ToString(), "Theoretical Beauty Scores");
 }
 
 
