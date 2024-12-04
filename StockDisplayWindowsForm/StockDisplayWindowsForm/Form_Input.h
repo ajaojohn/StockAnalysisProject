@@ -230,7 +230,6 @@ namespace CppCLRWinFormsProject {
 			chartArea1->AxisY->Title = L"Price";
 			chartArea1->Name = L"ChartArea_OHLC";
 			chartArea2->Name = L"ChartArea_Beauty";
-			chartArea2->Visible = false;
 			this->chart_stockData->ChartAreas->Add(chartArea1);
 			this->chart_stockData->ChartAreas->Add(chartArea2);
 			legend1->Enabled = false;
@@ -248,7 +247,7 @@ namespace CppCLRWinFormsProject {
 			series1->YValuesPerPoint = 4;
 			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
 			series2->ChartArea = L"ChartArea_Beauty";
-			series2->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Bar;
+			series2->IsValueShownAsLabel = true;
 			series2->Legend = L"Legend1";
 			series2->Name = L"Series_Beauty";
 			this->chart_stockData->Series->Add(series1);
@@ -1519,25 +1518,6 @@ private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlest
 
 		// Add the Fibonacci line to the chart
 		chart_stockData->Annotations->Add(fibLine);
-
-		// Create TextAnnotation for the label
-		DataVisualization::Charting::TextAnnotation^ fibLabel = gcnew DataVisualization::Charting::TextAnnotation();
-		fibLabel->Name = "FibLabel_" + percentage.ToString() + "%";
-		fibLabel->Name = labelName;
-		fibLabel->Text = percentage.ToString() + "%";
-		fibLabel->ForeColor = levelColors[i];
-		fibLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
-		fibLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-		fibLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-		fibLabel->Y = levelValue;
-		fibLabel->AnchorX = startIndex; // Align with the start of the wave
-		// Set to be aligned to left of point
-		fibLabel->Alignment = Drawing::ContentAlignment::TopCenter;
-		fibLabel->IsSizeAlwaysRelative = false;
-		fibLabel->ToolTip = "Fibonacci Level";
-
-		// Add the label to the chart
-		chart_stockData->Annotations->Add(fibLabel);
 	}
 }
 
@@ -1736,11 +1716,12 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->Series["Series_Beauty"]->Points->Clear();
 	for (int i = 0; i < totalIncrements; i++) {
 		double price = adjustedLevels[i];
+		double price = adjustedLevels[i];
 		double beauty = beautyScores[i];
 
-		// For Bar chart, set Y-value as Price and X-value as Beauty Score
+		// For Column chart, set X-value as category (Price) and Y-value as Beauty Score
 		System::Windows::Forms::DataVisualization::Charting::DataPoint^ dp = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
-		dp->SetValueXY(price, beauty); // X=Beauty Score, Y=Price
+		dp->SetValueXY(price, beauty); // X=Price, Y=Beauty Score
 		chart_stockData->Series["Series_Beauty"]->Points->Add(dp);
 	}
 
@@ -1750,20 +1731,14 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
 	if (isRising) {
 		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
-	} else {
+	}
+	else {
 		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum = theoreticalPrice; // Adjust based on your data
 	}
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
-
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Interval = incrementStep; // Optional
-
-	chart_stockData->Series["Series_Beauty"]->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Bar;
-	chart_stockData->Series["Series_Beauty"]->Color = System::Drawing::Color::Blue;
-	chart_stockData->Series["Series_Beauty"]->BorderWidth = 2;
-	chart_stockData->Series["Series_Beauty"]->IsValueShownAsLabel = true; // Show values on bars
-
 
 	// Find the maximum beauty score and its corresponding price level
 	double maxBeauty = 0.0;
@@ -1807,7 +1782,7 @@ private: System::Void calculateTheoreticalBeauties(
 	auto maxBeautyLabel = gcnew DataVisualization::Charting::TextAnnotation();
 	maxBeautyLabel->Name = "MaxBeautyLabel";
 	maxBeautyLabel->Text = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
-	maxBeautyLabel->ForeColor = System::Drawing::Color::Red;
+	maxBeautyLabel->ForeColor = System::Drawing::Color::Black;
 	maxBeautyLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
 	maxBeautyLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 	maxBeautyLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
