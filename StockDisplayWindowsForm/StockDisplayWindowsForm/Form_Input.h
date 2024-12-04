@@ -155,6 +155,7 @@ namespace CppCLRWinFormsProject {
 			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
 			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -250,8 +251,17 @@ namespace CppCLRWinFormsProject {
 			series2->IsValueShownAsLabel = true;
 			series2->Legend = L"Legend1";
 			series2->Name = L"Series_Beauty";
+			series3->ChartArea = L"ChartArea_OHLC";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Point;
+			series3->IsVisibleInLegend = false;
+			series3->Legend = L"Legend1";
+			series3->MarkerColor = System::Drawing::Color::Magenta;
+			series3->MarkerSize = 10;
+			series3->MarkerStyle = System::Windows::Forms::DataVisualization::Charting::MarkerStyle::Circle;
+			series3->Name = L"Series_Circles";
 			this->chart_stockData->Series->Add(series1);
 			this->chart_stockData->Series->Add(series2);
+			this->chart_stockData->Series->Add(series3);
 			this->chart_stockData->Size = System::Drawing::Size(1004, 597);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
@@ -1527,7 +1537,7 @@ private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlest
 	double low = Math::Min((double)cs1->Low, (double)cs2->Low);
 
 	// Define Fibonacci levels
-	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.0, 68.0, 50.0, 32.0, 24.0, 0.0 };
+	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.4, 62.8, 50.0, 38.2, 23.6, 0.0 };
 
 	// Define colors for each level for better distinction
 	array<System::Drawing::Color>^ levelColors = gcnew array<System::Drawing::Color> {
@@ -1600,7 +1610,8 @@ private: void removeFibonacciAndMaxBeautyAnnotations() {
 		if (ann->Name->StartsWith("FibLevel_") ||
 			ann->Name->StartsWith("FibLabel_") ||
 			ann->Name->StartsWith("MaxBeautyLine") ||
-			ann->Name->StartsWith("MaxBeautyLabel"))
+			ann->Name->StartsWith("MaxBeautyLabel") ||
+			ann->Name->StartsWith("Circle_")) // Added condition to remove circle annotations
 		{
 			annotationsToRemove->Add(ann);
 		}
@@ -1610,6 +1621,35 @@ private: void removeFibonacciAndMaxBeautyAnnotations() {
 	for each (DataVisualization::Charting::Annotation ^ ann in annotationsToRemove) {
 		chart_stockData->Annotations->Remove(ann);
 	}
+}
+
+
+/// <summary>
+/// Adds a circle annotation to the chart at the specified X and Y coordinates.
+/// </summary>
+/// <param name="name">Unique name for the annotation.</param>
+/// <param name="xValue">The X-axis value (date) where the annotation will be placed.</param>
+/// <param name="yValue">The Y-axis value (price) where the annotation will be placed.</param>
+/// <param name="color">Color of the circle.</param>
+private: void addCircleAnnotation(String^ name, double xValue, double yValue, System::Drawing::Color color) {
+	// Create an EllipseAnnotation to represent the circle
+	auto circle = gcnew DataVisualization::Charting::RectangleAnnotation();
+	circle->Name = name;
+	circle->X = xValue - 0.05;
+	circle->Y = yValue * 0.997;
+	circle->Width = 0.1; // Adjust size as needed
+	circle->Height = 1; // Adjust size as needed
+	circle->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+	circle->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+	circle->LineColor = System::Drawing::Color::Black;
+	circle->LineWidth = 1;
+	circle->BackColor = System::Drawing::Color::Magenta;
+	circle->ClipToChartArea = "ChartArea_OHLC";
+	circle->IsSizeAlwaysRelative = false;
+	circle->Alignment = Drawing::ContentAlignment::BottomCenter;
+
+	// Add the circle annotation to the chart
+	chart_stockData->Annotations->Add(circle);
 }
 
 
@@ -1761,14 +1801,18 @@ private: System::Void calculateTheoreticalBeauties(
 		return;
 	}
 
-	// Define increments (e.g., 0%, 2%, ..., maxIncrementPercentage)
+	// Calculate allowance based on waveRange
+	double allowance = waveRange * 0.015;
+	detailedInfo->AppendFormat("Allowance: {0:F4}\n\n", allowance); // Increased precision for logging
+
+	// Define increments (e.g., 0%, 1%, ..., maxIncrementPercentage)
 	int totalIncrements = static_cast<int>(maxIncrementPercentage / incrementStep) + 1;
 	array<double>^ incrementPercentages = gcnew array<double>(totalIncrements);
 	array<double>^ adjustedLevels = gcnew array<double>(totalIncrements);
 	array<double>^ beautyScores = gcnew array<double>(totalIncrements);
 
 	for (int i = 0; i < totalIncrements; i++) {
-		incrementPercentages[i] = i * incrementStep; // 0%, 2%, ..., maxIncrementPercentage
+		incrementPercentages[i] = i * incrementStep; // 0%, 1%, ..., maxIncrementPercentage
 		if (isRising) {
 			// For rising waves, theoreticalPrice increases
 			adjustedLevels[i] = theoreticalPrice + (waveRange * (incrementPercentages[i] / 100.0));
@@ -1789,6 +1833,7 @@ private: System::Void calculateTheoreticalBeauties(
 		// Log the current theoretical price
 		detailedInfo->AppendFormat("Increment {0}% - Theoretical Price: {1:F2}\n", incrementPercentages[i], currentTheoreticalPrice);
 
+		auto subsetInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
 		// Calculate beauty score for each candlestick in the subset
 		for each (aSmartCandlestick ^ candlestick in subsetCandlesticks) {
 			double beauty = CalculateBeautyForACandlestick(
@@ -1796,12 +1841,58 @@ private: System::Void calculateTheoreticalBeauties(
 				secondCs,
 				candlestick,
 				currentTheoreticalPrice,
-				detailedInfo
+				subsetInfo
 			);
 			beautyScores[i] += beauty;
 		}
 
 		detailedInfo->AppendFormat("Total Beauty Score at {0:F2}: {1}\n\n", currentTheoreticalPrice, beautyScores[i]);
+
+		// **Add Circle Annotations at Increment 0%**
+		if (i == 0) {
+			// Define Fibonacci levels based on the wave direction
+			array<double>^ fibonacciPercentages = gcnew array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
+			array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+			for (int j = 0; j < fibonacciPercentages->Length; j++) {
+				fibonacciLevels[j] = firstCandlestickLevel + (theoreticalPrice - firstCandlestickLevel) * (fibonacciPercentages[j] / 100.0);
+			}
+
+			// Iterate through each candlestick to check for matches
+			for (int k = 0; k < subsetCandlesticks->Count; k++) {
+				aSmartCandlestick^ candlestick = subsetCandlesticks[k];
+				// Check each attribute: Open, High, Low, Close
+				array<double>^ attributes = gcnew array<double> {
+					static_cast<double>(candlestick->Open),
+						static_cast<double>(candlestick->High),
+						static_cast<double>(candlestick->Low),
+						static_cast<double>(candlestick->Close)
+				};
+				array<String^>^ attributeNames = gcnew array<String^> { "Open", "High", "Low", "Close" };
+
+				for (int attrIdx = 0; attrIdx < attributes->Length; attrIdx++) {
+					double attrValue = attributes[attrIdx];
+					String^ attrName = attributeNames[attrIdx];
+
+					for (int fibIdx = 0; fibIdx < fibonacciLevels->Length; fibIdx++) {
+						double fibLevel = fibonacciLevels[fibIdx];
+						// Updated matching condition using allowance
+						if (Math::Abs(attrValue - fibLevel) <= allowance) {
+							// Create a unique name for the circle annotation
+							String^ circleName = "Circle_" + attrName + "_" + k.ToString() + "_" + fibIdx.ToString();
+							// Add the circle annotation
+							addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Blue);
+							// Optionally, log this event
+							detailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
+								attrName,
+								attrValue,
+								k,
+								fibonacciPercentages[fibIdx],
+								fibLevel);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Plot the beauty scores on the Series_Beauty
@@ -1820,8 +1911,15 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
 	double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
+	if (isRising) {
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
+	}
+	else {
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum = theoreticalPrice; // Adjust based on your data
+	}
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
+	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Interval = incrementStep; // Optional
 
 	// Find the maximum beauty score and its corresponding price level
@@ -1884,8 +1982,10 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->Invalidate();
 
 	// Display detailed results in a message box
-	//MessageBox::Show(detailedInfo->ToString(), "Theoretical Beauty Scores");
+	MessageBox::Show(detailedInfo->ToString(), "Theoretical Beauty Scores");
 }
+
+
 
 
 private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
