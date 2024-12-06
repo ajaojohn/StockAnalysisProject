@@ -150,11 +150,11 @@ namespace CppCLRWinFormsProject {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea1 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea2 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
-			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea3 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::ChartArea^ chartArea4 = (gcnew System::Windows::Forms::DataVisualization::Charting::ChartArea());
+			System::Windows::Forms::DataVisualization::Charting::Legend^ legend2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
+			System::Windows::Forms::DataVisualization::Charting::Series^ series4 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -207,7 +207,7 @@ namespace CppCLRWinFormsProject {
 			this->dateTimePicker_start->Name = L"dateTimePicker_start";
 			this->dateTimePicker_start->Size = System::Drawing::Size(120, 22);
 			this->dateTimePicker_start->TabIndex = 2;
-			this->dateTimePicker_start->Value = System::DateTime(2024, 1, 1, 0, 0, 0, 0);
+			this->dateTimePicker_start->Value = System::DateTime(2022, 1, 1, 0, 0, 0, 0);
 			// 
 			// dateTimePicker_end
 			// 
@@ -224,34 +224,34 @@ namespace CppCLRWinFormsProject {
 			this->chart_stockData->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			chartArea1->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->LabelStyle->Format = L"F2";
-			chartArea1->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
-			chartArea1->AxisY->Title = L"Price";
-			chartArea1->Name = L"ChartArea_OHLC";
-			chartArea2->Name = L"ChartArea_Beauty";
-			this->chart_stockData->ChartAreas->Add(chartArea1);
-			this->chart_stockData->ChartAreas->Add(chartArea2);
-			legend1->Enabled = false;
-			legend1->Name = L"Legend1";
-			this->chart_stockData->Legends->Add(legend1);
+			chartArea3->AxisX->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->LabelStyle->Format = L"F2";
+			chartArea3->AxisY->MajorGrid->LineColor = System::Drawing::Color::LightGray;
+			chartArea3->AxisY->Title = L"Price";
+			chartArea3->Name = L"ChartArea_OHLC";
+			chartArea4->Name = L"ChartArea_Beauty";
+			this->chart_stockData->ChartAreas->Add(chartArea3);
+			this->chart_stockData->ChartAreas->Add(chartArea4);
+			legend2->Enabled = false;
+			legend2->Name = L"Legend1";
+			this->chart_stockData->Legends->Add(legend2);
 			this->chart_stockData->Location = System::Drawing::Point(9, 9);
 			this->chart_stockData->Name = L"chart_stockData";
-			series1->ChartArea = L"ChartArea_OHLC";
-			series1->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
-			series1->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
-			series1->IsXValueIndexed = true;
-			series1->Legend = L"Legend1";
-			series1->Name = L"Series_OHLC";
-			series1->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
-			series1->YValuesPerPoint = 4;
-			series1->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
-			series2->ChartArea = L"ChartArea_Beauty";
-			series2->IsValueShownAsLabel = true;
-			series2->Legend = L"Legend1";
-			series2->Name = L"Series_Beauty";
-			this->chart_stockData->Series->Add(series1);
-			this->chart_stockData->Series->Add(series2);
+			series3->ChartArea = L"ChartArea_OHLC";
+			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Candlestick;
+			series3->CustomProperties = L"PriceDownColor=Red, PriceUpColor=Green";
+			series3->IsXValueIndexed = true;
+			series3->Legend = L"Legend1";
+			series3->Name = L"Series_OHLC";
+			series3->XValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::DateTime;
+			series3->YValuesPerPoint = 4;
+			series3->YValueType = System::Windows::Forms::DataVisualization::Charting::ChartValueType::UInt64;
+			series4->ChartArea = L"ChartArea_Beauty";
+			series4->IsValueShownAsLabel = true;
+			series4->Legend = L"Legend1";
+			series4->Name = L"Series_Beauty";
+			this->chart_stockData->Series->Add(series3);
+			this->chart_stockData->Series->Add(series4);
 			this->chart_stockData->Size = System::Drawing::Size(1004, 597);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
