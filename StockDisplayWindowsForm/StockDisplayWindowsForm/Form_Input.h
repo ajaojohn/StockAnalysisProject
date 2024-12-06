@@ -785,7 +785,10 @@ private: Generic::List<aSmartCandlestick^>^ readCandlesticksFromFile(System::Str
 	/// </summary>
 	/// <returns>void</returns>
 	private: System::Void update() {
-		// Get the start date from the date picker
+		// Remove existing Fibonacci and MaxBeauty annotations before loading new data
+		removeFibonacciAndMaxBeautyAnnotations();
+		// Reset any previous selections
+		resetWaveSelections();
 		// Get the start date from the date picker
 		System::DateTime^ startDate = this->dateTimePicker_start->Value;
 		// Get the end date from the date picker
@@ -1057,7 +1060,7 @@ private: System::Void checkBox_selectAllPatterns_CheckedChanged(System::Object^ 
 private:
 	const int SNAP_MARGIN = 5; // Number of candlesticks to search on either side
 	System::Drawing::Rectangle selectionRectangle; // Rectangle to draw during selection
-	DataVisualization::Charting::DataPoint^ currentDragDataPoint = nullptr;
+	DataVisualization::Charting::DataPoint^ currentDragDataPoint = nullptr; // Currently dragged DataPoint
 	bool isDragging; // Indicates if a drag operation is in progress
 	System::Drawing::Point dragStartPoint; // Starting point of the drag
 	aSmartCandlestick^ selectedCandlestickStart; // Candlestick at drag start
@@ -1065,957 +1068,1014 @@ private:
 
 	DataVisualization::Charting::DataPoint^ selectedDataPointStart; // Data point at drag start
 	DataVisualization::Charting::DataPoint^ selectedDataPointEnd; // Data point at drag end
-	DataVisualization::Charting::RectangleAnnotation^ currentWaveRectangle;
+	DataVisualization::Charting::RectangleAnnotation^ currentWaveRectangle; // Current wave rectangle annotation
 
-/// <summary>
-/// Finds the nearest peak or valley to a candlestick
-/// </summary>
-/// <param name="cs">Candlestick to search from</param>
-/// <param name="margin">Margin to search</param>
-/// <returns></returns>
-aSmartCandlestick^ Form_Input::findNearestPeakOrValley(aSmartCandlestick^ cs, int margin) {
-    if (cs == nullptr) return nullptr;
-    if (filteredListOfCandlesticks->Count == 0) return nullptr;
+	/// <summary>
+	/// Finds the nearest peak or valley to a given candlestick within a specified margin.
+	/// </summary>
+	/// <param name="cs">Candlestick to search from.</param>
+	/// <param name="margin">Margin to search on either side.</param>
+	/// <returns>The nearest peak or valley candlestick, or nullptr if none found.</returns>
+	aSmartCandlestick^ findNearestPeakOrValley(aSmartCandlestick^ cs, int margin) {
+		if (cs == nullptr) return nullptr;
+		if (filteredListOfCandlesticks->Count == 0) return nullptr;
 
-    // Find the index of the reference candlestick
-    int index = filteredListOfCandlesticks->IndexOf(cs);
-    if (index == -1) return nullptr;
+		// Find the index of the reference candlestick
+		int index = filteredListOfCandlesticks->IndexOf(cs);
+		if (index == -1) return nullptr;
 
-    // Alternate search: for each distance d from 1 to margin
-    for (int d = 0; d < margin; d++) {
-        // Calculate backward and forward indices
-        int backIndex = index - d;
-        int forwardIndex = index + d;
+		// Search outward from the reference candlestick within the margin
+		for (int d = 0; d < margin; d++) {
+			// Calculate backward and forward indices
+			int backIndex = index - d;
+			int forwardIndex = index + d;
 
-        // Search backward first
-        if (backIndex >= 0) {
-            aSmartCandlestick^ backCandlestick = filteredListOfCandlesticks[backIndex];
-            if (backCandlestick->IsPeak || backCandlestick->IsValley) {
-                return backCandlestick;
-            }
-        }
+			// Search backward first
+			if (backIndex >= 0) {
+				aSmartCandlestick^ backCandlestick = filteredListOfCandlesticks[backIndex];
+				if (backCandlestick->IsPeak || backCandlestick->IsValley) {
+					return backCandlestick;
+				}
+			}
 
-        // Then search forward
-        if (forwardIndex < filteredListOfCandlesticks->Count) {
-            aSmartCandlestick^ forwardCandlestick = filteredListOfCandlesticks[forwardIndex];
-            if (forwardCandlestick->IsPeak || forwardCandlestick->IsValley) {
-                return forwardCandlestick;
-            }
-        }
-    }
-
-    // If no peak or valley is found within the margin
-    return nullptr;
-}
-
-private: aSmartCandlestick^ findCandlestickByXValue(double xValue) {
-	for each (aSmartCandlestick ^ cs in filteredListOfCandlesticks) {
-		if (cs->Date->ToOADate() == xValue) {
-			return cs;
-		}
-	}
-	return nullptr;
-}
-
-private: System::Void resetWaveSelections() {
-	if (selectedDataPointStart != nullptr) {
-		highlightDataPoint(selectedDataPointStart, false); // Remove arrow
-	}
-	if (selectedDataPointEnd != nullptr) {
-		highlightDataPoint(selectedDataPointEnd, false); // Remove arrow
-	}
-
-	// Remove the current rectangle annotation if it exists
-	if (currentWaveRectangle != nullptr) {
-		chart_stockData->Annotations->Remove(currentWaveRectangle);
-		currentWaveRectangle = nullptr;
-	}
-
-	selectedCandlestickStart = nullptr;
-	selectedCandlestickEnd = nullptr;
-	selectedDataPointStart = nullptr;
-	selectedDataPointEnd = nullptr;
-
-	// Clear beauty chart
-	chart_stockData->Series["Series_Beauty"]->Points->Clear();
-}
-
-
-private: System::Void highlightDataPoint(DataVisualization::Charting::DataPoint^ dp, bool isSelected) {
-	if (dp == nullptr) return;
-
-	// Generate a unique annotation name based on the data point index
-	int pointIndex = dp->XValue;
-	String^ annotationName = "SelectionArrow_" + pointIndex.ToString();
-
-	if (isSelected) {
-		// Check if the annotation already exists to avoid duplicates
-		bool exists = false;
-		for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
-			if (ann->Name == annotationName) {
-				exists = true;
-				break;
+			// Then search forward
+			if (forwardIndex < filteredListOfCandlesticks->Count) {
+				aSmartCandlestick^ forwardCandlestick = filteredListOfCandlesticks[forwardIndex];
+				if (forwardCandlestick->IsPeak || forwardCandlestick->IsValley) {
+					return forwardCandlestick;
+				}
 			}
 		}
 
-		if (!exists) {
-			// Create and configure the arrow annotation
-			auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
-			arrowAnnotation->Name = annotationName;
-			arrowAnnotation->BackColor = System::Drawing::Color::Yellow;
-			arrowAnnotation->LineColor = System::Drawing::Color::Black;
-			arrowAnnotation->Width = 0; // No width for a vertical arrow
-			arrowAnnotation->Height = -5; // Adjust the height as needed
-			arrowAnnotation->AnchorDataPoint = dp;
-			arrowAnnotation->Y = dp->YValues[0] + (dp->YValues[1] - dp->YValues[0]) * 0.05; // Position above the data point
-
-			// Optionally, add a label to the arrow
-			auto labelAnnotation = gcnew DataVisualization::Charting::TextAnnotation();
-			labelAnnotation->Name = "SelectionLabel_" + pointIndex.ToString();
-			labelAnnotation->Text = "Selected";
-			labelAnnotation->ForeColor = System::Drawing::Color::Black;
-			labelAnnotation->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
-			labelAnnotation->AnchorDataPoint = dp;
-			labelAnnotation->Y = arrowAnnotation->Y + 0.02; // Slightly above the arrow
-			labelAnnotation->X = dp->XValue;
-			labelAnnotation->Alignment = Drawing::ContentAlignment::MiddleCenter;
-
-			// Add the annotations to the chart
-			chart_stockData->Annotations->Add(arrowAnnotation);
-			chart_stockData->Annotations->Add(labelAnnotation);
-		}
+		// If no peak or valley is found within the margin
+		return nullptr;
 	}
-	else {
-		// Remove the arrow annotation if it exists
-		DataVisualization::Charting::Annotation^ annotationToRemove = nullptr;
-		DataVisualization::Charting::Annotation^ labelToRemove = nullptr;
 
-		for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
-			if (ann->Name == annotationName) {
-				annotationToRemove = ann;
-			}
-			else if (ann->Name == "SelectionLabel_" + pointIndex.ToString()) {
-				labelToRemove = ann;
+	/// <summary>
+	/// Finds a candlestick by its X-axis value (date).
+	/// </summary>
+	/// <param name="xValue">The X-axis value (date) of the candlestick.</param>
+	/// <returns>The corresponding candlestick, or nullptr if not found.</returns>
+	aSmartCandlestick^ findCandlestickByXValue(double xValue) {
+		for each (aSmartCandlestick ^ cs in filteredListOfCandlesticks) {
+			if (cs->Date->ToOADate() == xValue) {
+				return cs;
 			}
 		}
-
-		if (annotationToRemove != nullptr) {
-			chart_stockData->Annotations->Remove(annotationToRemove);
-		}
-
-		if (labelToRemove != nullptr) {
-			chart_stockData->Annotations->Remove(labelToRemove);
-		}
-	}
-}
-
-
-private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mouseX)
-{
-	// Access the relevant ChartArea
-	DataVisualization::Charting::ChartArea^ chartArea = chart_stockData->ChartAreas["ChartArea_OHLC"];
-
-	// Convert the mouse's X pixel position to the axis X-value (which is the index)
-	double xValue = chartArea->AxisX->PixelPositionToValue(static_cast<double>(mouseX));
-
-	// Round to the nearest integer index
-	int index = static_cast<int>(Math::Round(xValue));
-
-	// Check if the index is within the valid range
-	if (index > 0 && index <= chart_stockData->Series["Series_OHLC"]->Points->Count)
-	{
-		// Optional: Define a threshold to ensure the click is close enough to the DataPoint
-		// For indexed charts, a threshold of 0.5 is reasonable
-		double distance = Math::Abs(xValue - index);
-		double threshold = 0.5; // Adjust if necessary
-
-		if (distance <= threshold)
-		{
-			return chart_stockData->Series["Series_OHLC"]->Points[index - 1];
-		}
+		return nullptr;
 	}
 
-	// Return nullptr if no DataPoint is within the threshold
-	return nullptr;
-}
-
-
-
-private: System::Void chart_stockData_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
-	if (e->Button == System::Windows::Forms::MouseButtons::Left) {
-		// Remove existing Fibonacci and MaxBeauty annotations
-		removeFibonacciAndMaxBeautyAnnotations();
-
-		// Reset any previous selections
-		resetWaveSelections();
-
-		isDragging = true;
-		dragStartPoint = System::Drawing::Point(e->X, e->Y);
-		selectionRectangle = System::Drawing::Rectangle(e->X, e->Y, 0, 0);
-
-		// Use the helper method to get the closest DataPoint
-		DataVisualization::Charting::DataPoint^ startPoint = GetDataPointByXPosition(e->X);
-		if (startPoint != nullptr) {
-			selectedCandlestickStart = findCandlestickByXValue(startPoint->XValue);
-			selectedDataPointStart = startPoint;
-			highlightDataPoint(selectedDataPointStart, true); // Add arrow
+	/// <summary>
+	/// Resets any selected wave selections and clears related annotations.
+	/// </summary>
+	private: System::Void resetWaveSelections() {
+		// Remove highlight from start and end DataPoints
+		if (selectedDataPointStart != nullptr) {
+			highlightDataPoint(selectedDataPointStart, false); // Remove arrow
+		}
+		if (selectedDataPointEnd != nullptr) {
+			highlightDataPoint(selectedDataPointEnd, false); // Remove arrow
 		}
 
-		// Unhighlight any existing drag DataPoint
-		if (currentDragDataPoint != nullptr) {
-			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
-			currentDragDataPoint = nullptr;
+		// Remove the current rectangle annotation if it exists
+		if (currentWaveRectangle != nullptr) {
+			chart_stockData->Annotations->Remove(currentWaveRectangle);
+			currentWaveRectangle = nullptr;
+		}
+
+		// Clear selected candlesticks and DataPoints
+		selectedCandlestickStart = nullptr;
+		selectedCandlestickEnd = nullptr;
+		selectedDataPointStart = nullptr;
+		selectedDataPointEnd = nullptr;
+
+		// Clear beauty chart
+		chart_stockData->Series["Series_Beauty"]->Points->Clear();
+	}
+
+		   /// <summary>
+		   /// Highlights or unhighlights a specific DataPoint with an arrow and label.
+		   /// </summary>
+		   /// <param name="dp">The DataPoint to highlight or unhighlight.</param>
+		   /// <param name="isSelected">True to highlight, false to remove highlight.</param>
+	private: System::Void highlightDataPoint(DataVisualization::Charting::DataPoint^ dp, bool isSelected) {
+		if (dp == nullptr) return;
+
+		// Generate a unique annotation name based on the data point index
+		int pointIndex = static_cast<int>(dp->XValue);
+		String^ annotationName = "SelectionArrow_" + pointIndex.ToString();
+
+		if (isSelected) {
+			// Check if the annotation already exists to avoid duplicates
+			bool exists = false;
+			for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+				if (ann->Name == annotationName) {
+					exists = true;
+					break;
+				}
+			}
+
+			if (!exists) {
+				// Create and configure the arrow annotation
+				auto arrowAnnotation = gcnew DataVisualization::Charting::ArrowAnnotation();
+				arrowAnnotation->Name = annotationName;
+				arrowAnnotation->BackColor = System::Drawing::Color::Yellow;
+				arrowAnnotation->LineColor = System::Drawing::Color::Black;
+				arrowAnnotation->Width = 0; // No width for a vertical arrow
+				arrowAnnotation->Height = -5; // Adjust the height as needed
+				arrowAnnotation->AnchorDataPoint = dp;
+				arrowAnnotation->Y = dp->YValues[0] + (dp->YValues[1] - dp->YValues[0]) * 0.05; // Position above the data point
+
+				// Create and configure the label annotation
+				auto labelAnnotation = gcnew DataVisualization::Charting::TextAnnotation();
+				labelAnnotation->Name = "SelectionLabel_" + pointIndex.ToString();
+				labelAnnotation->Text = "Selected";
+				labelAnnotation->ForeColor = System::Drawing::Color::Black;
+				labelAnnotation->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
+				labelAnnotation->AnchorDataPoint = dp;
+				labelAnnotation->Y = arrowAnnotation->Y + 0.02; // Slightly above the arrow
+				labelAnnotation->X = dp->XValue;
+				labelAnnotation->Alignment = Drawing::ContentAlignment::MiddleCenter;
+
+				// Add the annotations to the chart
+				chart_stockData->Annotations->Add(arrowAnnotation);
+				chart_stockData->Annotations->Add(labelAnnotation);
+			}
+		}
+		else {
+			// Remove the arrow and label annotations if they exist
+			DataVisualization::Charting::Annotation^ annotationToRemove = nullptr;
+			DataVisualization::Charting::Annotation^ labelToRemove = nullptr;
+
+			for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+				if (ann->Name == annotationName) {
+					annotationToRemove = ann;
+				}
+				else if (ann->Name == "SelectionLabel_" + pointIndex.ToString()) {
+					labelToRemove = ann;
+				}
+			}
+
+			if (annotationToRemove != nullptr) {
+				chart_stockData->Annotations->Remove(annotationToRemove);
+			}
+
+			if (labelToRemove != nullptr) {
+				chart_stockData->Annotations->Remove(labelToRemove);
+			}
 		}
 	}
-}
 
+		/// <summary>
+		/// Retrieves the DataPoint closest to the given mouse X position.
+		/// </summary>
+		/// <param name="mouseX">The mouse's X pixel position.</param>
+		/// <returns>The nearest DataPoint, or nullptr if none is within the threshold.</returns>
+	private: DataVisualization::Charting::DataPoint^ GetDataPointByXPosition(int mouseX) {
+		// Access the relevant ChartArea
+		DataVisualization::Charting::ChartArea^ chartArea = chart_stockData->ChartAreas["ChartArea_OHLC"];
 
-private: System::Void chart_stockData_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
-	if (isDragging) {
-		// Update the selection rectangle based on mouse movement
-		int x = Math::Min(dragStartPoint.X, e->X);
-		int y = Math::Min(dragStartPoint.Y, e->Y);
-		int width = Math::Abs(e->X - dragStartPoint.X);
-		int height = Math::Abs(e->Y - dragStartPoint.Y);
-		selectionRectangle = System::Drawing::Rectangle(x, y, width, height);
+		// Convert the mouse's X pixel position to the axis X-value (which is the index)
+		double xValue = chartArea->AxisX->PixelPositionToValue(static_cast<double>(mouseX));
 
-		// Redraw the chart to display the selection rectangle
-		chart_stockData->Invalidate();
+		// Round to the nearest integer index
+		int index = static_cast<int>(Math::Round(xValue));
 
-		// Use the helper method to get the closest DataPoint
-		DataVisualization::Charting::DataPoint^ currentPoint = GetDataPointByXPosition(e->X);
+		// Check if the index is within the valid range
+		if (index > 0 && index <= chart_stockData->Series["Series_OHLC"]->Points->Count) {
+			// Define a threshold to ensure the click is close enough to the DataPoint
+			double distance = Math::Abs(xValue - index);
+			double threshold = 0.5; // Adjust if necessary
 
-		if (currentPoint != currentDragDataPoint && currentPoint != nullptr) {
-			// Unhighlight the previous DataPoint
+			if (distance <= threshold) {
+				return chart_stockData->Series["Series_OHLC"]->Points[index - 1];
+			}
+		}
+
+		// Return nullptr if no DataPoint is within the threshold
+		return nullptr;
+	}
+
+		   /// <summary>
+		   /// Handles the MouseDown event on the chart for initiating wave selection.
+		   /// </summary>
+		   /// <param name="sender">Event sender.</param>
+		   /// <param name="e">Mouse event arguments.</param>
+	private: System::Void chart_stockData_MouseDown(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+		if (e->Button == System::Windows::Forms::MouseButtons::Left) {
+			// Remove existing Fibonacci and MaxBeauty annotations
+			removeFibonacciAndMaxBeautyAnnotations();
+
+			// Reset any previous selections
+			resetWaveSelections();
+
+			// Initialize dragging state
+			isDragging = true;
+			dragStartPoint = System::Drawing::Point(e->X, e->Y);
+			selectionRectangle = System::Drawing::Rectangle(e->X, e->Y, 0, 0);
+
+			// Get the closest DataPoint to the mouse position
+			DataVisualization::Charting::DataPoint^ startPoint = GetDataPointByXPosition(e->X);
+			if (startPoint != nullptr) {
+				selectedCandlestickStart = findCandlestickByXValue(startPoint->XValue);
+				selectedDataPointStart = startPoint;
+				highlightDataPoint(selectedDataPointStart, true); // Highlight the start DataPoint
+			}
+
+			// Unhighlight any existing drag DataPoint
 			if (currentDragDataPoint != nullptr) {
-				highlightDataPoint(currentDragDataPoint, false); // Remove arrow
+				highlightDataPoint(currentDragDataPoint, false); // Remove highlight
+				currentDragDataPoint = nullptr;
 			}
-
-			// Highlight the new DataPoint
-			highlightDataPoint(currentPoint, true); // Add arrow
-			currentDragDataPoint = currentPoint;
-		}
-		else if (currentPoint == nullptr && currentDragDataPoint != nullptr) {
-			// If not hovering over a DataPoint, remove any existing highlight
-			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
-			currentDragDataPoint = nullptr;
 		}
 	}
-}
 
+		   /// <summary>
+		   /// Handles the MouseMove event on the chart for updating the selection rectangle and highlighting.
+		   /// </summary>
+		   /// <param name="sender">Event sender.</param>
+		   /// <param name="e">Mouse event arguments.</param>
+	private: System::Void chart_stockData_MouseMove(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+		if (isDragging) {
+			// Update the selection rectangle based on mouse movement
+			int x = Math::Min(dragStartPoint.X, e->X);
+			int y = Math::Min(dragStartPoint.Y, e->Y);
+			int width = Math::Abs(e->X - dragStartPoint.X);
+			int height = Math::Abs(e->Y - dragStartPoint.Y);
+			selectionRectangle = System::Drawing::Rectangle(x, y, width, height);
 
-private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
-	if (isDragging) {
-		isDragging = false;
+			// Redraw the chart to display the selection rectangle
+			chart_stockData->Invalidate();
 
-		// Redraw the chart to remove the selection rectangle
-		chart_stockData->Invalidate();
+			// Get the closest DataPoint to the current mouse position
+			DataVisualization::Charting::DataPoint^ currentPoint = GetDataPointByXPosition(e->X);
 
-		// Remove any existing drag DataPoint arrow
-		if (currentDragDataPoint != nullptr) {
-			highlightDataPoint(currentDragDataPoint, false); // Remove arrow
-			currentDragDataPoint = nullptr;
-		}
+			if (currentPoint != currentDragDataPoint && currentPoint != nullptr) {
+				// Unhighlight the previous DataPoint
+				if (currentDragDataPoint != nullptr) {
+					highlightDataPoint(currentDragDataPoint, false); // Remove highlight
+				}
 
-		// Use the helper method to get the closest DataPoint
-		DataVisualization::Charting::DataPoint^ endPoint = GetDataPointByXPosition(e->X);
-		if (endPoint != nullptr) {
-			selectedCandlestickEnd = findCandlestickByXValue(endPoint->XValue);
-			selectedDataPointEnd = endPoint;
-			highlightDataPoint(selectedDataPointEnd, true); // Add arrow
-
-			// Perform actions with the selected candlesticks
-			onTwoCandlesticksSelected(selectedCandlestickStart, selectedCandlestickEnd);
+				// Highlight the new DataPoint
+				highlightDataPoint(currentPoint, true); // Add highlight
+				currentDragDataPoint = currentPoint;
+			}
+			else if (currentPoint == nullptr && currentDragDataPoint != nullptr) {
+				// If not hovering over a DataPoint, remove any existing highlight
+				highlightDataPoint(currentDragDataPoint, false); // Remove highlight
+				currentDragDataPoint = nullptr;
+			}
 		}
 	}
-}
 
+		   /// <summary>
+		   /// Handles the MouseUp event on the chart to finalize wave selection and perform calculations.
+		   /// </summary>
+		   /// <param name="sender">Event sender.</param>
+		   /// <param name="e">Mouse event arguments.</param>
+	private: System::Void chart_stockData_MouseUp(System::Object^ sender, System::Windows::Forms::MouseEventArgs^ e) {
+		if (isDragging) {
+			// End dragging state
+			isDragging = false;
 
-private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
-	if (csStart != nullptr && csEnd != nullptr) {
-		// Find the nearest peak or valley to the start candlestick
-		aSmartCandlestick^ snappedStart = findNearestPeakOrValley(csStart, SNAP_MARGIN);
-		// Find the nearest peak or valley to the end candlestick
-		aSmartCandlestick^ snappedEnd = csEnd;
+			// Redraw the chart to remove the selection rectangle
+			chart_stockData->Invalidate();
 
-		// Check if both snapped candlesticks are found
-		if (snappedStart != nullptr && snappedEnd != nullptr) {
-			// Unhighlight the initially selected candlesticks
-			if (selectedDataPointStart != nullptr) {
-				highlightDataPoint(selectedDataPointStart, false);
+			// Remove any existing drag DataPoint highlight
+			if (currentDragDataPoint != nullptr) {
+				highlightDataPoint(currentDragDataPoint, false); // Remove highlight
+				currentDragDataPoint = nullptr;
 			}
-			if (selectedDataPointEnd != nullptr) {
-				highlightDataPoint(selectedDataPointEnd, false);
+
+			// Get the closest DataPoint to the mouse position
+			DataVisualization::Charting::DataPoint^ endPoint = GetDataPointByXPosition(e->X);
+			if (endPoint != nullptr) {
+				selectedCandlestickEnd = findCandlestickByXValue(endPoint->XValue);
+				selectedDataPointEnd = endPoint;
+				highlightDataPoint(selectedDataPointEnd, true); // Highlight the end DataPoint
+
+				// Perform actions with the selected candlesticks
+				onTwoCandlesticksSelected(selectedCandlestickStart, selectedCandlestickEnd);
 			}
+		}
+	}
 
-			// Find the DataPoints corresponding to the snapped candlesticks
-			DataVisualization::Charting::DataPoint^ snappedStartPoint = nullptr;
-			DataVisualization::Charting::DataPoint^ snappedEndPoint = nullptr;
+		   /// <summary>
+		   /// Handles the selection of two candlesticks and performs validation and calculations.
+		   /// </summary>
+		   /// <param name="csStart">Start candlestick.</param>
+		   /// <param name="csEnd">End candlestick.</param>
+	private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
+		if (csStart != nullptr && csEnd != nullptr) {
+			// Find the nearest peak or valley to the start candlestick
+			aSmartCandlestick^ snappedStart = findNearestPeakOrValley(csStart, SNAP_MARGIN);
+			// Use the end candlestick as is (could also snap if needed)
+			aSmartCandlestick^ snappedEnd = csEnd;
 
-			for each (DataVisualization::Charting::DataPoint ^ dp in chart_stockData->Series["Series_OHLC"]->Points) {
-				if (dp->XValue == snappedStart->Date->ToOADate()) {
-					snappedStartPoint = dp;
+			// Check if both snapped candlesticks are found
+			if (snappedStart != nullptr && snappedEnd != nullptr) {
+				// Unhighlight the initially selected candlesticks
+				if (selectedDataPointStart != nullptr) {
+					highlightDataPoint(selectedDataPointStart, false);
 				}
-				if (dp->XValue == snappedEnd->Date->ToOADate()) {
-					snappedEndPoint = dp;
+				if (selectedDataPointEnd != nullptr) {
+					highlightDataPoint(selectedDataPointEnd, false);
 				}
-			}
 
-			// Highlight the snapped candlesticks
-			if (snappedStartPoint != nullptr) {
-				highlightDataPoint(snappedStartPoint, true);
-			}
-			if (snappedEndPoint != nullptr) {
-				highlightDataPoint(snappedEndPoint, true);
-			}
+				// Find the DataPoints corresponding to the snapped candlesticks
+				DataVisualization::Charting::DataPoint^ snappedStartPoint = findCandlestickDataPoint(snappedStart);
+				DataVisualization::Charting::DataPoint^ snappedEndPoint = findCandlestickDataPoint(snappedEnd);
 
-			// Update selected candlesticks and DataPoints
-			selectedCandlestickStart = snappedStart;
-			selectedCandlestickEnd = snappedEnd;
-			selectedDataPointStart = snappedStartPoint;
-			selectedDataPointEnd = snappedEndPoint;
+				// Highlight the snapped candlesticks
+				if (snappedStartPoint != nullptr) {
+					highlightDataPoint(snappedStartPoint, true);
+				}
+				if (snappedEndPoint != nullptr) {
+					highlightDataPoint(snappedEndPoint, true);
+				}
 
-			if (isValidWave(snappedStart, snappedEnd)) {
-				// Run the onValidSelection method
-				onValidSelection(snappedStart, snappedEnd);
+				// Update selected candlesticks and DataPoints
+				selectedCandlestickStart = snappedStart;
+				selectedCandlestickEnd = snappedEnd;
+				selectedDataPointStart = snappedStartPoint;
+				selectedDataPointEnd = snappedEndPoint;
+
+				// Validate the selected wave
+				if (isValidWave(snappedStart, snappedEnd)) {
+					// Perform calculations and annotations for a valid wave
+					onValidSelection(snappedStart, snappedEnd);
+				}
+				else {
+					// Draw a rectangle between the selected candlesticks and notify the user
+					drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
+					// Removed MessageBox for logging purposes
+					resetWaveSelections();
+				}
 			}
 			else {
-
-				// Show the information in a message box
-				drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
-				MessageBox::Show("Selected Candlesticks do not form a valid wave.", "Selection Error");
-				resetWaveSelections();
-			}			
-		}
-		else {
-			MessageBox::Show("No nearby peak or valley found within the margin of error.", "Selection Error");
+				// Notify the user that no nearby peak or valley was found
+				// Removed MessageBox for logging purposes
+			}
 		}
 	}
-}
 
-private: System::Void chart_stockData_Paint(System::Object^ sender, System::Windows::Forms::PaintEventArgs^ e) {
-	if (isDragging) {
-		// Define the pen for drawing the rectangle (e.g., Blue dashed line)
-		System::Drawing::Pen^ pen = gcnew System::Drawing::Pen(System::Drawing::Color::Blue, 2);
-		pen->DashStyle = System::Drawing::Drawing2D::DashStyle::Dash;
-
-		// Draw the selection rectangle
-		e->Graphics->DrawRectangle(pen, selectionRectangle);
-
-		// Clean up
-		delete pen;
+		   /// <summary>
+		   /// Finds the DataPoint associated with a given candlestick.
+		   /// </summary>
+		   /// <param name="cs">The candlestick to find.</param>
+		   /// <returns>The corresponding DataPoint, or nullptr if not found.</returns>
+	private: DataVisualization::Charting::DataPoint^ findCandlestickDataPoint(aSmartCandlestick^ cs) {
+		if (cs == nullptr) return nullptr;
+		for each (DataVisualization::Charting::DataPoint ^ dp in chart_stockData->Series["Series_OHLC"]->Points) {
+			if (dp->XValue == cs->Date->ToOADate()) {
+				return dp;
+			}
+		}
+		return nullptr;
 	}
-}
 
-	   bool Form_Input::isValidWave(aSmartCandlestick^ candlestick1, aSmartCandlestick^ candlestick2) {
-		   // Validate inputs
-		   if (candlestick1 == nullptr || candlestick2 == nullptr)
-			   return false;
+		   /// <summary>
+		   /// Handles the Paint event of the chart to draw the selection rectangle.
+		   /// </summary>
+		   /// <param name="sender">Event sender.</param>
+		   /// <param name="e">Paint event arguments.</param>
+	private: System::Void chart_stockData_Paint(System::Object^ sender, System::Windows::Forms::PaintEventArgs^ e) {
+		if (isDragging) {
+			// Define the pen for drawing the rectangle (e.g., Blue dashed line)
+			System::Drawing::Pen^ pen = gcnew System::Drawing::Pen(System::Drawing::Color::Blue, 2);
+			pen->DashStyle = System::Drawing::Drawing2D::DashStyle::Dash;
 
-		   // Determine if the first candlestick is a peak or a valley
-		   bool c1Peak = candlestick1->IsPeak;
-		   bool c1Valley = candlestick1->IsValley;
+			// Draw the selection rectangle
+			e->Graphics->DrawRectangle(pen, selectionRectangle);
 
-		   // Ensure the first candlestick is either a peak or a valley
-		   if (!(c1Peak || c1Valley))
-			   return false;
+			// Clean up the pen
+			delete pen;
+		}
+	}
 
-		   // Find indices of the selected candlesticks in the filtered list
-		   int index1 = filteredListOfCandlesticks->IndexOf(candlestick1);
-		   int index2 = filteredListOfCandlesticks->IndexOf(candlestick2);
-
-		   // Ensure both candlesticks are present in the list
-		   if (index1 == -1 || index2 == -1)
-			   return false;
-
-		   // Determine the order based on index
-		   int startIndex = Math::Min(index1, index2);
-		   int endIndex = Math::Max(index1, index2);
-
-		   if (startIndex == endIndex) {
-			   MessageBox::Show("Selected candlesticks are the same.", "Selection Error");
-			   return false;
-		   }
-
-		   // Get the first candlestick in the selection
-		   aSmartCandlestick^ firstCandlestick = filteredListOfCandlesticks[startIndex];
-		   // Get the second candlestick in the selection
-		   aSmartCandlestick^ secondCandlestick = filteredListOfCandlesticks[endIndex];
-
-		   auto maxY = Math::Max((double)firstCandlestick->High, (double)secondCandlestick->High);
-		   auto minY = Math::Min((double)firstCandlestick->Low, (double)secondCandlestick->Low);
-		   
-
-		   // Iterate through candlesticks between startIndex and endIndex (exclusive)
-		   for (int i = startIndex + 1; i < endIndex; i++) {
-			   aSmartCandlestick^ curr = filteredListOfCandlesticks[i];
-
-			   // If first is a peak, ensure no intermediate high exceeds first's high
-			   if ((double)curr->High > maxY)
+		   /// <summary>
+		   /// Validates whether the selected candlesticks form a valid wave.
+		   /// </summary>
+		   /// <param name="candlestick1">First candlestick.</param>
+		   /// <param name="candlestick2">Second candlestick.</param>
+		   /// <returns>True if valid wave, false otherwise.</returns>
+		   bool Form_Input::isValidWave(aSmartCandlestick^ candlestick1, aSmartCandlestick^ candlestick2) {
+			   // Validate inputs
+			   if (candlestick1 == nullptr || candlestick2 == nullptr)
 				   return false;
 
-			   // If first is a valley, ensure no intermediate low falls below first's low
-			   if ((double)curr->Low < minY)
+			   // Determine if the first candlestick is a peak or a valley
+			   bool c1Peak = candlestick1->IsPeak;
+			   bool c1Valley = candlestick1->IsValley;
+
+			   // Ensure the first candlestick is either a peak or a valley
+			   if (!(c1Peak || c1Valley))
 				   return false;
+
+			   // Find indices of the selected candlesticks in the filtered list
+			   int index1 = filteredListOfCandlesticks->IndexOf(candlestick1);
+			   int index2 = filteredListOfCandlesticks->IndexOf(candlestick2);
+
+			   // Ensure both candlesticks are present in the list
+			   if (index1 == -1 || index2 == -1)
+				   return false;
+
+			   // Determine the order based on index
+			   int startIndex = Math::Min(index1, index2);
+			   int endIndex = Math::Max(index1, index2);
+
+			   if (startIndex == endIndex) {
+				   // Selected candlesticks are the same
+				   // Removed MessageBox for logging purposes
+				   return false;
+			   }
+
+			   // Get the first and second candlesticks in the selection
+			   aSmartCandlestick^ firstCandlestick = filteredListOfCandlesticks[startIndex];
+			   aSmartCandlestick^ secondCandlestick = filteredListOfCandlesticks[endIndex];
+
+			   // Determine the maximum and minimum Y values within the wave
+			   double maxY = Math::Max((double)firstCandlestick->High, (double)secondCandlestick->High);
+			   double minY = Math::Min((double)firstCandlestick->Low, (double)secondCandlestick->Low);
+
+			   // Iterate through candlesticks between startIndex and endIndex (exclusive)
+			   for (int i = startIndex + 1; i < endIndex; i++) {
+				   aSmartCandlestick^ curr = filteredListOfCandlesticks[i];
+
+				   // If first is a peak, ensure no intermediate high exceeds first's high
+				   if ((double)curr->High > maxY)
+					   return false;
+
+				   // If first is a valley, ensure no intermediate low falls below first's low
+				   if ((double)curr->Low < minY)
+					   return false;
+			   }
+
+			   // All conditions met; valid wave within selection
+			   return true;
 		   }
 
-		   // All conditions met; valid wave within selection
-		   return true;
-	   }
-private: DataVisualization::Charting::RectangleAnnotation^ drawRectangleBetweenCandlesticks(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
-	// Remove existing rectangle annotation if any
-	if (currentWaveRectangle != nullptr) {
-		chart_stockData->Annotations->Remove(currentWaveRectangle);
-		currentWaveRectangle = nullptr;
-	}
-
-	// Create new rectangle annotation
-	auto rectangleAnnotation = gcnew DataVisualization::Charting::RectangleAnnotation();
-	rectangleAnnotation->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-	rectangleAnnotation->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-	rectangleAnnotation->LineColor = Color::Blue;
-	rectangleAnnotation->BackColor = Color::Transparent;
-	rectangleAnnotation->LineWidth = 2;
-	rectangleAnnotation->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
-	rectangleAnnotation->IsSizeAlwaysRelative = false;
-
-	// Determine the highest and lowest Y values
-	double maxY = Math::Max((double)cs1->High, (double)cs2->High);
-	double minY = Math::Min((double)cs1->Low, (double)cs2->Low);
-
-	// Determine the order based on the X values (dates)
-	aSmartCandlestick^ firstCS;
-	aSmartCandlestick^ secondCS;
-
-	if (cs1->Date->ToOADate() < cs2->Date->ToOADate()) {
-		firstCS = cs1;
-		secondCS = cs2;
-	}
-	else {
-		firstCS = cs2;
-		secondCS = cs1;
-	}
-
-	// Set the position and size of the rectangle
-	rectangleAnnotation->Y = minY;
-	rectangleAnnotation->Height = maxY - minY;
-	rectangleAnnotation->X = firstCS->Index;
-	rectangleAnnotation->Width = secondCS->Index - firstCS->Index;
-
-	// Add the rectangle to the chart
-	chart_stockData->Annotations->Add(rectangleAnnotation);
-
-	// Assign the newly created rectangle to the member variable
-	currentWaveRectangle = rectangleAnnotation;
-
-	return rectangleAnnotation;
-}
-
-private: System::Void checkBox_showPeaksAndValleys_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-	showAnnotationsForSelectedPattern(nullptr, nullptr);
-}
-
-private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
-	// Validate input
-	if (cs1 == nullptr || cs2 == nullptr) {
-		MessageBox::Show("Invalid candlesticks for drawing Fibonacci levels.", "Error");
-		return;
-	}
-
-	// Determine which candlestick has the higher high and which has the lower low
-	double high = Math::Max((double)cs1->High, (double)cs2->High);
-	double low = Math::Min((double)cs1->Low, (double)cs2->Low);
-
-	// Define Fibonacci levels
-	array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.4, 62.8, 50.0, 38.2, 23.6, 0.0 };
-
-	// Define colors for each level for better distinction
-	array<System::Drawing::Color>^ levelColors = gcnew array<System::Drawing::Color> {
-		System::Drawing::Color::Red,        // 100%
-			System::Drawing::Color::Orange,     // 76%
-			System::Drawing::Color::Yellow,     // 68%
-			System::Drawing::Color::Green,      // 50%
-			System::Drawing::Color::Blue,       // 32%
-			System::Drawing::Color::Purple,     // 24%
-			System::Drawing::Color::Gray        // 0%
-	};
-
-	// Remove existing Fibonacci annotations to prevent duplication
-	List<DataVisualization::Charting::Annotation^>^ annotationsToRemove = gcnew List<DataVisualization::Charting::Annotation^>();
-
-	for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
-		if (annotation->Name->StartsWith("FibLevel_") || annotation->Name->StartsWith("FibLabel_")) {
-			annotationsToRemove->Add(annotation);
+		   /// <summary>
+		   /// Draws a rectangle annotation between two candlesticks on the chart.
+		   /// </summary>
+		   /// <param name="cs1">First candlestick.</param>
+		   /// <param name="cs2">Second candlestick.</param>
+		   /// <returns>The created RectangleAnnotation.</returns>
+	private: DataVisualization::Charting::RectangleAnnotation^ drawRectangleBetweenCandlesticks(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+		// Remove existing rectangle annotation if any
+		if (currentWaveRectangle != nullptr) {
+			chart_stockData->Annotations->Remove(currentWaveRectangle);
+			currentWaveRectangle = nullptr;
 		}
-	}
 
-	for each (DataVisualization::Charting::Annotation ^ annotation in annotationsToRemove) {
-		chart_stockData->Annotations->Remove(annotation);
-	}
+		// Create new rectangle annotation
+		auto rectangleAnnotation = gcnew DataVisualization::Charting::RectangleAnnotation();
+		rectangleAnnotation->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		rectangleAnnotation->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		rectangleAnnotation->LineColor = Color::Blue;
+		rectangleAnnotation->BackColor = Color::Transparent;
+		rectangleAnnotation->LineWidth = 2;
+		rectangleAnnotation->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+		rectangleAnnotation->IsSizeAlwaysRelative = false;
 
-	// Determine the x-axis range based on the selected wave
-	int startIndex = Math::Min(cs1->Index, cs2->Index);
-	int endIndex = Math::Max(cs1->Index, cs2->Index);
+		// Determine the highest and lowest Y values
+		double maxY = Math::Max((double)cs1->High, (double)cs2->High);
+		double minY = Math::Min((double)cs1->Low, (double)cs2->Low);
 
-	// Calculate the y-values for each Fibonacci level
-	array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
-	for (int i = 0; i < fibonacciPercentages->Length; i++) {
-		fibonacciLevels[i] = low + (high - low) * (fibonacciPercentages[i] / 100.0);
-	}
+		// Determine the order based on the X values (dates)
+		aSmartCandlestick^ firstCS;
+		aSmartCandlestick^ secondCS;
 
-	// Draw each Fibonacci level
-	for (int i = 0; i < fibonacciLevels->Length; i++) {
-		double levelValue = fibonacciLevels[i];
-		double percentage = fibonacciPercentages[i];
-		System::String^ levelName = "FibLevel_" + percentage.ToString() + "%";
-		System::String^ labelName = "FibLabel_" + percentage.ToString() + "%";
-
-		// Create HorizontalLineAnnotation
-		DataVisualization::Charting::HorizontalLineAnnotation^ fibLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
-		fibLine->Name = "FibLevel_" + percentage.ToString() + "%";
-		fibLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-		fibLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-		fibLine->Y = levelValue;
-		fibLine->LineColor = levelColors[i];
-		fibLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
-		fibLine->LineWidth = 2;
-		fibLine->ClipToChartArea = "ChartArea_OHLC";
-		fibLine->IsInfinitive = false;
-		fibLine->IsSizeAlwaysRelative = false;
-		fibLine->X = startIndex; // Slight offset for better visibility
-		fibLine->Width = endIndex - startIndex; // Span the wave
-
-		// Add the Fibonacci line to the chart
-		chart_stockData->Annotations->Add(fibLine);
-	}
-}
-
-private: void removeFibonacciAndMaxBeautyAnnotations() {
-	// Create a list to hold annotations to remove
-	System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ annotationsToRemove =
-		gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
-
-	// Iterate through existing annotations and identify those to remove
-	for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
-		if (ann->Name->StartsWith("FibLevel_") ||
-			ann->Name->StartsWith("FibLabel_") ||
-			ann->Name->StartsWith("MaxBeautyLine") ||
-			ann->Name->StartsWith("MaxBeautyLabel") ||
-			ann->Name->StartsWith("Circle_")) // Added condition to remove circle annotations
-		{
-			annotationsToRemove->Add(ann);
-		}
-	}
-
-	// Remove the identified annotations from the chart
-	for each (DataVisualization::Charting::Annotation ^ ann in annotationsToRemove) {
-		chart_stockData->Annotations->Remove(ann);
-	}
-}
-
-
-/// <summary>
-/// Adds a circle annotation to the chart at the specified X and Y coordinates.
-/// </summary>
-/// <param name="name">Unique name for the annotation.</param>
-/// <param name="xValue">The X-axis value (date) where the annotation will be placed.</param>
-/// <param name="yValue">The Y-axis value (price) where the annotation will be placed.</param>
-/// <param name="color">Color of the circle.</param>
-private: void addCircleAnnotation(String^ name, double xValue, double yValue, System::Drawing::Color color) {
-	// Create an EllipseAnnotation to represent the circle
-	auto circle = gcnew DataVisualization::Charting::RectangleAnnotation();
-	circle->Name = name;
-	circle->X = xValue - 0.05;
-	circle->Y = yValue * 0.997;
-	circle->Width = 0.1; // Adjust size as needed
-	circle->Height = 1; // Adjust size as needed
-	circle->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-	circle->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-	circle->LineColor = System::Drawing::Color::Black;
-	circle->LineWidth = 1;
-	circle->BackColor = System::Drawing::Color::Magenta;
-	circle->ClipToChartArea = "ChartArea_OHLC";
-	circle->IsSizeAlwaysRelative = false;
-	circle->Alignment = Drawing::ContentAlignment::BottomCenter;
-
-	// Add the circle annotation to the chart
-	chart_stockData->Annotations->Add(circle);
-}
-
-
-/// <summary>
-/// Calculates the beauty score for a single candlestick based on Fibonacci levels and allowance.
-/// </summary>
-/// <param name="candlestick">The candlestick to evaluate.</param>
-/// <param name="fibonacciLevels">Array of Fibonacci level values.</param>
-/// <param name="allowance">Allowance value for matching.</param>
-/// <returns>The beauty score for the candlestick.</returns>
-private: double CalculateBeautyForACandlestick(
-	aSmartCandlestick^ firstCs,
-	aSmartCandlestick^ secondCs,
-	aSmartCandlestick^ targetCandlestick,
-	double theoreticalPrice,
-	System::Text::StringBuilder^ detailedInfo)
-{
-	double beautyScore = 0.0;
-
-	// Determine wave direction based on chronological order
-	bool isRising = secondCs->High > firstCs->High;
-
-	// Identify the first candlestick level based on wave direction
-	double firstCandlestickLevel = isRising ? static_cast<double>(firstCs->Low) : static_cast<double>(firstCs->High);
-
-	// Calculate wave range
-	double waveRange = isRising ? (theoreticalPrice - firstCandlestickLevel)
-		: (firstCandlestickLevel - theoreticalPrice);
-
-	// Define allowance as 1.5% of the wave range
-	double allowance = waveRange * 0.015;
-
-	// Define Fibonacci percentages
-	cli::array<double>^ fibonacciPercentages = gcnew cli::array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
-
-	// Calculate Fibonacci levels based on wave direction
-	cli::array<double>^ fibonacciLevels = gcnew cli::array<double>(fibonacciPercentages->Length);
-	for (int i = 0; i < fibonacciPercentages->Length; i++) {
-		if (isRising) {
-			// For rising waves: 0% at firstCandlestickLow, 100% at theoreticalPrice
-			fibonacciLevels[i] = firstCandlestickLevel + (theoreticalPrice - firstCandlestickLevel) * (fibonacciPercentages[i] / 100.0);
+		if (cs1->Date->ToOADate() < cs2->Date->ToOADate()) {
+			firstCS = cs1;
+			secondCS = cs2;
 		}
 		else {
-			// For falling waves: 100% at firstCandlestickHigh, 0% at theoreticalPrice
-			fibonacciLevels[i] = firstCandlestickLevel - (firstCandlestickLevel - theoreticalPrice) * (fibonacciPercentages[i] / 100.0);
+			firstCS = cs2;
+			secondCS = cs1;
 		}
+
+		// Set the position and size of the rectangle
+		rectangleAnnotation->Y = minY;
+		rectangleAnnotation->Height = maxY - minY;
+		rectangleAnnotation->X = firstCS->Index;
+		rectangleAnnotation->Width = secondCS->Index - firstCS->Index;
+
+		// Add the rectangle to the chart
+		chart_stockData->Annotations->Add(rectangleAnnotation);
+
+		// Assign the newly created rectangle to the member variable
+		currentWaveRectangle = rectangleAnnotation;
+
+		return rectangleAnnotation;
 	}
 
-	// Array of candlestick attributes
-	cli::array<double>^ attributes = gcnew cli::array<double>{
-		static_cast<double>(targetCandlestick->Open),
-			static_cast<double>(targetCandlestick->High),
-			static_cast<double>(targetCandlestick->Low),
-			static_cast<double>(targetCandlestick->Close)
-	};
+		   /// <summary>
+		   /// Handles the CheckedChanged event for the "Show Peaks And Valleys" checkbox.
+		   /// </summary>
+		   /// <param name="sender">Event sender.</param>
+		   /// <param name="e">Event arguments.</param>
+	private: System::Void checkBox_showPeaksAndValleys_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+		showAnnotationsForSelectedPattern(nullptr, nullptr);
+	}
 
-	// Check each attribute against all Fibonacci levels
-	for each (double attr in attributes) {
+		   /// <summary>
+		   /// Draws Fibonacci level annotations between two candlesticks on the chart.
+		   /// </summary>
+		   /// <param name="cs1">First candlestick.</param>
+		   /// <param name="cs2">Second candlestick.</param>
+		   /// <returns>void</returns>
+	private: System::Void drawFibonacciLevels(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+		// Validate input
+		if (cs1 == nullptr || cs2 == nullptr) {
+			// Removed MessageBox for logging purposes
+			return;
+		}
+
+		// Determine which candlestick has the higher high and which has the lower low
+		double high = Math::Max((double)cs1->High, (double)cs2->High);
+		double low = Math::Min((double)cs1->Low, (double)cs2->Low);
+
+		// Define Fibonacci levels percentages
+		array<double>^ fibonacciPercentages = gcnew array<double> { 100.0, 76.4, 62.8, 50.0, 38.2, 23.6, 0.0 };
+
+		// Define colors for each level for better distinction
+		array<System::Drawing::Color>^ levelColors = gcnew array<System::Drawing::Color> {
+			System::Drawing::Color::Blue,        // 100%
+				System::Drawing::Color::Blue,        // 76.4%
+				System::Drawing::Color::Blue,        // 62.8%
+				System::Drawing::Color::Blue,        // 50.0%
+				System::Drawing::Color::Blue,        // 38.2%
+				System::Drawing::Color::Blue,        // 23.6%
+				System::Drawing::Color::Blue         // 0.0%
+		};
+
+		// Remove existing Fibonacci annotations to prevent duplication
+		removeFibonacciAndMaxBeautyAnnotations();
+
+		// Determine the x-axis range based on the selected wave
+		int startIndex = Math::Min(cs1->Index, cs2->Index);
+		int endIndex = Math::Max(cs1->Index, cs2->Index);
+
+		// Calculate the y-values for each Fibonacci level
+		array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+		for (int i = 0; i < fibonacciPercentages->Length; i++) {
+			fibonacciLevels[i] = low + (high - low) * (fibonacciPercentages[i] / 100.0);
+		}
+
+		// Draw each Fibonacci level
 		for (int i = 0; i < fibonacciLevels->Length; i++) {
 			double levelValue = fibonacciLevels[i];
-			double difference = Math::Abs(attr - levelValue);
-			if (difference <= allowance) {
-				beautyScore += 1.0;
+			double percentage = fibonacciPercentages[i];
+			System::String^ levelName = "FibLevel_" + percentage.ToString() + "%";
+			System::String^ labelName = "FibLabel_" + percentage.ToString() + "%";
 
-				// Log detailed information
-				detailedInfo->AppendFormat("    Candlestick Date: {0}, Attribute: {1:F2}, Fibonacci Level: {2:F2}, Difference: {3:F2}\n",
-					targetCandlestick->Date->ToShortDateString(),
-					attr,
-					levelValue,
-					difference);
+			// Create HorizontalLineAnnotation for the Fibonacci level
+			DataVisualization::Charting::HorizontalLineAnnotation^ fibLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+			fibLine->Name = "FibLevel_" + percentage.ToString() + "%";
+			fibLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+			fibLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+			fibLine->Y = levelValue;
+			fibLine->LineColor = levelColors[i];
+			fibLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+			fibLine->LineWidth = 2;
+			fibLine->ClipToChartArea = "ChartArea_OHLC";
+			fibLine->IsInfinitive = false;
+			fibLine->IsSizeAlwaysRelative = false;
+			fibLine->X = startIndex; // Slight offset for better visibility
+			fibLine->Width = endIndex - startIndex; // Span the wave
 
-				// Once matched with a Fibonacci level, no need to check other levels for this attribute
-				break;
+			// Add the Fibonacci line to the chart
+			chart_stockData->Annotations->Add(fibLine);
+		}
+	}
+
+		   /// <summary>
+		   /// Removes existing Fibonacci and Max Beauty annotations from the chart.
+		   /// </summary>
+	private: void removeFibonacciAndMaxBeautyAnnotations() {
+		// Create a list to hold annotations to remove
+		System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ annotationsToRemove =
+			gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
+
+		// Identify annotations related to Fibonacci levels and Max Beauty lines
+		for each (DataVisualization::Charting::Annotation ^ ann in chart_stockData->Annotations) {
+			if (ann->Name->StartsWith("FibLevel_") ||
+				ann->Name->StartsWith("FibLabel_") ||
+				ann->Name->StartsWith("MaxBeautyLine") ||
+				ann->Name->StartsWith("MaxBeautyLabel") ||
+				ann->Name->StartsWith("Circle_")) // Remove circle annotations as well
+			{
+				annotationsToRemove->Add(ann);
 			}
 		}
-	}
 
-	return beautyScore;
-}
-
-
-
-
-/// <summary>
-/// Calculates the theoretical beauty scores by varying the wave height and displays them in a chart.
-/// </summary>
-/// <param name="cs1">First selected candlestick.</param>
-/// <param name="cs2">Second selected candlestick.</param>
-/// <param name="maxIncrementPercentage">Maximum percentage to increment/decrement the wave height.</param>
-/// <param name="incrementStep">Step size for each increment/decrement.</param>
-/// <returns>void</returns>
-private: System::Void calculateTheoreticalBeauties(
-	aSmartCandlestick^ cs1,
-	aSmartCandlestick^ cs2,
-	double maxPercentage,
-	double incrementStep)
-{
-	System::Text::StringBuilder^ detailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
-
-	// Validate input
-	if (cs1 == nullptr || cs2 == nullptr) {
-		MessageBox::Show("Invalid candlesticks for calculating theoretical beauty scores.", "Error");
-		return;
-	}
-
-	// Find indices of cs1 and cs2 in filteredListOfCandlesticks
-	int index1 = filteredListOfCandlesticks->IndexOf(cs1);
-	int index2 = filteredListOfCandlesticks->IndexOf(cs2);
-
-	// Validate that both candlesticks are in the list
-	if (index1 == -1 || index2 == -1) {
-		MessageBox::Show("One or both selected candlesticks are not in the filtered list.", "Error");
-		return;
-	}
-
-	// Determine the start and end indices
-	int startIndex = Math::Min(index1, index2);
-	int endIndex = Math::Max(index1, index2);
-
-	// Extract the subset of candlesticks between cs1 and cs2 (inclusive)
-	Generic::List<aSmartCandlestick^>^ subsetCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
-	for (int i = startIndex; i <= endIndex; i++) {
-		subsetCandlesticks->Add(filteredListOfCandlesticks[i]);
-	}
-
-	// Assign firstCs and secondCs based on chronological order
-	aSmartCandlestick^ firstCs = subsetCandlesticks[0];
-	aSmartCandlestick^ secondCs = subsetCandlesticks[subsetCandlesticks->Count - 1];
-
-	// Determine if the wave is rising or falling based on the first and last candlesticks in the subset
-	bool isRising = secondCs->High > firstCs->High;
-
-	// Determine the reference level based on wave direction
-	double firstCandlestickLevel = isRising ? static_cast<double>(firstCs->Low) : static_cast<double>(firstCs->High);
-
-	// Determine the theoretical price based on wave direction
-	double theoreticalPrice = isRising ? static_cast<double>(secondCs->High) : static_cast<double>(secondCs->Low);
-
-	// Calculate the wave range
-	double waveRange = isRising ? (theoreticalPrice - firstCandlestickLevel)
-		: (firstCandlestickLevel - theoreticalPrice);
-	detailedInfo->AppendFormat("Wave Direction: {0}\n", isRising ? "Rising" : "Falling");
-	detailedInfo->AppendFormat("firstCandlestickLevel: {0:F2}\n", firstCandlestickLevel);
-	detailedInfo->AppendFormat("Theoretical Price: {0:F2}\n", theoreticalPrice);
-	detailedInfo->AppendFormat("Wave Range: {0:F2}\n\n", waveRange);
-
-	if (waveRange == 0) {
-		MessageBox::Show("Selected wave has zero range. Cannot calculate theoretical beauty scores.", "Error");
-		return;
-	}
-
-	// Calculate allowance based on waveRange
-	double allowance = waveRange * 0.015;
-	detailedInfo->AppendFormat("Allowance: {0:F4}\n\n", allowance); // Increased precision for logging
-
-	// Define increments for both directions (-maxPercentage to +maxPercentage)
-	int totalIncrements = static_cast<int>(maxPercentage / incrementStep) * 2 + 1; // Including zero
-	array<double>^ incrementPercentages = gcnew array<double>(totalIncrements);
-	array<double>^ adjustedLevels = gcnew array<double>(totalIncrements);
-	array<double>^ beautyScores = gcnew array<double>(totalIncrements);
-
-	// Populate the incrementPercentages and adjustedLevels arrays
-	int idx = 0;
-	for (int i = -static_cast<int>(maxPercentage); i <= static_cast<int>(maxPercentage); i += static_cast<int>(incrementStep)) {
-		double deltaPercentage = static_cast<double>(i);
-		incrementPercentages[idx] = deltaPercentage;
-		if (deltaPercentage < 0) {
-			// For negative percentages, adjust theoreticalPrice downwards
-			adjustedLevels[idx] = theoreticalPrice - (waveRange * (Math::Abs(deltaPercentage) / 100.0));
+		// Remove the identified annotations from the chart
+		for each (DataVisualization::Charting::Annotation ^ ann in annotationsToRemove) {
+			chart_stockData->Annotations->Remove(ann);
 		}
-		else {
-			// For positive percentages, adjust theoreticalPrice upwards
-			adjustedLevels[idx] = theoreticalPrice + (waveRange * (deltaPercentage / 100.0));
-		}
-		idx++;
 	}
 
-	// Initialize beautyScores array
-	for (int i = 0; i < beautyScores->Length; i++) {
-		beautyScores[i] = 0.0;
+		   /// <summary>
+		   /// Adds a circle annotation to the chart at the specified X and Y coordinates.
+		   /// </summary>
+		   /// <param name="name">Unique name for the annotation.</param>
+		   /// <param name="xValue">The X-axis value (date) where the annotation will be placed.</param>
+		   /// <param name="yValue">The Y-axis value (price) where the annotation will be placed.</param>
+		   /// <param name="color">Color of the circle.</param>
+	private: void addCircleAnnotation(String^ name, double xValue, double yValue, System::Drawing::Color color) {
+		// Create a RectangleAnnotation to represent the circle (since EllipseAnnotation is not available)
+		auto circle = gcnew DataVisualization::Charting::RectangleAnnotation();
+		circle->Name = name;
+		circle->X = xValue - 0.05; // Slight offset for centering
+		circle->Y = yValue * 0.997; // Adjust Y position for better alignment
+		circle->Width = 0.1; // Adjust size as needed
+		circle->Height = 1; // Adjust size as needed
+		circle->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		circle->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		circle->LineColor = System::Drawing::Color::Black;
+		circle->LineWidth = 1;
+		circle->BackColor = color;
+		circle->ClipToChartArea = "ChartArea_OHLC";
+		circle->IsSizeAlwaysRelative = false;
+		circle->Alignment = Drawing::ContentAlignment::BottomCenter;
+
+		// Add the circle annotation to the chart
+		chart_stockData->Annotations->Add(circle);
 	}
 
-	// Initialize a list to store detailed info for both directions
-	System::Text::StringBuilder^ allDetailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
+		   /// <summary>
+		   /// Calculates the beauty score for a single candlestick based on Fibonacci levels and allowance.
+		   /// </summary>
+		   /// <param name="firstCs">First candlestick in the wave.</param>
+		   /// <param name="secondCs">Second candlestick in the wave.</param>
+		   /// <param name="targetCandlestick">The candlestick to evaluate.</param>
+		   /// <param name="theoreticalPrice">The theoretical price level.</param>
+		   /// <param name="detailedInfo">StringBuilder for logging detailed information.</param>
+		   /// <returns>The beauty score for the candlestick.</returns>
+	private: double CalculateBeautyForACandlestick(
+		aSmartCandlestick^ firstCs,
+		aSmartCandlestick^ secondCs,
+		aSmartCandlestick^ targetCandlestick,
+		double theoreticalPrice,
+		System::Text::StringBuilder^ detailedInfo)
+	{
+		double beautyScore = 0.0;
 
-	// Iterate through each increment to calculate beauty scores
-	for (int i = 0; i < incrementPercentages->Length; i++) {
-		double currentDeltaPercentage = incrementPercentages[i];
-		double currentTheoreticalPrice = adjustedLevels[i];
-		beautyScores[i] = 0.0;
+		// Determine wave direction based on chronological order
+		bool isRising = secondCs->High > firstCs->High;
 
-		// Log the current theoretical price and direction
-		String^ direction = (currentDeltaPercentage < 0) ? "Downwards" :
-			(currentDeltaPercentage > 0) ? "Upwards" : "No Change";
-		allDetailedInfo->AppendFormat("Increment {0}% ({1}) - Theoretical Price: {2:F2}\n",
-			currentDeltaPercentage, direction, currentTheoreticalPrice);
+		// Identify the first candlestick level based on wave direction
+		double firstCandlestickLevel = isRising ? static_cast<double>(firstCs->Low) : static_cast<double>(firstCs->High);
 
-		// Calculate beauty score for each candlestick in the subset
-		for each (aSmartCandlestick ^ candlestick in subsetCandlesticks) {
-			double beauty = CalculateBeautyForACandlestick(
-				firstCs,
-				secondCs,
-				candlestick,
-				currentTheoreticalPrice,
-				detailedInfo // You can choose to log separately for each direction if needed
-			);
-			beautyScores[i] += beauty;
+		// Calculate wave range
+		double waveRange = isRising ? (theoreticalPrice - firstCandlestickLevel)
+			: (firstCandlestickLevel - theoreticalPrice);
+
+		// Define allowance as 1.5% of the wave range
+		double allowance = waveRange * 0.015;
+
+		// Define Fibonacci percentages
+		cli::array<double>^ fibonacciPercentages = gcnew cli::array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
+
+		// Calculate Fibonacci levels based on wave direction
+		cli::array<double>^ fibonacciLevels = gcnew cli::array<double>(fibonacciPercentages->Length);
+		for (int i = 0; i < fibonacciPercentages->Length; i++) {
+			if (isRising) {
+				// For rising waves: 0% at firstCandlestickLow, 100% at theoreticalPrice
+				fibonacciLevels[i] = firstCandlestickLevel + (theoreticalPrice - firstCandlestickLevel) * (fibonacciPercentages[i] / 100.0);
+			}
+			else {
+				// For falling waves: 100% at firstCandlestickHigh, 0% at theoreticalPrice
+				fibonacciLevels[i] = firstCandlestickLevel - (firstCandlestickLevel - theoreticalPrice) * (fibonacciPercentages[i] / 100.0);
+			}
 		}
 
-		allDetailedInfo->AppendFormat("Total Beauty Score at {0:F2}: {1}\n\n",
-			currentTheoreticalPrice, beautyScores[i]);
+		// Array of candlestick attributes
+		cli::array<double>^ attributes = gcnew cli::array<double>{
+			static_cast<double>(targetCandlestick->Open),
+				static_cast<double>(targetCandlestick->High),
+				static_cast<double>(targetCandlestick->Low),
+				static_cast<double>(targetCandlestick->Close)
+		};
 
-		// **Add Circle Annotations at Increment 0%**
-		if (currentDeltaPercentage == 0) {
-			// Define Fibonacci levels based on the wave direction
-			array<double>^ fibonacciPercentages = gcnew array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
-			array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
-			for (int j = 0; j < fibonacciPercentages->Length; j++) {
-				fibonacciLevels[j] = firstCandlestickLevel + (theoreticalPrice - firstCandlestickLevel) * (fibonacciPercentages[j] / 100.0);
+		// Check each attribute against all Fibonacci levels
+		for each (double attr in attributes) {
+			for (int i = 0; i < fibonacciLevels->Length; i++) {
+				double levelValue = fibonacciLevels[i];
+				double difference = Math::Abs(attr - levelValue);
+				if (difference <= allowance) {
+					beautyScore += 1.0;
+
+					// Log detailed information
+					detailedInfo->AppendFormat("    Candlestick Date: {0}, Attribute: {1:F2}, Fibonacci Level: {2:F2}, Difference: {3:F2}\n",
+						targetCandlestick->Date->ToShortDateString(),
+						attr,
+						levelValue,
+						difference);
+
+					// Once matched with a Fibonacci level, no need to check other levels for this attribute
+					break;
+				}
+			}
+		}
+
+		return beautyScore;
+	}
+
+		   /// <summary>
+		   /// Calculates the theoretical beauty scores by varying the wave height and displays them in a chart.
+		   /// </summary>
+		   /// <param name="cs1">First selected candlestick.</param>
+		   /// <param name="cs2">Second selected candlestick.</param>
+		   /// <param name="maxPercentage">Maximum percentage to increment/decrement the wave height.</param>
+		   /// <param name="incrementStep">Step size for each increment/decrement.</param>
+	private: System::Void calculateTheoreticalBeauties(
+		aSmartCandlestick^ cs1,
+		aSmartCandlestick^ cs2,
+		double maxPercentage,
+		double incrementStep)
+	{
+		System::Text::StringBuilder^ detailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
+
+		// Validate input
+		if (cs1 == nullptr || cs2 == nullptr) {
+			// Removed MessageBox for logging purposes
+			return;
+		}
+
+		// Find indices of cs1 and cs2 in filteredListOfCandlesticks
+		int index1 = filteredListOfCandlesticks->IndexOf(cs1);
+		int index2 = filteredListOfCandlesticks->IndexOf(cs2);
+
+		// Validate that both candlesticks are in the list
+		if (index1 == -1 || index2 == -1) {
+			// Removed MessageBox for logging purposes
+			return;
+		}
+
+		// Determine the start and end indices
+		int startIndex = Math::Min(index1, index2);
+		int endIndex = Math::Max(index1, index2);
+
+		// Extract the subset of candlesticks between cs1 and cs2 (inclusive)
+		Generic::List<aSmartCandlestick^>^ subsetCandlesticks = gcnew Generic::List<aSmartCandlestick^>();
+		for (int i = startIndex; i <= endIndex; i++) {
+			subsetCandlesticks->Add(filteredListOfCandlesticks[i]);
+		}
+
+		// Assign firstCs and secondCs based on chronological order
+		aSmartCandlestick^ firstCs = subsetCandlesticks[0];
+		aSmartCandlestick^ secondCs = subsetCandlesticks[subsetCandlesticks->Count - 1];
+
+		// Determine if the wave is rising or falling based on the first and last candlesticks in the subset
+		bool isRising = secondCs->High > firstCs->High;
+
+		// Determine the reference level based on wave direction
+		double firstCandlestickLevel = isRising ? static_cast<double>(firstCs->Low) : static_cast<double>(firstCs->High);
+
+		// Determine the theoretical price based on wave direction
+		double theoreticalPrice = isRising ? static_cast<double>(secondCs->High) : static_cast<double>(secondCs->Low);
+
+		// Calculate the wave range
+		double waveRange = isRising ? (theoreticalPrice - firstCandlestickLevel)
+			: (firstCandlestickLevel - theoreticalPrice);
+		detailedInfo->AppendFormat("Wave Direction: {0}\n", isRising ? "Rising" : "Falling");
+		detailedInfo->AppendFormat("firstCandlestickLevel: {0:F2}\n", firstCandlestickLevel);
+		detailedInfo->AppendFormat("Theoretical Price: {0:F2}\n", theoreticalPrice);
+		detailedInfo->AppendFormat("Wave Range: {0:F2}\n\n", waveRange);
+
+		if (waveRange == 0) {
+			// Removed MessageBox for logging purposes
+			return;
+		}
+
+		// Calculate allowance based on waveRange
+		double allowance = waveRange * 0.015;
+		detailedInfo->AppendFormat("Allowance: {0:F4}\n\n", allowance); // Increased precision for logging
+
+		// Define increments for both directions (-maxPercentage to +maxPercentage)
+		int totalIncrements = static_cast<int>(maxPercentage / incrementStep) * 2 + 1; // Including zero
+		array<double>^ incrementPercentages = gcnew array<double>(totalIncrements);
+		array<double>^ adjustedLevels = gcnew array<double>(totalIncrements);
+		array<double>^ beautyScores = gcnew array<double>(totalIncrements);
+
+		// Populate the incrementPercentages and adjustedLevels arrays
+		int idx = 0;
+		for (int i = -static_cast<int>(maxPercentage); i <= static_cast<int>(maxPercentage); i += static_cast<int>(incrementStep)) {
+			double deltaPercentage = static_cast<double>(i);
+			incrementPercentages[idx] = deltaPercentage;
+			if (deltaPercentage < 0) {
+				// For negative percentages, adjust theoreticalPrice downwards
+				adjustedLevels[idx] = theoreticalPrice - (waveRange * (Math::Abs(deltaPercentage) / 100.0));
+			}
+			else {
+				// For positive percentages, adjust theoreticalPrice upwards
+				adjustedLevels[idx] = theoreticalPrice + (waveRange * (deltaPercentage / 100.0));
+			}
+			idx++;
+		}
+
+		// Initialize beautyScores array
+		for (int i = 0; i < beautyScores->Length; i++) {
+			beautyScores[i] = 0.0;
+		}
+
+		// Initialize a list to store detailed info for both directions
+		System::Text::StringBuilder^ allDetailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
+
+		// Iterate through each increment to calculate beauty scores
+		for (int i = 0; i < incrementPercentages->Length; i++) {
+			double currentDeltaPercentage = incrementPercentages[i];
+			double currentTheoreticalPrice = adjustedLevels[i];
+			beautyScores[i] = 0.0;
+
+			// Log the current theoretical price and direction
+			String^ direction = (currentDeltaPercentage < 0) ? "Downwards" :
+				(currentDeltaPercentage > 0) ? "Upwards" : "No Change";
+			allDetailedInfo->AppendFormat("Increment {0}% ({1}) - Theoretical Price: {2:F2}\n",
+				currentDeltaPercentage, direction, currentTheoreticalPrice);
+
+			// Calculate beauty score for each candlestick in the subset
+			for each (aSmartCandlestick ^ candlestick in subsetCandlesticks) {
+				double beauty = CalculateBeautyForACandlestick(
+					firstCs,
+					secondCs,
+					candlestick,
+					currentTheoreticalPrice,
+					detailedInfo // Logging detailed information
+				);
+				beautyScores[i] += beauty;
 			}
 
-			// Iterate through each candlestick to check for matches
-			for (int k = 0; k < subsetCandlesticks->Count; k++) {
-				aSmartCandlestick^ candlestick = subsetCandlesticks[k];
-				// Check each attribute: Open, High, Low, Close
-				array<double>^ attributes = gcnew array<double> {
-					static_cast<double>(candlestick->Open),
-						static_cast<double>(candlestick->High),
-						static_cast<double>(candlestick->Low),
-						static_cast<double>(candlestick->Close)
-				};
-				array<String^>^ attributeNames = gcnew array<String^> { "Open", "High", "Low", "Close" };
+			allDetailedInfo->AppendFormat("Total Beauty Score at {0:F2}: {1}\n\n",
+				currentTheoreticalPrice, beautyScores[i]);
 
-				for (int attrIdx = 0; attrIdx < attributes->Length; attrIdx++) {
-					double attrValue = attributes[attrIdx];
-					String^ attrName = attributeNames[attrIdx];
+			// **Add Circle Annotations at Increment 0%**
+			if (currentDeltaPercentage == 0) {
+				// Define Fibonacci levels based on the wave direction
+				array<double>^ fibonacciPercentages = gcnew array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
+				array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
+				for (int j = 0; j < fibonacciPercentages->Length; j++) {
+					fibonacciLevels[j] = firstCandlestickLevel + (theoreticalPrice - firstCandlestickLevel) * (fibonacciPercentages[j] / 100.0);
+				}
 
-					for (int fibIdx = 0; fibIdx < fibonacciLevels->Length; fibIdx++) {
-						double fibLevel = fibonacciLevels[fibIdx];
-						// Updated matching condition using allowance
-						if (Math::Abs(attrValue - fibLevel) <= allowance) {
-							// Create a unique name for the circle annotation
-							String^ circleName = "Circle_" + attrName + "_" + k.ToString() + "_" + fibIdx.ToString();
-							// Add the circle annotation
-							addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Blue);
-							// Optionally, log this event
-							allDetailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
-								attrName,
-								attrValue,
-								k,
-								fibonacciPercentages[fibIdx],
-								fibLevel);
+				// Iterate through each candlestick to check for matches
+				for (int k = 0; k < subsetCandlesticks->Count; k++) {
+					aSmartCandlestick^ candlestick = subsetCandlesticks[k];
+					// Check each attribute: Open, High, Low, Close
+					array<double>^ attributes = gcnew array<double> {
+						static_cast<double>(candlestick->Open),
+							static_cast<double>(candlestick->High),
+							static_cast<double>(candlestick->Low),
+							static_cast<double>(candlestick->Close)
+					};
+					array<String^>^ attributeNames = gcnew array<String^> { "Open", "High", "Low", "Close" };
+
+					for (int attrIdx = 0; attrIdx < attributes->Length; attrIdx++) {
+						double attrValue = attributes[attrIdx];
+						String^ attrName = attributeNames[attrIdx];
+
+						for (int fibIdx = 0; fibIdx < fibonacciLevels->Length; fibIdx++) {
+							double fibLevel = fibonacciLevels[fibIdx];
+							// Matching condition using allowance
+							if (Math::Abs(attrValue - fibLevel) <= allowance) {
+								// Create a unique name for the circle annotation
+								String^ circleName = "Circle_" + attrName + "_" + k.ToString() + "_" + fibIdx.ToString();
+								// Add the circle annotation
+								addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Blue);
+								// Log this event
+								allDetailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
+									attrName,
+									attrValue,
+									k,
+									fibonacciPercentages[fibIdx],
+									fibLevel);
+							}
 						}
 					}
 				}
 			}
 		}
+
+		// Plot the beauty scores on the existing Series_Beauty
+		// First, clear existing points
+		chart_stockData->Series["Series_Beauty"]->Points->Clear();
+
+		for (int i = 0; i < beautyScores->Length; i++) {
+			double deltaPercentage = incrementPercentages[i];
+			double beauty = beautyScores[i];
+			double price = adjustedLevels[i];
+
+			// Create a new data point
+			System::Windows::Forms::DataVisualization::Charting::DataPoint^ dp = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
+
+			// Set X value as the adjusted price
+			dp->SetValueXY(price, beauty);
+
+			// Assign different colors based on direction
+			if (deltaPercentage > 0) {
+				// Upwards increments - Green
+				dp->Color = System::Drawing::Color::Green;
+			}
+			else if (deltaPercentage < 0) {
+				// Downwards increments - Red
+				dp->Color = System::Drawing::Color::Red;
+			}
+			else {
+				// No change - Blue
+				dp->Color = System::Drawing::Color::Blue;
+			}
+
+			// Optionally, set a tooltip or label for better UX
+			dp->ToolTip = String::Format("Price: {0:F2}\nBeauty Score: {1}", price, beauty);
+
+			// Add the data point to the series
+			chart_stockData->Series["Series_Beauty"]->Points->Add(dp);
+		}
+
+		// Customize the beauty scores chart
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
+		double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
+		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Interval = incrementStep; // Optional
+
+		// Find the maximum beauty score and its corresponding price level
+		double maxBeauty = 0.0;
+		int maxIndex = 0;
+		for (int i = 0; i < beautyScores->Length; i++) {
+			if (beautyScores[i] > maxBeauty) {
+				maxBeauty = beautyScores[i];
+				maxIndex = i;
+			}
+		}
+		double maxBeautyLevel = adjustedLevels[maxIndex];
+
+		// Remove any existing annotations related to the maximum beauty line
+		System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ existingMaxBeautyAnnotations =
+			gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
+
+		for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
+			if (annotation->Name->StartsWith("MaxBeautyLine") || annotation->Name->StartsWith("MaxBeautyLabel")) {
+				existingMaxBeautyAnnotations->Add(annotation);
+			}
+		}
+
+		for each (DataVisualization::Charting::Annotation ^ annotation in existingMaxBeautyAnnotations) {
+			chart_stockData->Annotations->Remove(annotation);
+		}
+
+		// Create and configure the HorizontalLineAnnotation for Max Beauty Level
+		auto maxBeautyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
+		maxBeautyLine->Name = "MaxBeautyLine";
+		maxBeautyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		maxBeautyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		maxBeautyLine->Y = maxBeautyLevel; // Set Y to the price level with max beauty
+		maxBeautyLine->LineColor = System::Drawing::Color::Purple; // Distinct color
+		maxBeautyLine->LineWidth = 2;
+		maxBeautyLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
+		maxBeautyLine->IsInfinitive = true; // Extend across the entire X-axis
+		maxBeautyLine->ToolTip = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
+		maxBeautyLine->ClipToChartArea = "ChartArea_OHLC";
+
+		// Optionally, add a label to the line
+		auto maxBeautyLabel = gcnew DataVisualization::Charting::TextAnnotation();
+		maxBeautyLabel->Name = "MaxBeautyLabel";
+		maxBeautyLabel->Text = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
+		maxBeautyLabel->ForeColor = System::Drawing::Color::Black;
+		maxBeautyLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
+		maxBeautyLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
+		maxBeautyLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
+		maxBeautyLabel->Y = maxBeautyLevel;
+		maxBeautyLabel->X = chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum; // Position at the end of the X-axis
+		maxBeautyLabel->Alignment = Drawing::ContentAlignment::MiddleRight;
+
+		// Add the annotations to the chart
+		chart_stockData->Annotations->Add(maxBeautyLine);
+		chart_stockData->Annotations->Add(maxBeautyLabel);
+
+		// Refresh the chart to display the new data
+		chart_stockData->Invalidate();
 	}
 
-	// Plot the beauty scores on the existing Series_Beauty
-	// First, clear existing points
-	chart_stockData->Series["Series_Beauty"]->Points->Clear();
+		   /// <summary>
+		   /// Handles the validation and processing of a valid wave selection.
+		   /// </summary>
+		   /// <param name="cs1">First candlestick of the wave.</param>
+		   /// <param name="cs2">Second candlestick of the wave.</param>
+	private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
+		// Draw a rectangle between the snapped candlesticks
+		drawRectangleBetweenCandlesticks(cs1, cs2);
 
-	for (int i = 0; i < beautyScores->Length; i++) {
-		double deltaPercentage = incrementPercentages[i];
-		double beauty = beautyScores[i];
-		double price = adjustedLevels[i];
+		// Draw Fibonacci levels between the snapped candlesticks
+		drawFibonacciLevels(cs1, cs2);
 
-		// Create a new data point
-		System::Windows::Forms::DataVisualization::Charting::DataPoint^ dp = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
-
-		// Set X value as the adjusted price
-		dp->SetValueXY(price, beauty);
-
-		// Assign different colors based on direction
-		if (deltaPercentage > 0) {
-			// Upwards increments - Green
-			dp->Color = System::Drawing::Color::Green;
-		}
-		else if (deltaPercentage < 0) {
-			// Downwards increments - Red
-			dp->Color = System::Drawing::Color::Red;
-		}
-		else {
-			// No change - Blue
-			dp->Color = System::Drawing::Color::Blue;
-		}
-
-		// Optionally, set a tooltip or label for better UX
-		dp->ToolTip = String::Format("Price: {0:F2}\nBeauty Score: {1}", price, beauty);
-
-		// Add the data point to the series
-		chart_stockData->Series["Series_Beauty"]->Points->Add(dp);
+		// Calculate and display the beauty scores from -23.6% to +23.6% of wave end
+		calculateTheoreticalBeauties(cs1, cs2, 23.6, 1);
 	}
 
-	// Customize the beauty scores chart
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
-	double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
-	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Interval = incrementStep; // Optional
-
-	// Find the maximum beauty score and its corresponding price level
-	double maxBeauty = 0.0;
-	int maxIndex = 0;
-	for (int i = 0; i < beautyScores->Length; i++) {
-		if (beautyScores[i] > maxBeauty) {
-			maxBeauty = beautyScores[i];
-			maxIndex = i;
-		}
-	}
-	double maxBeautyLevel = adjustedLevels[maxIndex];
-
-	// Remove any existing annotations related to the maximum beauty line
-	System::Collections::Generic::List<DataVisualization::Charting::Annotation^>^ existingMaxBeautyAnnotations =
-		gcnew System::Collections::Generic::List<DataVisualization::Charting::Annotation^>();
-
-	for each (DataVisualization::Charting::Annotation ^ annotation in chart_stockData->Annotations) {
-		if (annotation->Name->StartsWith("MaxBeautyLine") || annotation->Name->StartsWith("MaxBeautyLabel")) {
-			existingMaxBeautyAnnotations->Add(annotation);
-		}
-	}
-
-	for each (DataVisualization::Charting::Annotation ^ annotation in existingMaxBeautyAnnotations) {
-		chart_stockData->Annotations->Remove(annotation);
-	}
-
-	// Create and configure the HorizontalLineAnnotation for Max Beauty Level
-	auto maxBeautyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
-	maxBeautyLine->Name = "MaxBeautyLine";
-	maxBeautyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-	maxBeautyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-	maxBeautyLine->Y = maxBeautyLevel; // Set Y to the price level with max beauty
-	maxBeautyLine->LineColor = System::Drawing::Color::Purple; // Distinct color
-	maxBeautyLine->LineWidth = 2;
-	maxBeautyLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
-	maxBeautyLine->IsInfinitive = true; // Extend across the entire X-axis
-	maxBeautyLine->ToolTip = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
-	maxBeautyLine->ClipToChartArea = "ChartArea_OHLC";
-
-	// Optionally, add a label to the line
-	auto maxBeautyLabel = gcnew DataVisualization::Charting::TextAnnotation();
-	maxBeautyLabel->Name = "MaxBeautyLabel";
-	maxBeautyLabel->Text = "Max Beauty Level: " + maxBeautyLevel.ToString("F2");
-	maxBeautyLabel->ForeColor = System::Drawing::Color::Black;
-	maxBeautyLabel->Font = gcnew System::Drawing::Font("Arial", 8, System::Drawing::FontStyle::Bold);
-	maxBeautyLabel->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
-	maxBeautyLabel->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
-	maxBeautyLabel->Y = maxBeautyLevel;
-	maxBeautyLabel->X = chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum; // Position at the end of the X-axis
-	maxBeautyLabel->Alignment = Drawing::ContentAlignment::MiddleRight;
-
-	// Add the annotations to the chart
-	chart_stockData->Annotations->Add(maxBeautyLine);
-	chart_stockData->Annotations->Add(maxBeautyLabel);
-
-	// Refresh the chart to display the new data
-	chart_stockData->Invalidate();
-
-	// Display detailed results in a message box
-	//MessageBox::Show(allDetailedInfo->ToString(), "Theoretical Beauty Scores");
-}
-
-
-
-private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick^ cs2) {
-	// Draw rectangle between the snapped candlesticks
-	drawRectangleBetweenCandlesticks(cs1, cs2);
-
-	// Draw Fibonacci levels between the snapped candlesticks
-	drawFibonacciLevels(cs1, cs2);
-
-	// Calculate and display the average beauty score
-	calculateTheoreticalBeauties(cs1, cs2, 23.6, 1);
-}
 };
 }
