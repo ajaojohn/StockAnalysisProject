@@ -1744,7 +1744,7 @@ private: double CalculateBeautyForACandlestick(
 private: System::Void calculateTheoreticalBeauties(
 	aSmartCandlestick^ cs1,
 	aSmartCandlestick^ cs2,
-	double maxIncrementPercentage,
+	double maxPercentage,
 	double incrementStep)
 {
 	System::Text::StringBuilder^ detailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
@@ -1805,35 +1805,48 @@ private: System::Void calculateTheoreticalBeauties(
 	double allowance = waveRange * 0.015;
 	detailedInfo->AppendFormat("Allowance: {0:F4}\n\n", allowance); // Increased precision for logging
 
-	// Define increments (e.g., 0%, 1%, ..., maxIncrementPercentage)
-	int totalIncrements = static_cast<int>(maxIncrementPercentage / incrementStep) + 1;
+	// Define increments for both directions (-maxPercentage to +maxPercentage)
+	int totalIncrements = static_cast<int>(maxPercentage / incrementStep) * 2 + 1; // Including zero
 	array<double>^ incrementPercentages = gcnew array<double>(totalIncrements);
 	array<double>^ adjustedLevels = gcnew array<double>(totalIncrements);
 	array<double>^ beautyScores = gcnew array<double>(totalIncrements);
 
-	for (int i = 0; i < totalIncrements; i++) {
-		incrementPercentages[i] = i * incrementStep; // 0%, 1%, ..., maxIncrementPercentage
-		if (isRising) {
-			// For rising waves, theoreticalPrice increases
-			adjustedLevels[i] = theoreticalPrice + (waveRange * (incrementPercentages[i] / 100.0));
+	// Populate the incrementPercentages and adjustedLevels arrays
+	int idx = 0;
+	for (int i = -static_cast<int>(maxPercentage); i <= static_cast<int>(maxPercentage); i += static_cast<int>(incrementStep)) {
+		double deltaPercentage = static_cast<double>(i);
+		incrementPercentages[idx] = deltaPercentage;
+		if (deltaPercentage < 0) {
+			// For negative percentages, adjust theoreticalPrice downwards
+			adjustedLevels[idx] = theoreticalPrice - (waveRange * (Math::Abs(deltaPercentage) / 100.0));
 		}
 		else {
-			// For falling waves, theoreticalPrice decreases
-			adjustedLevels[i] = theoreticalPrice - (waveRange * (incrementPercentages[i] / 100.0));
+			// For positive percentages, adjust theoreticalPrice upwards
+			adjustedLevels[idx] = theoreticalPrice + (waveRange * (deltaPercentage / 100.0));
 		}
+		idx++;
 	}
 
-	// Iterate through each increment to calculate beauty scores
-	for (int i = 0; i < totalIncrements; i++) {
-		double currentTheoreticalPrice = adjustedLevels[i];
+	// Initialize beautyScores array
+	for (int i = 0; i < beautyScores->Length; i++) {
+		beautyScores[i] = 0.0;
+	}
 
-		// Initialize beauty score for this increment
+	// Initialize a list to store detailed info for both directions
+	System::Text::StringBuilder^ allDetailedInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
+
+	// Iterate through each increment to calculate beauty scores
+	for (int i = 0; i < incrementPercentages->Length; i++) {
+		double currentDeltaPercentage = incrementPercentages[i];
+		double currentTheoreticalPrice = adjustedLevels[i];
 		beautyScores[i] = 0.0;
 
-		// Log the current theoretical price
-		detailedInfo->AppendFormat("Increment {0}% - Theoretical Price: {1:F2}\n", incrementPercentages[i], currentTheoreticalPrice);
+		// Log the current theoretical price and direction
+		String^ direction = (currentDeltaPercentage < 0) ? "Downwards" :
+			(currentDeltaPercentage > 0) ? "Upwards" : "No Change";
+		allDetailedInfo->AppendFormat("Increment {0}% ({1}) - Theoretical Price: {2:F2}\n",
+			currentDeltaPercentage, direction, currentTheoreticalPrice);
 
-		auto subsetInfo = gcnew System::Text::StringBuilder("Theoretical Beauty Scores:\n\n");
 		// Calculate beauty score for each candlestick in the subset
 		for each (aSmartCandlestick ^ candlestick in subsetCandlesticks) {
 			double beauty = CalculateBeautyForACandlestick(
@@ -1841,15 +1854,16 @@ private: System::Void calculateTheoreticalBeauties(
 				secondCs,
 				candlestick,
 				currentTheoreticalPrice,
-				subsetInfo
+				detailedInfo // You can choose to log separately for each direction if needed
 			);
 			beautyScores[i] += beauty;
 		}
 
-		detailedInfo->AppendFormat("Total Beauty Score at {0:F2}: {1}\n\n", currentTheoreticalPrice, beautyScores[i]);
+		allDetailedInfo->AppendFormat("Total Beauty Score at {0:F2}: {1}\n\n",
+			currentTheoreticalPrice, beautyScores[i]);
 
 		// **Add Circle Annotations at Increment 0%**
-		if (i == 0) {
+		if (currentDeltaPercentage == 0) {
 			// Define Fibonacci levels based on the wave direction
 			array<double>^ fibonacciPercentages = gcnew array<double> { 0.0, 23.6, 38.2, 50.0, 61.8, 76.4, 100.0 };
 			array<double>^ fibonacciLevels = gcnew array<double>(fibonacciPercentages->Length);
@@ -1882,7 +1896,7 @@ private: System::Void calculateTheoreticalBeauties(
 							// Add the circle annotation
 							addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Blue);
 							// Optionally, log this event
-							detailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
+							allDetailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
 								attrName,
 								attrValue,
 								k,
@@ -1895,15 +1909,39 @@ private: System::Void calculateTheoreticalBeauties(
 		}
 	}
 
-	// Plot the beauty scores on the Series_Beauty
+	// Plot the beauty scores on the existing Series_Beauty
+	// First, clear existing points
 	chart_stockData->Series["Series_Beauty"]->Points->Clear();
-	for (int i = 0; i < totalIncrements; i++) {
-		double price = adjustedLevels[i];
-		double beauty = beautyScores[i];
 
-		// For Column chart, set X-value as category (Price) and Y-value as Beauty Score
+	for (int i = 0; i < beautyScores->Length; i++) {
+		double deltaPercentage = incrementPercentages[i];
+		double beauty = beautyScores[i];
+		double price = adjustedLevels[i];
+
+		// Create a new data point
 		System::Windows::Forms::DataVisualization::Charting::DataPoint^ dp = gcnew System::Windows::Forms::DataVisualization::Charting::DataPoint();
-		dp->SetValueXY(price, beauty); // X=Price, Y=Beauty Score
+
+		// Set X value as the adjusted price
+		dp->SetValueXY(price, beauty);
+
+		// Assign different colors based on direction
+		if (deltaPercentage > 0) {
+			// Upwards increments - Green
+			dp->Color = System::Drawing::Color::Green;
+		}
+		else if (deltaPercentage < 0) {
+			// Downwards increments - Red
+			dp->Color = System::Drawing::Color::Red;
+		}
+		else {
+			// No change - Blue
+			dp->Color = System::Drawing::Color::Blue;
+		}
+
+		// Optionally, set a tooltip or label for better UX
+		dp->ToolTip = String::Format("Price: {0:F2}\nBeauty Score: {1}", price, beauty);
+
+		// Add the data point to the series
 		chart_stockData->Series["Series_Beauty"]->Points->Add(dp);
 	}
 
@@ -1911,12 +1949,6 @@ private: System::Void calculateTheoreticalBeauties(
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->Visible = true;
 	double maximumBeautyScore = (secondCs->Index - firstCs->Index + 1) * 4;
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Title = "Price";
-	if (isRising) {
-		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Minimum = theoreticalPrice; // Adjust based on your data
-	}
-	else {
-		chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum = theoreticalPrice; // Adjust based on your data
-	}
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->LabelStyle->Format = "F0";
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Title = "Beauty Score (Maximum: " + maximumBeautyScore.ToString() + ")";
 	chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisY->Minimum = 0; // Adjust based on your data
@@ -1947,13 +1979,13 @@ private: System::Void calculateTheoreticalBeauties(
 		chart_stockData->Annotations->Remove(annotation);
 	}
 
-	// Create and configure the HorizontalLineAnnotation
+	// Create and configure the HorizontalLineAnnotation for Max Beauty Level
 	auto maxBeautyLine = gcnew DataVisualization::Charting::HorizontalLineAnnotation();
 	maxBeautyLine->Name = "MaxBeautyLine";
 	maxBeautyLine->AxisX = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisX;
 	maxBeautyLine->AxisY = chart_stockData->ChartAreas["ChartArea_OHLC"]->AxisY;
 	maxBeautyLine->Y = maxBeautyLevel; // Set Y to the price level with max beauty
-	maxBeautyLine->LineColor = System::Drawing::Color::Red; // Distinct color
+	maxBeautyLine->LineColor = System::Drawing::Color::Purple; // Distinct color
 	maxBeautyLine->LineWidth = 2;
 	maxBeautyLine->LineDashStyle = DataVisualization::Charting::ChartDashStyle::Dash;
 	maxBeautyLine->IsInfinitive = true; // Extend across the entire X-axis
@@ -1971,20 +2003,17 @@ private: System::Void calculateTheoreticalBeauties(
 	maxBeautyLabel->Y = maxBeautyLevel;
 	maxBeautyLabel->X = chart_stockData->ChartAreas["ChartArea_Beauty"]->AxisX->Maximum; // Position at the end of the X-axis
 	maxBeautyLabel->Alignment = Drawing::ContentAlignment::MiddleRight;
-	maxBeautyLabel->ToolTip = "Maximum Beauty Score";
 
 	// Add the annotations to the chart
 	chart_stockData->Annotations->Add(maxBeautyLine);
 	chart_stockData->Annotations->Add(maxBeautyLabel);
 
-
 	// Refresh the chart to display the new data
 	chart_stockData->Invalidate();
 
 	// Display detailed results in a message box
-	MessageBox::Show(detailedInfo->ToString(), "Theoretical Beauty Scores");
+	//MessageBox::Show(allDetailedInfo->ToString(), "Theoretical Beauty Scores");
 }
-
 
 
 
@@ -1996,7 +2025,7 @@ private: System::Void onValidSelection(aSmartCandlestick^ cs1, aSmartCandlestick
 	drawFibonacciLevels(cs1, cs2);
 
 	// Calculate and display the average beauty score
-	calculateTheoreticalBeauties(cs1, cs2, 25, 1);
+	calculateTheoreticalBeauties(cs1, cs2, 23.6, 1);
 }
 };
 }
