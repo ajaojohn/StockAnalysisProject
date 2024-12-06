@@ -155,7 +155,6 @@ namespace CppCLRWinFormsProject {
 			System::Windows::Forms::DataVisualization::Charting::Legend^ legend1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Legend());
 			System::Windows::Forms::DataVisualization::Charting::Series^ series1 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			System::Windows::Forms::DataVisualization::Charting::Series^ series2 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
-			System::Windows::Forms::DataVisualization::Charting::Series^ series3 = (gcnew System::Windows::Forms::DataVisualization::Charting::Series());
 			this->button_load = (gcnew System::Windows::Forms::Button());
 			this->openFileDialog_load = (gcnew System::Windows::Forms::OpenFileDialog());
 			this->dateTimePicker_start = (gcnew System::Windows::Forms::DateTimePicker());
@@ -251,17 +250,8 @@ namespace CppCLRWinFormsProject {
 			series2->IsValueShownAsLabel = true;
 			series2->Legend = L"Legend1";
 			series2->Name = L"Series_Beauty";
-			series3->ChartArea = L"ChartArea_OHLC";
-			series3->ChartType = System::Windows::Forms::DataVisualization::Charting::SeriesChartType::Point;
-			series3->IsVisibleInLegend = false;
-			series3->Legend = L"Legend1";
-			series3->MarkerColor = System::Drawing::Color::Magenta;
-			series3->MarkerSize = 10;
-			series3->MarkerStyle = System::Windows::Forms::DataVisualization::Charting::MarkerStyle::Circle;
-			series3->Name = L"Series_Circles";
 			this->chart_stockData->Series->Add(series1);
 			this->chart_stockData->Series->Add(series2);
-			this->chart_stockData->Series->Add(series3);
 			this->chart_stockData->Size = System::Drawing::Size(1004, 597);
 			this->chart_stockData->TabIndex = 4;
 			this->chart_stockData->Text = L"Stock Data";
