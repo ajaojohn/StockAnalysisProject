@@ -1361,65 +1361,78 @@ private:
 	}
 
 		   /// <summary>
-		   /// Handles the selection of two candlesticks and performs validation and calculations.
-		   /// </summary>
-		   /// <param name="csStart">Start candlestick.</param>
-		   /// <param name="csEnd">End candlestick.</param>
-	private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
-		if (csStart != nullptr && csEnd != nullptr) {
-			// Find the nearest peak or valley to the start candlestick
-			aSmartCandlestick^ snappedStart = findNearestPeakOrValley(csStart, SNAP_MARGIN);
-			// Use the end candlestick as is (could also snap if needed)
-			aSmartCandlestick^ snappedEnd = csEnd;
+/// Handles the selection of two candlesticks and performs validation and calculations.
+/// </summary>
+/// <param name="csStart">Start candlestick.</param>
+/// <param name="csEnd">End candlestick.</param>
+private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSmartCandlestick^ csEnd) {
+	if (csStart != nullptr && csEnd != nullptr) {
+		// Find the nearest peak or valley to the start candlestick
+		aSmartCandlestick^ snappedStart = findNearestPeakOrValley(csStart, SNAP_MARGIN);
+		// Use the end candlestick as is (could also snap if needed)
+		aSmartCandlestick^ snappedEnd = csEnd;
 
-			// Check if both snapped candlesticks are found
-			if (snappedStart != nullptr && snappedEnd != nullptr) {
-				// Unhighlight the initially selected candlesticks
-				if (selectedDataPointStart != nullptr) {
-					highlightDataPoint(selectedDataPointStart, false);
-				}
-				if (selectedDataPointEnd != nullptr) {
-					highlightDataPoint(selectedDataPointEnd, false);
-				}
+		// Check if both snapped candlesticks are found
+		if (snappedStart != nullptr && snappedEnd != nullptr) {
+			// Unhighlight the initially selected candlesticks
+			if (selectedDataPointStart != nullptr) {
+				highlightDataPoint(selectedDataPointStart, false);
+			}
+			if (selectedDataPointEnd != nullptr) {
+				highlightDataPoint(selectedDataPointEnd, false);
+			}
 
-				// Find the DataPoints corresponding to the snapped candlesticks
-				DataVisualization::Charting::DataPoint^ snappedStartPoint = findCandlestickDataPoint(snappedStart);
-				DataVisualization::Charting::DataPoint^ snappedEndPoint = findCandlestickDataPoint(snappedEnd);
+			// Find the DataPoints corresponding to the snapped candlesticks
+			DataVisualization::Charting::DataPoint^ snappedStartPoint = findCandlestickDataPoint(snappedStart);
+			DataVisualization::Charting::DataPoint^ snappedEndPoint = findCandlestickDataPoint(snappedEnd);
 
-				// Highlight the snapped candlesticks
-				if (snappedStartPoint != nullptr) {
-					highlightDataPoint(snappedStartPoint, true);
-				}
-				if (snappedEndPoint != nullptr) {
-					highlightDataPoint(snappedEndPoint, true);
-				}
+			// Highlight the snapped candlesticks
+			if (snappedStartPoint != nullptr) {
+				highlightDataPoint(snappedStartPoint, true);
+			}
+			if (snappedEndPoint != nullptr) {
+				highlightDataPoint(snappedEndPoint, true);
+			}
 
-				// Update selected candlesticks and DataPoints
-				selectedCandlestickStart = snappedStart;
-				selectedCandlestickEnd = snappedEnd;
-				selectedDataPointStart = snappedStartPoint;
-				selectedDataPointEnd = snappedEndPoint;
+			// Update selected candlesticks and DataPoints
+			selectedCandlestickStart = snappedStart;
+			selectedCandlestickEnd = snappedEnd;
+			selectedDataPointStart = snappedStartPoint;
+			selectedDataPointEnd = snappedEndPoint;
 
-				// Validate the selected wave
-				if (isValidWave(snappedStart, snappedEnd)) {
-					// Perform calculations and annotations for a valid wave
-					onValidSelection(snappedStart, snappedEnd);
-				}
-				else {
-					// Draw a rectangle between the selected candlesticks and notify the user
-					drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
-					// Show error message
-					MessageBox::Show("Invalid wave selected.", "Error");
-					// Removed MessageBox for logging purposes
-					resetWaveSelections();
-				}
+			// Validate the selected wave
+			if (isValidWave(snappedStart, snappedEnd)) {
+				// Perform calculations and annotations for a valid wave
+				onValidSelection(snappedStart, snappedEnd);
 			}
 			else {
-				// Notify the user that no nearby peak or valley was found
-				// Removed MessageBox for logging purposes
+				// Draw a rectangle between the selected candlesticks
+				drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
+
+				// Show error message indicating invalid wave selection
+				MessageBox::Show(
+					"Invalid wave selected. Please ensure that the wave meets the required criteria.",
+					"Invalid Wave Selection",
+					MessageBoxButtons::OK,
+					MessageBoxIcon::Error
+				);
+
+				// Reset wave selections to allow the user to make a new selection
+				resetWaveSelections();
 			}
 		}
+		else {
+			// Notify the user that no nearby peak or valley was found
+			MessageBox::Show(
+				"No nearby peak or valley was found within the snapping margin. Please try selecting another wave.",
+				"Selection Error",
+				MessageBoxButtons::OK,
+				MessageBoxIcon::Warning
+			);
+		}
 	}
+}
+
 
 		   /// <summary>
 		   /// Finds the DataPoint associated with a given candlestick.
