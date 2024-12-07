@@ -1513,6 +1513,15 @@ private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSma
 			   double maxY = Math::Max((double)firstCandlestick->High, (double)secondCandlestick->High);
 			   double minY = Math::Min((double)firstCandlestick->Low, (double)secondCandlestick->Low);
 
+			   // Special case
+			   // If the max high and min low belong to the same candlestick, the wave is not valid
+			   if (maxY == (double)firstCandlestick->High && minY == (double)firstCandlestick->Low) {
+				   return false;
+			   }
+			   if (maxY == (double)secondCandlestick->High && minY == (double)secondCandlestick->Low) {
+				   return false;
+			   }
+
 			   // Iterate through candlesticks between startIndex and endIndex (exclusive)
 			   for (int i = startIndex + 1; i < endIndex; i++) {
 				   aSmartCandlestick^ curr = filteredListOfCandlesticks[i];
@@ -2074,6 +2083,8 @@ private: System::Void onTwoCandlesticksSelected(aSmartCandlestick^ csStart, aSma
 
 		// Refresh the chart to display the new data
 		chart_stockData->Invalidate();
+
+		// MessageBox::Show(detailedInfo->ToString(), "Analysis Complete");
 	}
 
 		   /// <summary>
