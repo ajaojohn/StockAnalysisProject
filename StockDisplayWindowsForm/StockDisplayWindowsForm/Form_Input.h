@@ -1408,6 +1408,8 @@ private:
 				else {
 					// Draw a rectangle between the selected candlesticks and notify the user
 					drawRectangleBetweenCandlesticks(snappedStart, snappedEnd);
+					// Show error message
+					MessageBox::Show("Invalid wave selected.", "Error");
 					// Removed MessageBox for logging purposes
 					resetWaveSelections();
 				}
