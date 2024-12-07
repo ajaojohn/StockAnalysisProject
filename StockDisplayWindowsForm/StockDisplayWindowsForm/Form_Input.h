@@ -1687,7 +1687,7 @@ private:
 		   /// <param name="color">Color of the circle.</param>
 	private: void addCircleAnnotation(String^ name, double xValue, double yValue, System::Drawing::Color color) {
 		// Create a RectangleAnnotation to represent the circle (since EllipseAnnotation is not available)
-		auto circle = gcnew DataVisualization::Charting::RectangleAnnotation();
+		auto circle = gcnew DataVisualization::Charting::EllipseAnnotation();
 		circle->Name = name;
 		circle->X = xValue - 0.05; // Slight offset for centering
 		circle->Y = yValue * 0.997; // Adjust Y position for better alignment
@@ -1945,7 +1945,7 @@ private:
 								// Create a unique name for the circle annotation
 								String^ circleName = "Circle_" + attrName + "_" + k.ToString() + "_" + fibIdx.ToString();
 								// Add the circle annotation
-								addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Blue);
+								addCircleAnnotation(circleName, candlestick->Index, attrValue, System::Drawing::Color::Magenta);
 								// Log this event
 								allDetailedInfo->AppendFormat("    {0}:{1} of Candlestick {2} matches Fibonacci Level {3}% ({4:F2})\n",
 									attrName,
